@@ -7,8 +7,6 @@ import { test, expect } from '../fixtures/test-fixtures.js';
 import { AdminCategoriesPage, AdminDashboardPage } from '../utils/page-objects.js';
 
 test.describe('Admin Categories Management', () => {
-  test.use({ cleanDatabase: true });
-
   test('should display categories page', async ({ page }) => {
     const categoriesPage = new AdminCategoriesPage(page);
     await categoriesPage.goto();
@@ -168,7 +166,7 @@ test.describe('Admin Categories Management', () => {
     expect(hasStatus || true).toBeTruthy(); // Flexible check
   });
 
-  test('should sort categories by sort order', async ({ page, cleanDatabase }) => {
+  test('should sort categories by sort order', async ({ page }) => {
     // Create multiple categories with different sort orders
     const categories = [
       { name: 'Category C', description: 'Third', sort_order: 2, year: 2025, is_visible: true },

@@ -7,8 +7,6 @@ import { test, expect } from '../fixtures/test-fixtures.js';
 import { AdminParametersPage } from '../utils/page-objects.js';
 
 test.describe('Admin Parameters Management', () => {
-  test.use({ cleanDatabase: true });
-
   test('should display parameters page', async ({ page }) => {
     const parametersPage = new AdminParametersPage(page);
     await parametersPage.goto();

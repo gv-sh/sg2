@@ -14,8 +14,6 @@ import {
 } from '../utils/page-objects.js';
 
 test.describe('End-to-End Integration Flow', () => {
-  test.use({ cleanDatabase: true });
-
   test('complete flow: admin creates category and parameters, user generates content', async ({ browser }) => {
     // Create two separate browser contexts for admin and user
     const adminContext = await browser.newContext();

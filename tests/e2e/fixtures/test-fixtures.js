@@ -13,25 +13,14 @@ import {
 
 /**
  * Extended test with custom fixtures
+ * Uses unique names to avoid conflicts - no cleanup needed
  */
 export const test = base.extend({
-  // Ensure server is ready before each test
-  serverReady: async ({}, use) => {
-    await waitForServer();
-    await use();
-  },
-
-  // Clean database before and after each test
-  cleanDatabase: async ({}, use) => {
-    await cleanupTestData();
-    await use();
-    await cleanupTestData();
-  },
-
-  // Create a test category
+  // Create a test category (generates unique name using timestamp + random)
   testCategory: async ({}, use) => {
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const category = await createCategory({
-      name: 'Test Category',
+      name: `Test Category ${uniqueId}`,
       description: 'Category for testing',
       is_visible: true,
       year: 2025,
@@ -40,10 +29,11 @@ export const test = base.extend({
     await use(category.data);
   },
 
-  // Create a test category with parameters
+  // Create a test category with parameters (generates unique name using timestamp + random)
   categoryWithParameters: async ({}, use) => {
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const category = await createCategory({
-      name: 'Test Category',
+      name: `Test Category ${uniqueId}`,
       description: 'Category for testing',
       is_visible: true,
       year: 2025,

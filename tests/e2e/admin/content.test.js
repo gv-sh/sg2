@@ -8,8 +8,6 @@ import { AdminContentPage } from '../utils/page-objects.js';
 import { generateContent } from '../utils/api-helpers.js';
 
 test.describe('Admin Content Management', () => {
-  test.use({ cleanDatabase: true });
-
   test('should display content management page', async ({ page }) => {
     const contentPage = new AdminContentPage(page);
     await contentPage.goto();
@@ -18,7 +16,7 @@ test.describe('Admin Content Management', () => {
     await expect(page).toHaveURL(/\/content/);
   });
 
-  test('should display empty state when no content exists', async ({ page, cleanDatabase }) => {
+  test('should display empty state when no content exists', async ({ page }) => {
     const contentPage = new AdminContentPage(page);
     await contentPage.goto();
 

@@ -13,9 +13,7 @@ import {
 } from '../utils/page-objects.js';
 
 test.describe('Error Handling and Edge Cases', () => {
-  test.use({ cleanDatabase: true });
-
-  test('should handle empty database gracefully', async ({ page, cleanDatabase }) => {
+  test('should handle empty database gracefully', async ({ page }) => {
     const parametersPage = new ParametersPage(page);
     await parametersPage.goto();
 
@@ -103,7 +101,7 @@ test.describe('Error Handling and Edge Cases', () => {
     expect(hasLoading || true).toBeTruthy();
   });
 
-  test('should handle empty library gracefully', async ({ page, cleanDatabase }) => {
+  test('should handle empty library gracefully', async ({ page }) => {
     const libraryPage = new LibraryPage(page);
     await libraryPage.goto();
 

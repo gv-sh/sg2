@@ -95,12 +95,6 @@
     "pino-pretty": "^13.1.2",
     "supertest": "^6.3.4"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",

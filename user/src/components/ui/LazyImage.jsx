@@ -63,13 +63,27 @@ const LazyImage = ({
     setIsLoaded(true);
     // Call onLoad after opacity transition completes
     const imgEl = e.target;
+    let transitionFired = false;
+
     const handleTransitionEnd = (event) => {
-      if (event.propertyName === 'opacity') {
+      if (event.propertyName === 'opacity' && !transitionFired) {
+        transitionFired = true;
         onLoad?.();
         imgEl.removeEventListener('transitionend', handleTransitionEnd);
       }
     };
+
     imgEl.addEventListener('transitionend', handleTransitionEnd);
+
+    // Fallback: if no transition fires within 400ms, call onLoad anyway
+    // This handles cases where transitions are disabled (e.g., in tests)
+    setTimeout(() => {
+      if (!transitionFired) {
+        transitionFired = true;
+        imgEl.removeEventListener('transitionend', handleTransitionEnd);
+        onLoad?.();
+      }
+    }, 400);
   };
 
   const handleError = () => {
@@ -95,20 +109,20 @@ const LazyImage = ({
 
   // Error placeholder
   const ErrorPlaceholder = () => (
-    <div 
+    <div
       className={`bg-gray-100 flex items-center justify-center ${className}`}
       style={{ ...style }}
     >
       <div className="text-gray-400 text-center p-4">
         <div className="text-2xl mb-2">📷</div>
-        <div className="text-sm">Image unavailable</div>
+        <div className="text-sm">Failed to load image</div>
       </div>
     </div>
   );
 
   return (
     <div ref={imgRef} className="relative">
-      {!isVisible || (!isLoaded && !isError) ? (
+      {!isVisible ? (
         <Skeleton />
       ) : isError ? (
         <ErrorPlaceholder />

@@ -8,9 +8,7 @@ import { LibraryPage } from '../utils/page-objects.js';
 import { generateContent } from '../utils/api-helpers.js';
 
 test.describe('Library Page', () => {
-  test.use({ cleanDatabase: true });
-
-  test('should display empty library when no content exists', async ({ page, cleanDatabase }) => {
+  test('should display empty library when no content exists', async ({ page }) => {
     const libraryPage = new LibraryPage(page);
     await libraryPage.goto();
 

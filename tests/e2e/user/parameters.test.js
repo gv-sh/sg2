@@ -7,8 +7,6 @@ import { test, expect } from '../fixtures/test-fixtures.js';
 import { ParametersPage } from '../utils/page-objects.js';
 
 test.describe('Parameters Page', () => {
-  test.use({ cleanDatabase: true });
-
   test('should display parameters page', async ({ page, categoryWithParameters }) => {
     const parametersPage = new ParametersPage(page);
     await parametersPage.goto();
@@ -203,7 +201,7 @@ test.describe('Parameters Page', () => {
     expect(await page.isVisible('text=Test Category')).toBeTruthy();
   });
 
-  test('should handle empty state when no categories exist', async ({ page, cleanDatabase }) => {
+  test('should handle empty state when no categories exist', async ({ page }) => {
     const parametersPage = new ParametersPage(page);
     await parametersPage.goto();
 

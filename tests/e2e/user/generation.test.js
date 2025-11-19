@@ -7,8 +7,6 @@ import { test, expect } from '../fixtures/test-fixtures.js';
 import { ParametersPage, GeneratingPage, StoryPage } from '../utils/page-objects.js';
 
 test.describe('Content Generation Flow', () => {
-  test.use({ cleanDatabase: true });
-
   test('should complete full generation flow', async ({ page, categoryWithParameters }) => {
     const parametersPage = new ParametersPage(page);
     const generatingPage = new GeneratingPage(page);

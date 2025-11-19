@@ -8,8 +8,6 @@ import { StoryPage, LibraryPage } from '../utils/page-objects.js';
 import { generateContent } from '../utils/api-helpers.js';
 
 test.describe('Story Page', () => {
-  test.use({ cleanDatabase: true });
-
   let testStoryId;
 
   test.beforeEach(async ({ categoryWithParameters }) => {

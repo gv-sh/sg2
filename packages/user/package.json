@@ -1,0 +1,88 @@
+{
+  "name": "@gv-sh/specgen-user",
+  "version": "1.0.1",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "build/",
+    "public/",
+    "src/",
+    "package.json",
+    "README.md",
+    "src/*.css",
+    "src/*.js",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gv-sh/specgen-user.git"
+  },
+  "keywords": [
+    "react",
+    "fiction",
+    "generator",
+    "user-interface"
+  ],
+  "bugs": {
+    "url": "https://github.com/gv-sh/specgen-user/issues"
+  },
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "autoprefixer": "^10.4.16",
+    "axios": "^1.8.4",
+    "dompurify": "^3.2.6",
+    "gsap": "^3.13.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
+    "postcss": "^8.4.31",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.28.0",
+    "react-scripts": "5.0.1",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.176.0"
+  },
+  "scripts": {
+    "start": "cross-env PORT=3002 REACT_APP_API_URL=http://localhost:3000 react-scripts start",
+    "start:alt": "cross-env REACT_APP_API_URL=http://localhost:3000 react-scripts start",
+    "build": "cross-env REACT_APP_API_URL=/api react-scripts build",
+    "build:dev": "cross-env REACT_APP_API_URL=http://localhost:3000 react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "prepublishOnly": "npm run build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cross-env": "^7.0.3",
+    "framer-motion": "^12.9.1",
+    "lucide-react": "^0.503.0"
+  }
+}

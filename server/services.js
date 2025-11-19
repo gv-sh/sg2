@@ -431,6 +431,26 @@ class DataService {
     return { success: true, message: 'Content deleted successfully' };
   }
 
+  async getAvailableYears() {
+    const content = await this.query(
+      'SELECT prompt_data FROM generated_content WHERE prompt_data IS NOT NULL'
+    );
+
+    const years = new Set();
+    content.forEach(item => {
+      try {
+        const promptData = JSON.parse(item.prompt_data);
+        if (promptData.year) {
+          years.add(promptData.year);
+        }
+      } catch (error) {
+        // Skip invalid JSON
+      }
+    });
+
+    return Array.from(years).sort((a, b) => b - a); // Sort descending (newest first)
+  }
+
   // Settings
   async getSetting(key) {
     const setting = await this.get('SELECT * FROM settings WHERE key = ?', [key]);

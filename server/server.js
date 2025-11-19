@@ -1063,7 +1063,7 @@ app.post('/api/generate', async (req, res, next) => {
       image_format: result.imageFormat || 'png',
       image_size_bytes: result.imageSizeBytes || 0,
       thumbnail_size_bytes: result.thumbnailSizeBytes || 0,
-      prompt_data: parameters,
+      prompt_data: { ...parameters, year },
       metadata: result.metadata
     };
 
@@ -1190,7 +1190,7 @@ app.get('/api/content/summary', async (req, res, next) => {
     const filters = contentFiltersSchema.parse(req.query);
     const limit = parseInt(filters.limit) || 20;
     const contentType = filters.type || null;
-    
+
     const content = await dataService.getRecentContent(limit, contentType);
     const summary = content.map(item => ({
       id: item.id,
@@ -1198,8 +1198,40 @@ app.get('/api/content/summary', async (req, res, next) => {
       content_type: item.content_type,
       created_at: item.created_at
     }));
-    
+
     res.json({ success: true, data: summary });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @swagger
+ * /api/content/years:
+ *   get:
+ *     summary: Get all years with generated content
+ *     tags: [Content]
+ *     responses:
+ *       200:
+ *         description: List of years that have content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                   example: [2150, 2100, 2077, 1890]
+ */
+app.get('/api/content/years', async (req, res, next) => {
+  try {
+    const years = await dataService.getAvailableYears();
+    res.json({ success: true, data: years });
   } catch (error) {
     next(error);
   }

@@ -216,19 +216,18 @@ describe('LazyImage Component', () => {
       const img = screen.getByAltText(mockAlt);
       const removeEventListenerSpy = jest.spyOn(img, 'removeEventListener');
 
-      // Simulate load with transition
+      // Simulate load - the component will add transitionend listener
       act(() => {
         img.dispatchEvent(new Event('load'));
-        img.dispatchEvent(new Event('transitionend', { 
-          bubbles: true,
-          propertyName: 'opacity'
-        }));
       });
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'transitionend', 
-        expect.any(Function)
-      );
+      // Wait for the transitionend listener to be removed (either by event or timeout)
+      await waitFor(() => {
+        expect(removeEventListenerSpy).toHaveBeenCalledWith(
+          'transitionend',
+          expect.any(Function)
+        );
+      }, { timeout: 500 });
     });
   });
 

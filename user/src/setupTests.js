@@ -3,6 +3,7 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+import { act } from '@testing-library/react';
 
 // Mock Intersection Observer for tests
 global.IntersectionObserver = class IntersectionObserver {
@@ -17,17 +18,21 @@ global.IntersectionObserver = class IntersectionObserver {
 
   observe(target) {
     this.observing.add(target);
-    // Simulate immediate intersection for testing
+    // Simulate intersection immediately for testing - use setTimeout to ensure it's async
     setTimeout(() => {
-      this.callback([{
-        target,
-        isIntersecting: true,
-        intersectionRatio: 1,
-        boundingClientRect: target.getBoundingClientRect(),
-        intersectionRect: target.getBoundingClientRect(),
-        rootBounds: null,
-        time: Date.now()
-      }]);
+      if (this.observing.has(target)) {
+        act(() => {
+          this.callback([{
+            target,
+            isIntersecting: true,
+            intersectionRatio: 1,
+            boundingClientRect: target.getBoundingClientRect(),
+            intersectionRect: target.getBoundingClientRect(),
+            rootBounds: null,
+            time: Date.now()
+          }]);
+        });
+      }
     }, 0);
   }
 
@@ -81,6 +86,53 @@ const localStorageMock = {
 };
 
 global.localStorage = localStorageMock;
+
+// Suppress expected warnings in tests
+const originalWarn = console.warn;
+const originalError = console.error;
+const originalLog = console.log;
+
+beforeAll(() => {
+  console.warn = (...args) => {
+    const message = args[0];
+    if (typeof message === 'string' && (
+      message.includes('React Router Future Flag Warning') ||
+      message.includes('v7_startTransition') ||
+      message.includes('v7_relativeSplatPath') ||
+      message.includes('Failed to parse cached data') ||
+      message.includes('Failed to parse fallback cache')
+    )) {
+      return; // Suppress expected warnings
+    }
+    originalWarn.apply(console, args);
+  };
+
+  console.error = (...args) => {
+    const message = args[0];
+    if (typeof message === 'string' && (
+      message.includes('Error fetching stories')
+    )) {
+      return; // Suppress expected errors in tests
+    }
+    originalError.apply(console, args);
+  };
+
+  console.log = (...args) => {
+    const message = args[0];
+    if (typeof message === 'string' && (
+      message.includes('Using API URL')
+    )) {
+      return; // Suppress API URL logs in tests
+    }
+    originalLog.apply(console, args);
+  };
+});
+
+afterAll(() => {
+  console.warn = originalWarn;
+  console.error = originalError;
+  console.log = originalLog;
+});
 
 // Reset all mocks before each test
 beforeEach(() => {

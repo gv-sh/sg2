@@ -26,7 +26,6 @@ export const TABLES = {
       'name TEXT NOT NULL UNIQUE',
       'description TEXT DEFAULT \'\'',
       'visibility TEXT DEFAULT \'Show\' CHECK(visibility IN (\'Show\', \'Hide\'))',
-      'year INTEGER',
       'sort_order INTEGER DEFAULT 0',
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP'
     ],
@@ -205,7 +204,7 @@ export function getSchemaInitSQL(ifNotExists = false) {
  * Returns the expected fields for each table
  */
 export const EXPECTED_FIELDS = {
-  categories: ['id', 'name', 'description', 'visibility', 'year', 'sort_order', 'created_at'],
+  categories: ['id', 'name', 'description', 'visibility', 'sort_order', 'created_at'],
   parameters: ['id', 'name', 'description', 'type', 'category_id', 'visibility', 'required', 'sort_order', 'parameter_values', 'parameter_config', 'created_at'],
   generated_content: ['id', 'title', 'fiction_content', 'image_blob', 'image_thumbnail', 'image_format', 'image_size_bytes', 'thumbnail_size_bytes', 'prompt_data', 'metadata', 'created_at'],
   settings: ['key', 'value', 'data_type']

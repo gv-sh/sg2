@@ -23,7 +23,6 @@ export const test = base.extend({
       name: `Test Category ${uniqueId}`,
       description: 'Category for testing',
       is_visible: true,
-      year: 2025,
       sort_order: 0
     });
     await use(category.data);
@@ -36,7 +35,6 @@ export const test = base.extend({
       name: `Test Category ${uniqueId}`,
       description: 'Category for testing',
       is_visible: true,
-      year: 2025,
       sort_order: 0
     });
 
@@ -91,21 +89,18 @@ export const testData = {
       name: 'Fiction',
       description: 'Fiction generation category',
       is_visible: true,
-      year: 2025,
       sort_order: 0
     },
     {
       name: 'Poetry',
       description: 'Poetry generation category',
       is_visible: true,
-      year: 2025,
       sort_order: 1
     },
     {
       name: 'Science',
       description: 'Science fiction category',
       is_visible: true,
-      year: 2025,
       sort_order: 2
     }
   ],

@@ -13,7 +13,6 @@ function Categories() {
     name: '',
     description: '',
     visibility: 'Show',
-    year: new Date().getFullYear(),
     sort_order: 0
   });
   const [editingCategory, setEditingCategory] = useState(null);
@@ -40,7 +39,7 @@ function Categories() {
     e.preventDefault();
     try {
       await axios.post(`${config.API_URL}/api/categories`, newCategory);
-      setNewCategory({ name: '', description: '', visibility: 'Show', year: new Date().getFullYear(), sort_order: 0 });
+      setNewCategory({ name: '', description: '', visibility: 'Show', sort_order: 0 });
       fetchCategories();
       showAlert('default', 'Category added successfully!');
     } catch (error) {
@@ -104,7 +103,6 @@ function Categories() {
                   <TableRow className="bg-muted/50">
                     <TableHead>Name</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Year</TableHead>
                     <TableHead>Sort Order</TableHead>
                     <TableHead>Visibility</TableHead>
                     <TableHead className="w-[140px]">Actions</TableHead>
@@ -127,11 +125,6 @@ function Categories() {
                         <TableCell>
                           <span className="text-sm text-muted-foreground line-clamp-2">
                             {category.description || "—"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {category.year || "—"}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -223,26 +216,6 @@ function Categories() {
               <p className="text-xs text-muted-foreground">A detailed description helps users understand what this category is used for</p>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="categoryYear" className="text-sm font-medium">Year</label>
-              <Input
-                id="categoryYear"
-                type="number"
-                value={editingCategory ? editingCategory.year : newCategory.year}
-                onChange={(e) => {
-                  const yearValue = e.target.value ? parseInt(e.target.value, 10) : '';
-                  if (editingCategory) {
-                    setEditingCategory({ ...editingCategory, year: yearValue });
-                  } else {
-                    setNewCategory({ ...newCategory, year: yearValue });
-                  }
-                }}
-                placeholder={new Date().getFullYear().toString()}
-                min="1000"
-                max="9999"
-              />
-              <p className="text-xs text-muted-foreground">The year associated with this category</p>
-            </div>
 
             <div className="space-y-2">
               <label htmlFor="categorySortOrder" className="text-sm font-medium">Sort Order</label>

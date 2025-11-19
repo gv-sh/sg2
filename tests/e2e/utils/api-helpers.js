@@ -27,7 +27,6 @@ export async function createCategory(data) {
       name: data.name || 'Test Category',
       description: data.description || 'A test category',
       is_visible: data.is_visible !== undefined ? data.is_visible : true,
-      year: data.year || new Date().getFullYear(),
       sort_order: data.sort_order || 0
     })
   });

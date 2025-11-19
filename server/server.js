@@ -237,10 +237,6 @@ app.get('/', (req, res) => {
  *                         type: string
  *                         enum: [Show, Hide]
  *                         example: "Show"
- *                       year:
- *                         type: number
- *                         nullable: true
- *                         example: 2150
  *                       sort_order:
  *                         type: number
  *                         example: 0
@@ -294,10 +290,6 @@ app.get('/api/admin/categories', async (req, res, next) => {
  *                     visibility:
  *                       type: string
  *                       example: "Show"
- *                     year:
- *                       type: number
- *                       nullable: true
- *                       example: 2150
  *       404:
  *         description: Category not found
  *         content:
@@ -349,19 +341,12 @@ app.get('/api/admin/categories/:id', async (req, res, next) => {
  *                 type: string
  *                 enum: [Show, Hide]
  *                 default: Show
- *               year:
- *                 type: number
- *                 nullable: true
- *                 minimum: 1000
- *                 maximum: 9999
- *                 description: Optional year setting
  *           examples:
  *             cyberpunk:
  *               summary: Cyberpunk Category
  *               value:
  *                 name: "Cyberpunk"
  *                 description: "High tech, low life dystopian futures"
- *                 year: 2077
  *             space-opera:
  *               summary: Space Opera Category
  *               value:
@@ -445,18 +430,11 @@ app.post('/api/admin/categories', async (req, res, next) => {
  *               visibility:
  *                 type: string
  *                 enum: [Show, Hide]
- *               year:
- *                 type: number
- *                 nullable: true
  *           examples:
  *             update-description:
  *               summary: Update Description
  *               value:
  *                 description: "Updated description for science fiction stories"
- *             change-year:
- *               summary: Change Year Setting
- *               value:
- *                 year: 2200
  *             hide-category:
  *               summary: Hide Category
  *               value:

@@ -32,7 +32,6 @@ test.describe('Admin Categories Management', () => {
     // Fill form
     await page.fill('input[name="name"], input[placeholder*="name" i]', 'New Test Category');
     await page.fill('textarea[name="description"], textarea[placeholder*="description" i]', 'A new test category');
-    await page.fill('input[name="year"], input[type="number"]', '2025');
 
     // Submit form
     const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
@@ -169,9 +168,9 @@ test.describe('Admin Categories Management', () => {
   test('should sort categories by sort order', async ({ page }) => {
     // Create multiple categories with different sort orders
     const categories = [
-      { name: 'Category C', description: 'Third', sort_order: 2, year: 2025, is_visible: true },
-      { name: 'Category A', description: 'First', sort_order: 0, year: 2025, is_visible: true },
-      { name: 'Category B', description: 'Second', sort_order: 1, year: 2025, is_visible: true }
+      { name: 'Category C', description: 'Third', sort_order: 2, is_visible: true },
+      { name: 'Category A', description: 'First', sort_order: 0, is_visible: true },
+      { name: 'Category B', description: 'Second', sort_order: 1, is_visible: true }
     ];
 
     for (const cat of categories) {

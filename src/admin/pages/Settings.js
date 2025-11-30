@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import config, { updateApiUrl } from '../config';
+import config from '../config';
 import '../../index.css';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { Button, Input, Textarea, Select } from '../components/ui/form-controls';
@@ -30,10 +30,7 @@ const DEFAULT_SETTINGS = {
 
 function Settings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [apiUrl, setApiUrl] = useState(config.API_URL);
-  const [serverStatus, setServerStatus] = useState('unknown');
   const [isLoading, setIsLoading] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
 
   const fetchSettings = useCallback(async () => {
@@ -81,24 +78,6 @@ function Settings() {
 
   useEffect(() => {
     fetchSettings();
-    
-    // Test connection on initial load
-    const checkServerStatus = async () => {
-      try {
-        const pingUrl = `${config.API_URL}/api/health/ping`;
-        const response = await axios.get(pingUrl, { timeout: 3000 });
-        
-        if (response.status === 200 && response.data && response.data.message === 'pong') {
-          setServerStatus('online');
-        } else {
-          setServerStatus('offline');
-        }
-      } catch (error) {
-        setServerStatus('offline');
-      }
-    };
-    
-    checkServerStatus();
   }, [fetchSettings]);
 
   const handleSettingsChange = (section, subsection, field, value) => {
@@ -156,39 +135,6 @@ function Settings() {
     }
   };
 
-  const testConnection = async (e) => {
-    e.preventDefault();
-    setIsTesting(true);
-    try {
-      const pingUrl = `${apiUrl}/api/health/ping`;
-      const response = await axios.get(pingUrl, { timeout: 5000 });
-      
-      if (response.status === 200 && response.data && response.data.message === 'pong') {
-        setServerStatus('online');
-        showAlert('success', 'Successfully connected to the API server!');
-      } else {
-        setServerStatus('offline');
-        showAlert('danger', 'Server responded but with unexpected data');
-      }
-    } catch (error) {
-      setServerStatus('offline');
-      showAlert('danger', `Failed to connect to API server: ${error.message}`);
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  const saveConnection = (e) => {
-    e.preventDefault();
-    if (updateApiUrl(apiUrl)) {
-      showAlert('success', 'API URL updated successfully');
-      // Force reload to apply the new API URL to all components
-      window.location.reload();
-    } else {
-      showAlert('danger', 'Failed to update API URL');
-    }
-  };
-
   const showAlert = (type, message) => {
     setAlert({ show: true, type, message });
     setTimeout(() => setAlert({ show: false, type: '', message: '' }), 5000);
@@ -213,64 +159,6 @@ function Settings() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Server Connection Card */}
-          <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle>API Server Connection</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-2 space-y-2">
-                  <label htmlFor="apiUrl" className="text-sm font-medium">API Server URL</label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="apiUrl"
-                      value={apiUrl}
-                      onChange={(e) => setApiUrl(e.target.value)}
-                      placeholder="http://localhost:3000"
-                      className="flex-1"
-                    />
-                    <Button 
-                      type="button"
-                      variant={serverStatus === 'online' ? 'default' : serverStatus === 'offline' ? 'destructive' : 'secondary'}
-                      onClick={testConnection}
-                      disabled={isTesting}
-                    >
-                      {isTesting ? 'Testing...' : 'Test'}
-                    </Button>
-                    <Button 
-                      type="button"
-                      onClick={saveConnection}
-                      disabled={isTesting || apiUrl === config.API_URL}
-                    >
-                      Save
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Enter the base URL of your API server without /api (e.g., http://localhost:3000)
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Server Status</label>
-                  <div className="flex items-center gap-3">
-                    <Badge 
-                      variant={serverStatus === 'online' ? 'default' : serverStatus === 'offline' ? 'destructive' : 'secondary'}
-                      className="p-2"
-                    >
-                      {serverStatus === 'online' ? 'Connected' : 
-                       serverStatus === 'offline' ? 'Disconnected' : 
-                       'Unknown'}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {serverStatus === 'online' ? 'API server is reachable' : 
-                       serverStatus === 'offline' ? 'Cannot reach API server' : 
-                       'Connection status unknown'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* AI Models Card */}
           <Card className="shadow-sm">

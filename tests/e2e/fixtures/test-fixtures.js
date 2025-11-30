@@ -16,6 +16,25 @@ import {
  * Uses unique names to avoid conflicts - no cleanup needed
  */
 export const test = base.extend({
+  // Server configuration verification fixture
+  serverConfigured: async ({}, use) => {
+    // Wait for server to be ready
+    await waitForServer();
+    
+    // Verify critical endpoints are accessible
+    const healthResponse = await fetch('http://localhost:3000/api/system/health');
+    if (!healthResponse.ok) {
+      throw new Error('Server health check failed');
+    }
+    
+    const health = await healthResponse.json();
+    if (!health.success) {
+      throw new Error('Server is not properly configured');
+    }
+    
+    await use(true);
+  },
+
   // Create a test category (generates unique name using timestamp + random)
   testCategory: async ({}, use) => {
     // Wait for server to be ready

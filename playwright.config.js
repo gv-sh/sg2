@@ -9,9 +9,11 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  testMatch: '**/tests/e2e/**/*.test.js',
+  testIgnore: ['**/src/**', '**/admin/src/**', '**/user/src/**', '**/node_modules/**'],
   
-  // Global setup
-  globalSetup: './tests/e2e/global-setup.js',
+  // Global setup - temporarily disabled
+  // globalSetup: './tests/e2e/global-setup.js',
 
   // Maximum time one test can run
   timeout: 60 * 1000,
@@ -32,7 +34,7 @@ export default defineConfig({
   // Shared settings for all tests
   use: {
     // Base URL for tests
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
 
     // Collect trace on test failure
     trace: 'on-first-retry',

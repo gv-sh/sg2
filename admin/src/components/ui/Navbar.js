@@ -41,11 +41,13 @@ function Navbar({ serverStatus }) {
           <NavigationMenuList>
             {routes.map(({ path, label }) => (
               <NavigationMenuItem key={path}>
-                <Link to={path} className="block">
-                  <NavigationMenuLink active={location.pathname === path}>
-                    {label}
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink 
+                  as={Link} 
+                  to={path} 
+                  active={location.pathname === path}
+                >
+                  {label}
+                </NavigationMenuLink>
               </NavigationMenuItem>
             ))}
           </NavigationMenuList>

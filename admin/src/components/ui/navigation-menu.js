@@ -37,8 +37,8 @@ const NavigationMenuItem = React.forwardRef(({ className, ...props }, ref) => (
 NavigationMenuItem.displayName = "NavigationMenuItem"
 
 const NavigationMenuLink = React.forwardRef(
-  ({ className, active, children, ...props }, ref) => (
-    <a
+  ({ className, active, children, as: Component = "a", ...props }, ref) => (
+    <Component
       ref={ref}
       className={cn(
         "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -48,7 +48,7 @@ const NavigationMenuLink = React.forwardRef(
       {...props}
     >
       {children}
-    </a>
+    </Component>
   )
 )
 NavigationMenuLink.displayName = "NavigationMenuLink"

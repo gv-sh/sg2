@@ -9,6 +9,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  
+  // Global setup
+  globalSetup: './tests/e2e/global-setup.js',
 
   // Maximum time one test can run
   timeout: 60 * 1000,
@@ -29,7 +32,7 @@ export default defineConfig({
   // Shared settings for all tests
   use: {
     // Base URL for tests
-    baseURL: 'http://localhost:3002',
+    baseURL: 'http://localhost:3001',
 
     // Collect trace on test failure
     trace: 'on-first-retry',
@@ -59,31 +62,11 @@ export default defineConfig({
     },
   ],
 
-  // Web server configuration
-  webServer: [
-    {
-      command: 'cd server && NODE_ENV=test node server.js',
-      url: 'http://localhost:3000/api/system/health',
-      timeout: 30 * 1000,
-      reuseExistingServer: !process.env.CI,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-    {
-      command: 'cd admin && PORT=3001 react-scripts start',
-      url: 'http://localhost:3001',
-      timeout: 120 * 1000,
-      reuseExistingServer: !process.env.CI,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-    {
-      command: 'cd user && cross-env PORT=3002 REACT_APP_API_URL=http://localhost:3000 react-scripts start',
-      url: 'http://localhost:3002',
-      timeout: 120 * 1000,
-      reuseExistingServer: !process.env.CI,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-  ],
+  // Web server configuration  
+  webServer: {
+    command: 'cd server && NODE_ENV=test node server.js',
+    url: 'http://localhost:3000/api/health/ping',
+    timeout: 30 * 1000,
+    reuseExistingServer: true,
+  },
 });

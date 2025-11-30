@@ -15,102 +15,109 @@ test.describe('Admin Categories Management', () => {
     await expect(page).toHaveURL(/\/categories/);
 
     // Should have add category button
-    const addButton = page.locator('button:has-text("Add"), button:has-text("New"), button:has-text("Create")');
-    await expect(addButton.first()).toBeVisible();
+    await expect(page.locator('button:has-text("Add New Category")')).toBeVisible();
   });
 
   test('should create a new category', async ({ page }) => {
     const categoriesPage = new AdminCategoriesPage(page);
     await categoriesPage.goto();
 
+    // Wait for server to come online
+    await expect(page.locator('text=Server: offline')).not.toBeVisible({ timeout: 10000 });
+
     await page.waitForLoadState('networkidle');
 
     // Click add category button
-    const addButton = page.locator('button:has-text("Add"), button:has-text("New"), button:has-text("Create")').first();
-    await addButton.click();
+    await page.click('button:has-text("Add New Category")');
 
-    // Fill form
-    await page.fill('input[name="name"], input[placeholder*="name" i]', 'New Test Category');
-    await page.fill('textarea[name="description"], textarea[placeholder*="description" i]', 'A new test category');
+    // Wait for modal to appear and fill form
+    await page.waitForSelector('#categoryName');
+    await page.fill('#categoryName', 'New Test Category');
+    await page.fill('#categoryDescription', 'A new test category');
 
     // Submit form
-    const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
-    await submitButton.first().click();
+    await page.click('button[type="submit"]:has-text("Add Category")');
 
-    // Wait for form to submit
-    await page.waitForTimeout(1000);
+    // Wait for form to submit and server to process
+    await page.waitForTimeout(2000);
 
     // Verify category appears in list
-    await page.waitForSelector('text=New Test Category', { timeout: 5000 });
-    expect(await page.isVisible('text=New Test Category')).toBeTruthy();
+    await expect(page.locator('tr:has-text("New Test Category")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display list of categories', async ({ page, testCategory }) => {
     const categoriesPage = new AdminCategoriesPage(page);
     await categoriesPage.goto();
 
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    // Wait for server to come online
+    await expect(page.locator('text=Server: offline')).not.toBeVisible({ timeout: 10000 });
 
-    // Should display the test category
-    const categoryName = page.locator('text=Test Category');
-    await expect(categoryName).toBeVisible({ timeout: 5000 });
+    await page.waitForLoadState('networkidle');
+
+    // Wait for categories to load (no more "No categories found" message)
+    await expect(page.locator('text=No categories found')).not.toBeVisible({ timeout: 10000 });
+
+    // Should display the test category using its actual name
+    await expect(page.locator(`text=${testCategory.name}`)).toBeVisible({ timeout: 5000 });
   });
 
   test('should edit existing category', async ({ page, testCategory }) => {
     const categoriesPage = new AdminCategoriesPage(page);
     await categoriesPage.goto();
 
+    // Wait for server to come online
+    await expect(page.locator('text=Server: offline')).not.toBeVisible({ timeout: 10000 });
+
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
-    // Click edit button for test category
-    const editButton = page.locator('button:has-text("Edit"), button[aria-label*="Edit"]').first();
-    if (await editButton.isVisible()) {
-      await editButton.click();
+    // Wait for categories to load
+    await expect(page.locator('text=No categories found')).not.toBeVisible({ timeout: 10000 });
 
-      // Update category name
-      const nameInput = page.locator('input[name="name"], input[placeholder*="name" i]');
-      await nameInput.fill('Updated Test Category');
+    // Find the specific test category row and click its edit button
+    const categoryRow = page.locator(`tr:has-text("${testCategory.name}")`);
+    await expect(categoryRow).toBeVisible({ timeout: 5000 });
+    
+    const editButton = categoryRow.locator('button:has-text("Edit")');
+    await editButton.click();
 
-      // Submit form
-      const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Update")');
-      await submitButton.first().click();
+    // Update category name
+    await page.waitForSelector('#categoryName');
+    await page.fill('#categoryName', 'Updated Test Category');
 
-      // Wait for update
-      await page.waitForTimeout(1000);
+    // Submit form using specific Update button
+    await page.click('button:has-text("Update")');
 
-      // Verify updated name appears
-      await page.waitForSelector('text=Updated Test Category', { timeout: 5000 });
-      expect(await page.isVisible('text=Updated Test Category')).toBeTruthy();
-    }
+    // Wait for form submission to complete - check for network activity
+    await page.waitForLoadState('networkidle');
+
+    // Verify the updated category appears in the table
+    await expect(page.locator('tr:has-text("Updated Test Category")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should delete category', async ({ page, testCategory }) => {
     const categoriesPage = new AdminCategoriesPage(page);
     await categoriesPage.goto();
 
+    // Wait for server to come online
+    await expect(page.locator('text=Server: offline')).not.toBeVisible({ timeout: 10000 });
+
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
-    // Click delete button
-    const deleteButton = page.locator('button:has-text("Delete"), button[aria-label*="Delete"]').first();
-    if (await deleteButton.isVisible()) {
-      await deleteButton.click();
+    // Wait for categories to load
+    await expect(page.locator('text=No categories found')).not.toBeVisible({ timeout: 10000 });
 
-      // Confirm deletion
-      const confirmButton = page.locator('button:has-text("Confirm"), button:has-text("Yes"), button:has-text("Delete")');
-      if (await confirmButton.first().isVisible({ timeout: 2000 })) {
-        await confirmButton.first().click();
-      }
+    // Set up dialog handler before clicking delete
+    page.on('dialog', dialog => dialog.accept());
 
-      // Wait for deletion
-      await page.waitForTimeout(1000);
+    // Find the specific test category row and click its delete button
+    const categoryRow = page.locator(`tr:has-text("${testCategory.name}")`);
+    await expect(categoryRow).toBeVisible({ timeout: 5000 });
+    
+    const deleteButton = categoryRow.locator('button:has-text("Delete")');
+    await deleteButton.click();
 
-      // Verify category is removed
-      const categoryVisible = await page.isVisible('text=Test Category', { timeout: 2000 }).catch(() => false);
-      expect(categoryVisible).toBeFalsy();
-    }
+    // Wait for deletion and verify category is removed
+    await expect(page.locator(`text=${testCategory.name}`)).not.toBeVisible({ timeout: 10000 });
   });
 
   test('should validate required fields', async ({ page }) => {
@@ -120,12 +127,10 @@ test.describe('Admin Categories Management', () => {
     await page.waitForLoadState('networkidle');
 
     // Click add category
-    const addButton = page.locator('button:has-text("Add"), button:has-text("New"), button:has-text("Create")').first();
-    await addButton.click();
+    await page.click('button:has-text("Add New Category")');
 
     // Try to submit without filling required fields
-    const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Create")');
-    await submitButton.first().click();
+    await page.click('button[type="submit"]');
 
     // Should show validation error or prevent submission
     const errorMessage = page.locator('text=required, text=error, .error, [role="alert"]');
@@ -133,7 +138,7 @@ test.describe('Admin Categories Management', () => {
 
     // Form might use HTML5 validation or custom validation
     // Just verify we're still on the form (not submitted)
-    const formVisible = await page.locator('input[name="name"], input[placeholder*="name" i]').isVisible();
+    const formVisible = await page.locator('#categoryName').isVisible();
     expect(formVisible || hasError).toBeTruthy();
   });
 
@@ -212,8 +217,7 @@ test.describe('Admin Categories Management', () => {
         await visibilityCheckbox.click();
 
         // Submit
-        const submitButton = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Update")');
-        await submitButton.first().click();
+        await page.click('button[type="submit"]');
 
         await page.waitForTimeout(1000);
 

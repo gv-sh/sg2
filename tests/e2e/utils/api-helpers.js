@@ -135,18 +135,38 @@ export async function getHealthStatus() {
  * Wait for server to be ready
  */
 export async function waitForServer(maxAttempts = 30, interval = 1000) {
+  console.log(`Waiting for server... (max ${maxAttempts} attempts)`);
+  
   for (let i = 0; i < maxAttempts; i++) {
     try {
-      const health = await getHealthStatus();
-      if (health.status === 'healthy') {
-        return true;
+      // Check the ping endpoint that admin UI uses
+      const pingResponse = await fetch(`${API_BASE_URL}/api/health/ping`);
+      if (pingResponse.ok) {
+        const pingData = await pingResponse.json();
+        if (pingData.message === 'pong') {
+          console.log(`Server ready after ${i + 1} attempts`);
+          return true;
+        }
+      }
+      
+      // Fallback to system health check
+      const healthResponse = await fetch(`${API_BASE_URL}/api/system/health`);
+      if (healthResponse.ok) {
+        const health = await healthResponse.json();
+        if (health.success || health.data?.status === 'ok') {
+          console.log(`Server ready after ${i + 1} attempts`);
+          return true;
+        }
       }
     } catch (error) {
-      // Server not ready yet
+      // Server not ready yet, continue trying
+      if (i % 5 === 0) {
+        console.log(`Attempt ${i + 1}/${maxAttempts} - Server not ready yet...`);
+      }
     }
     await new Promise(resolve => setTimeout(resolve, interval));
   }
-  throw new Error('Server failed to start');
+  throw new Error(`Server failed to start after ${maxAttempts} attempts`);
 }
 
 /**

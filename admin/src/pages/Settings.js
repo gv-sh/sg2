@@ -29,30 +29,7 @@ const DEFAULT_SETTINGS = {
 };
 
 function Settings() {
-  const [settings, setSettings] = useState({
-    ai: {
-      models: {
-        fiction: '',
-        image: ''
-      },
-      parameters: {
-        fiction: {
-          temperature: 0,
-          max_tokens: 0,
-          default_story_length: 0,
-          system_prompt: ''
-        },
-        image: {
-          size: '',
-          quality: '',
-          prompt_suffix: ''
-        }
-      }
-    },
-    defaults: {
-      content_type: ''
-    }
-  });
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [apiUrl, setApiUrl] = useState(config.API_URL);
   const [serverStatus, setServerStatus] = useState('unknown');
   const [isLoading, setIsLoading] = useState(false);
@@ -63,9 +40,40 @@ function Settings() {
     try {
       setIsLoading(true);
       const response = await axios.get(`${config.API_URL}/api/settings`);
-      setSettings(response.data.data);
+      
+      // Ensure we have valid settings data with proper structure
+      const fetchedSettings = response.data?.data || {};
+      const mergedSettings = {
+        ai: {
+          models: {
+            fiction: fetchedSettings.ai?.models?.fiction || DEFAULT_SETTINGS.ai.models.fiction,
+            image: fetchedSettings.ai?.models?.image || DEFAULT_SETTINGS.ai.models.image
+          },
+          parameters: {
+            fiction: {
+              temperature: fetchedSettings.ai?.parameters?.fiction?.temperature ?? DEFAULT_SETTINGS.ai.parameters.fiction.temperature,
+              max_tokens: fetchedSettings.ai?.parameters?.fiction?.max_tokens ?? DEFAULT_SETTINGS.ai.parameters.fiction.max_tokens,
+              default_story_length: fetchedSettings.ai?.parameters?.fiction?.default_story_length ?? DEFAULT_SETTINGS.ai.parameters.fiction.default_story_length,
+              system_prompt: fetchedSettings.ai?.parameters?.fiction?.system_prompt || DEFAULT_SETTINGS.ai.parameters.fiction.system_prompt
+            },
+            image: {
+              size: fetchedSettings.ai?.parameters?.image?.size || DEFAULT_SETTINGS.ai.parameters.image.size,
+              quality: fetchedSettings.ai?.parameters?.image?.quality || DEFAULT_SETTINGS.ai.parameters.image.quality,
+              prompt_suffix: fetchedSettings.ai?.parameters?.image?.prompt_suffix || DEFAULT_SETTINGS.ai.parameters.image.prompt_suffix
+            }
+          }
+        },
+        defaults: {
+          content_type: fetchedSettings.defaults?.content_type || DEFAULT_SETTINGS.defaults.content_type
+        }
+      };
+      
+      setSettings(mergedSettings);
     } catch (error) {
-      showAlert('danger', 'Failed to fetch settings. Please try again.');
+      console.error('Failed to fetch settings:', error);
+      // On error, use default settings instead of leaving undefined
+      setSettings(DEFAULT_SETTINGS);
+      showAlert('danger', 'Failed to fetch settings. Using default values.');
     } finally {
       setIsLoading(false);
     }
@@ -134,10 +142,14 @@ function Settings() {
       try {
         setIsLoading(true);
         const response = await axios.post(`${config.API_URL}/api/settings/reset`);
-        setSettings(response.data.data);
+        // Use the same safe parsing as fetchSettings
+        const resetSettings = response.data?.data || DEFAULT_SETTINGS;
+        setSettings(resetSettings);
         showAlert('success', 'Settings reset to defaults');
       } catch (error) {
-        showAlert('danger', 'Failed to reset settings. Please try again.');
+        // If reset API fails, just use client-side defaults
+        setSettings(DEFAULT_SETTINGS);
+        showAlert('warning', 'Reset API failed, using client defaults');
       } finally {
         setIsLoading(false);
       }

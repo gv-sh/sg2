@@ -38,7 +38,7 @@ function Categories() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${config.API_URL}/api/categories`, newCategory);
+      await axios.post(`${config.API_URL}/api/admin/categories`, newCategory);
       setNewCategory({ name: '', description: '', visibility: 'Show', sort_order: 0 });
       fetchCategories();
       showAlert('default', 'Category added successfully!');
@@ -50,7 +50,7 @@ function Categories() {
   const handleUpdateCategory = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${config.API_URL}/api/categories/${editingCategory.id}`, editingCategory);
+      await axios.put(`${config.API_URL}/api/admin/categories/${editingCategory.id}`, editingCategory);
       setEditingCategory(null);
       setShowModal(false);
       fetchCategories();
@@ -63,7 +63,7 @@ function Categories() {
   const handleDeleteCategory = async (id) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
-        await axios.delete(`${config.API_URL}/api/categories/${id}`);
+        await axios.delete(`${config.API_URL}/api/admin/categories/${id}`);
         fetchCategories();
         showAlert('default', 'Category deleted successfully!');
       } catch (error) {

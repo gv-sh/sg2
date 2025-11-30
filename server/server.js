@@ -1678,6 +1678,33 @@ app.get('/api/system/docs.json', (req, res) => {
   res.json(swaggerSpec);
 });
 
+/**
+ * @swagger
+ * /api/health/ping:
+ *   get:
+ *     summary: Simple ping endpoint for admin UI
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Server is responding
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "pong"
+ */
+app.get('/api/health/ping', async (req, res) => {
+  try {
+    // Simple ping check - just verify server is running
+    res.json({ message: 'pong' });
+  } catch (error) {
+    res.status(500).json({ message: 'error' });
+  }
+});
+
 // ==================== LEGACY ROUTE MAPPINGS ====================
 
 // Legacy route mappings for backward compatibility

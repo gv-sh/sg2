@@ -18,6 +18,9 @@ import {
 export const test = base.extend({
   // Create a test category (generates unique name using timestamp + random)
   testCategory: async ({}, use) => {
+    // Wait for server to be ready
+    await waitForServer();
+    
     const uniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const category = await createCategory({
       name: `Test Category ${uniqueId}`,
@@ -25,11 +28,22 @@ export const test = base.extend({
       is_visible: true,
       sort_order: 0
     });
+    
     await use(category.data);
+    
+    // Cleanup after test
+    try {
+      await cleanupTestData();
+    } catch (error) {
+      console.log('Cleanup failed:', error.message);
+    }
   },
 
   // Create a test category with parameters (generates unique name using timestamp + random)
   categoryWithParameters: async ({}, use) => {
+    // Wait for server to be ready
+    await waitForServer();
+    
     const uniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const category = await createCategory({
       name: `Test Category ${uniqueId}`,
@@ -75,6 +89,13 @@ export const test = base.extend({
       category: category.data,
       parameters: [sliderParam.data, textParam.data, toggleParam.data]
     });
+    
+    // Cleanup after test
+    try {
+      await cleanupTestData();
+    } catch (error) {
+      console.log('Cleanup failed:', error.message);
+    }
   }
 });
 

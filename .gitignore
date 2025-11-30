@@ -52,6 +52,7 @@ tmp/
 temp/
 *.tmp
 .eslintcache
+*.bak
 
 # Optional npm cache directory
 .npm

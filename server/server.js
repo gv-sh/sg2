@@ -13,9 +13,15 @@ import pino from 'pino';
 import { z, ZodError } from 'zod';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import config from './config.js';
 import { dataService, aiService } from './services.js';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize logger
 const logger = pino({
@@ -184,8 +190,8 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // ==================== ROUTE HANDLERS ====================
 
-// Root endpoint
-app.get('/', (req, res) => {
+// API info endpoint (moved to /api)
+app.get('/api', (req, res) => {
   res.json({
     name: config.get('app.name'),
     version: config.get('app.version'),
@@ -1862,13 +1868,24 @@ app.use((error, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Endpoint not found',
-    availableEndpoints: ['/api/admin', '/api/content', '/api/system']
-  });
+// ==================== STATIC FILE SERVING ====================
+
+// Serve static files from React build
+const buildPath = path.join(__dirname, '..', 'build');
+app.use(express.static(buildPath));
+
+// Handle client-side routing - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  // Don't serve index.html for API routes
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      error: 'Endpoint not found',
+      availableEndpoints: ['/api/admin', '/api/content', '/api/system']
+    });
+  }
+  
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 // ==================== SERVER STARTUP ====================

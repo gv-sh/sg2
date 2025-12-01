@@ -9,7 +9,7 @@
  * - Code references (all fields actually used)
  */
 
-import type { TableDefinition, TablesDefinition, DefaultSetting, ExpectedFields } from '../types/database.js';
+import type { TablesDefinition, DefaultSetting, ExpectedFields } from '../types/database.js';
 
 /**
  * Schema version for migration tracking

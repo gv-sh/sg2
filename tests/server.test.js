@@ -62,7 +62,7 @@ describe('SpecGen Server - System Endpoints', () => {
     expect(response.status).toBeGreaterThanOrEqual(200);
     expect(response.body.success).toBeDefined();
     expect(response.body.data.status).toMatch(/^(ok|degraded)$/);
-    expect(response.body.data.database).toBe('connected');
+    expect(response.body.data.database.connected).toBe(true);
     expect(response.body.data.environment).toBe('test');
     expect(typeof response.body.data.uptime).toBe('number');
   });
@@ -172,7 +172,7 @@ describe('SpecGen Server - CORS and Security Headers', () => {
   test('Should handle CORS preflight requests', async () => {
     const response = await request(app)
       .options('/api/system/health')
-      .set('Origin', 'http://localhost:3001')
+      .set('Origin', 'http://localhost:3000')  // Use allowed origin
       .set('Access-Control-Request-Method', 'GET');
     
     expect(response.status).toBe(204);
@@ -185,7 +185,7 @@ describe('SpecGen Server - Rate Limiting', () => {
     // Make multiple requests quickly to verify rate limiting is disabled in tests
     const requests = [];
     for (let i = 0; i < 10; i++) {
-      requests.push(request(app).get('/api/system/health'));
+      requests.push(request(app).get('/api/health/ping'));
     }
     
     const responses = await Promise.all(requests);

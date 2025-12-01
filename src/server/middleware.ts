@@ -80,16 +80,12 @@ export const parameterFiltersSchema = z.object({
   categoryId: z.string().optional()
 });
 
-export const settingsSchema = z.record(z.any());
 
 // Common param schemas
 export const idParamSchema = z.object({
   id: z.string().min(1, 'ID is required')
 });
 
-export const yearParamSchema = z.object({
-  year: z.string().transform(val => parseInt(val)).pipe(z.number().int())
-});
 
 // ==================== SWAGGER DOCUMENTATION ====================
 
@@ -173,12 +169,13 @@ export const boomErrorHandler = (error: any, req: Request, res: Response, next: 
       error: error.output.payload.message,
     };
     
-    if (config.isDevelopment()) {
-      response.stack = error.stack;
-    }
-    
+    // Include details if available (for validation errors)
     if (error.output.payload.details) {
       response.details = error.output.payload.details;
+    }
+    
+    if (config.isDevelopment()) {
+      response.stack = error.stack;
     }
     
     return res.status(error.output.statusCode).json(response);
@@ -207,17 +204,3 @@ export const genericErrorHandler = (error: any, req: Request, res: Response, nex
   return res.status(500).json(response);
 };
 
-// ==================== HELPER FUNCTIONS ====================
-
-// 404 handler for API routes
-export const apiNotFoundHandler = (req: Request, res: Response): Response | null => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({
-      success: false,
-      error: 'Endpoint not found',
-      availableEndpoints: ['/api/admin', '/api/content', '/api/system']
-    });
-  }
-  // Let it pass through to static file handler
-  return null;
-};

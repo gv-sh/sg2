@@ -24,7 +24,7 @@
     "test:admin": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand tests/admin.test.js --config tests/jest.config.mjs --colors=true",
     "test:user": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand tests/user.test.js --config tests/jest.config.mjs --colors=true",
     "test:client": "react-scripts test --watchAll=false",
-    "lint": "cd src/server && eslint .",
+    "lint": "eslint src/",
     "clean": "rm -rf node_modules build src/server/data/*.db dist"
   },
   "keywords": [

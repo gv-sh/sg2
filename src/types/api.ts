@@ -31,6 +31,7 @@ export interface ApiResponse<T = any> {
   error?: string;
   message?: string;
   details?: any[];
+  meta?: Record<string, any>;
 }
 
 // Content types
@@ -51,8 +52,24 @@ export interface HealthStatusData {
   uptime: number;
   environment: string;
   version: string;
-  database: string;
-  ai: string;
+  memory?: {
+    used: number;
+    total: number;
+    external: number;
+  };
+  database: {
+    connected: boolean;
+    message?: string;
+  };
+  ai: {
+    configured: boolean;
+    model: string;
+  };
+  features?: {
+    rateLimiting: boolean;
+    cache: boolean;
+    metrics: boolean;
+  };
 }
 
 export interface DatabaseStatsData {

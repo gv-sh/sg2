@@ -3,7 +3,6 @@
  * Replaces the entire config/ directory with a single file
  */
 
-import * as path from 'path';
 import * as dotenv from 'dotenv';
 import type { Config, FeaturesConfig } from '../types/config.js';
 
@@ -25,7 +24,7 @@ const config: Config = {
 
   // Server Configuration
   server: {
-    port: parseInt(process.env.PORT || '3000'),
+    port: parseInt(process.env.PORT || (env === 'production' ? '8000' : '3000')),
     host: process.env.HOST || 'localhost',
     timeouts: {
       gracefulShutdown: 10000,
@@ -42,20 +41,8 @@ const config: Config = {
     },
     cors: {
       origins: {
-        development: [
-          'http://localhost:3000', 
-          'http://localhost:3001', 
-          'http://localhost:3002'
-        ],
-        production: [
-          'https://admin.specgen.app', 
-          'https://app.specgen.app'
-        ],
-        test: [
-          'http://localhost:3000', 
-          'http://localhost:3001', 
-          'http://localhost:3002'
-        ]
+        development: ['http://localhost:3000'],
+        production: process.env.ALLOWED_ORIGINS?.split(',') || ['https://yourdomain.com']
       },
       credentials: true
     },
@@ -141,7 +128,7 @@ Avoid using complex academic words or foreign concepts. Write like you're tellin
       description: 'API for Speculative Fiction Generator',
       servers: {
         development: 'http://localhost:3000',
-        production: 'https://api.specgen.app',
+        production: process.env.API_BASE_URL || 'https://api.yourdomain.com',
         test: 'http://localhost:3000'
       }
     }
@@ -192,18 +179,11 @@ export default {
     return path.split('.').reduce((obj: any, key) => obj?.[key], config);
   },
 
-  has(path: string): boolean {
-    try {
-      return this.get(path) !== undefined;
-    } catch {
-      return false;
-    }
-  },
 
-  // Environment checks
-  isDevelopment: (): boolean => env === 'development',
-  isProduction: (): boolean => env === 'production',
-  isTest: (): boolean => env === 'test',
+  // Environment checks (optimized)
+  isDevelopment: () => env === 'development',
+  isProduction: () => env === 'production', 
+  isTest: () => env === 'test',
 
   // Helper functions
   getDatabasePath(): string {
@@ -211,7 +191,7 @@ export default {
   },
 
   getCorsOrigins(): string[] {
-    return (config.security.cors.origins as any)[env] || config.security.cors.origins.development;
+    return (config.security.cors.origins as any)[env === 'production' ? 'production' : 'development'];
   },
 
   getSwaggerServer(): string {
@@ -242,14 +222,4 @@ export default {
     };
   },
 
-  getPaginationConfig() {
-    return config.business.pagination;
-  },
-
-  getYearRange() {
-    return config.business.years;
-  },
-
-  // Expose entire config for debugging
-  _config: config
 };

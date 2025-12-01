@@ -13,8 +13,7 @@ import { fileURLToPath } from 'url';
 import { Server } from 'http';
 
 import config from './config.js';
-import { dataService } from './services.js';
-import routes from './routes.js';
+import routes from './routes/index.js';
 import {
   logger,
   requestLoggingMiddleware,
@@ -25,11 +24,10 @@ import {
 } from './middleware.js';
 
 // Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Create Express app
-const app = express();
+const app: express.Application = express();
 const PORT = config.get('server.port');
 
 // ==================== MIDDLEWARE SETUP ====================

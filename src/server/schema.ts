@@ -9,32 +9,7 @@
  * - Code references (all fields actually used)
  */
 
-// Type definitions
-interface TableDefinition {
-  name: string;
-  columns: string[];
-  indexes: string[];
-}
-
-interface TablesDefinition {
-  categories: TableDefinition;
-  parameters: TableDefinition;
-  generated_content: TableDefinition;
-  settings: TableDefinition;
-}
-
-interface DefaultSetting {
-  key: string;
-  value: string;
-  data_type: 'string' | 'number' | 'boolean' | 'json';
-}
-
-interface ExpectedFields {
-  categories: string[];
-  parameters: string[];
-  generated_content: string[];
-  settings: string[];
-}
+import type { TableDefinition, TablesDefinition, DefaultSetting, ExpectedFields } from '../types/database.js';
 
 /**
  * Schema version for migration tracking

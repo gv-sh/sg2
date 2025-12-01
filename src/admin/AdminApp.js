@@ -6,10 +6,10 @@ import Content from './pages/Content.js';
 import Settings from './pages/Settings.js';
 import Database from './pages/Database.js';
 import Generate from './pages/Generate.js';
-import { Layout, Footer } from './components/layout/index.js';
-import Navbar from './components/ui/Navbar.js';
+import { Layout, Footer } from '../shared/components/admin/layout/index.js';
+import Navbar from '../shared/components/ui/Navbar.js';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../shared/components/ui/card.tsx';
-import { Button } from './components/ui/form-controls.js';
+import { Button } from '../shared/components/ui/form-controls.js';
 import config from './config.js';
 
 function AdminApp() {

@@ -11,187 +11,24 @@ import fs from 'fs';
 import path from 'path';
 import config from './config.js';
 import schema from './schema.js';
-
-// Type definitions
-interface DatabaseResult {
-  lastID: number;
-  changes: number;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-  visibility?: string;
-  sort_order: number;
-  created_at: Date;
-}
-
-interface Parameter {
-  id: string;
-  name: string;
-  description: string;
-  type: 'select' | 'text' | 'number' | 'boolean' | 'range';
-  category_id: string;
-  category_name?: string;
-  visibility?: string;
-  required: boolean;
-  sort_order: number;
-  parameter_values: any[] | null;
-  parameter_config: Record<string, any> | null;
-  created_at: Date;
-}
-
-interface GeneratedContent {
-  id: string;
-  title: string;
-  fiction_content: string;
-  image_blob?: Buffer | null;
-  image_thumbnail?: Buffer | null;
-  image_format: string;
-  image_size_bytes: number;
-  thumbnail_size_bytes: number;
-  prompt_data: Record<string, any>;
-  metadata: Record<string, any> | null;
-  created_at: Date;
-  image_original_url?: string;
-  image_thumbnail_url?: string;
-}
-
-interface Setting {
-  key: string;
-  value: any;
-  data_type: 'string' | 'number' | 'boolean' | 'json';
-}
-
-interface CategoryData {
-  id?: string;
-  name: string;
-  description?: string;
-  sort_order?: number;
-}
-
-interface ParameterData {
-  id?: string;
-  name: string;
-  description?: string;
-  type: 'select' | 'text' | 'number' | 'boolean' | 'range';
-  category_id: string;
-  sort_order?: number;
-  parameter_values?: any[] | { on: string; off: string };
-}
-
-interface ContentData {
-  title: string;
-  fiction_content: string;
-  image_blob?: Buffer | null;
-  image_thumbnail?: Buffer | null;
-  image_format?: string;
-  image_size_bytes?: number;
-  thumbnail_size_bytes?: number;
-  prompt_data?: Record<string, any>;
-  metadata?: Record<string, any>;
-}
-
-interface AIGenerationParameters {
-  [category: string]: {
-    [parameter: string]: any;
-  } | any;
-}
-
-interface FictionGenerationResult {
-  success: boolean;
-  title: string;
-  content: string;
-  type: 'fiction';
-  wordCount: number;
-  metadata: {
-    model: string;
-    tokens: number;
-  };
-}
-
-interface ImageGenerationResult {
-  success: boolean;
-  imageBlob?: Buffer;
-  imageThumbnail?: Buffer;
-  imageFormat?: string;
-  imageSizeBytes?: number;
-  thumbnailSizeBytes?: number;
-  imageUrl?: string;
-  imagePrompt: string;
-  type: 'image';
-  metadata: {
-    model: string;
-    prompt: string;
-    originalSize?: number;
-    thumbnailSize?: number;
-  };
-}
-
-interface CombinedGenerationResult {
-  success: boolean;
-  title: string;
-  content: string;
-  imagePrompt: string;
-  wordCount: number;
-  imageBlob?: Buffer;
-  imageThumbnail?: Buffer;
-  imageFormat?: string;
-  imageSizeBytes?: number;
-  thumbnailSizeBytes?: number;
-  error?: string;
-  imageUrl?: string;
-  metadata: {
-    fiction: {
-      model: string;
-      tokens: number;
-    };
-    image: {
-      model: string;
-      prompt: string;
-      originalSize?: number;
-      thumbnailSize?: number;
-    };
-  };
-}
-
-interface OpenAIChatResponse {
-  data: {
-    choices: Array<{
-      message: {
-        content: string;
-      };
-    }>;
-    model: string;
-    usage: {
-      total_tokens: number;
-    };
-  };
-}
-
-interface OpenAIImageResponse {
-  data: {
-    data: Array<{
-      url: string;
-    }>;
-  };
-}
-
-interface VisualPatterns {
-  characters: RegExp[];
-  locations: RegExp[];
-  objects: RegExp[];
-  atmosphere: RegExp[];
-}
-
-interface ProcessedImageData {
-  original: Buffer;
-  thumbnail: Buffer;
-  format: string;
-  originalSize: number;
-  thumbnailSize: number;
-}
+import type {
+  DatabaseResult,
+  Category,
+  Parameter,
+  GeneratedContent,
+  Setting,
+  CategoryData,
+  ParameterData,
+  ContentData,
+  AIGenerationParameters,
+  FictionGenerationResult,
+  ImageGenerationResult,
+  CombinedGenerationResult,
+  OpenAIChatResponse,
+  OpenAIImageResponse,
+  VisualPatterns,
+  ProcessedImageData
+} from '../types/services.js';
 
 // Check if Sharp is available
 let sharp: any = null;

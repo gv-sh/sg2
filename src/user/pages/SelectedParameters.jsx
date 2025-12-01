@@ -8,9 +8,9 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent
-} from '../components/ui/accordion';
+} from '../../shared/components/ui/accordion';
 import { cn } from '../lib/utils';
-import ParameterValueInput from '../components/parameters/ParameterValueInput';
+import ParameterValueInput from '../../shared/components/user/parameters/ParameterValueInput';
 import { randomizeParameterValue } from '../utils/parameterUtils';
 import { useNavigate } from 'react-router-dom';
 

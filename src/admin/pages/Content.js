@@ -3,11 +3,11 @@ import axios from 'axios';
 import config from '../config.js';
 import '../../index.css';
 import { Card, CardContent } from '../../shared/components/ui/card.tsx';
-import { Button, Select, Input } from '../components/ui/form-controls.js';
+import { Button, Select, Input } from '../../shared/components/ui/form-controls.js';
 import { Alert } from '../../shared/components/ui/alert.tsx';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table.js';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog.js';
-import { PaginationControls } from '../components/ui/pagination.js';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../shared/components/ui/table.js';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../shared/components/ui/dialog.js';
+import { PaginationControls } from '../../shared/components/ui/pagination.js';
 import { Clipboard, Download, Search, Trash2, CheckSquare, Square } from 'lucide-react';
 
 function Content() {

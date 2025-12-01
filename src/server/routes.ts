@@ -23,6 +23,16 @@ import {
   parameterFiltersSchema,
   idParamSchema
 } from './middleware.js';
+import type {
+  TypedRequestParams,
+  TypedRequestBody,
+  TypedRequestQuery,
+  TypedRequest,
+  ApiResponse,
+  ContentApiData,
+  HealthStatusData,
+  DatabaseStatsData
+} from '../types/api.js';
 
 const router = express.Router();
 
@@ -42,67 +52,6 @@ type ContentUpdateSchema = z.infer<typeof contentUpdateSchema>;
 type ContentFiltersSchema = z.infer<typeof contentFiltersSchema>;
 type ParameterFiltersSchema = z.infer<typeof parameterFiltersSchema>;
 type IdParamSchema = z.infer<typeof idParamSchema>;
-
-// Express route handler types
-interface TypedRequestParams<T extends Record<string, string> = Record<string, string>> extends Request {
-  params: T;
-}
-
-interface TypedRequestBody<T = any> extends Request {
-  body: T;
-}
-
-interface TypedRequestQuery<T extends Record<string, any> = Record<string, any>> extends Request {
-  query: T;
-}
-
-interface TypedRequest<P extends Record<string, string> = Record<string, string>, B = any, Q extends Record<string, any> = Record<string, any>> extends Request {
-  params: P;
-  body: B;
-  query: Q;
-}
-
-// API response types
-interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-  details?: any[];
-}
-
-// Content types
-interface ContentApiData {
-  id: string;
-  title: string;
-  fiction_content: string;
-  image_original_url?: string;
-  image_thumbnail_url?: string;
-  prompt_data: Record<string, any>;
-  metadata?: Record<string, any>;
-  created_at?: string;
-}
-
-interface HealthStatusData {
-  status: string;
-  timestamp: string;
-  uptime: number;
-  environment: string;
-  version: string;
-  database: string;
-  ai: string;
-}
-
-interface DatabaseStatsData {
-  status: string;
-  statistics: {
-    categories: number;
-    parameters: number;
-    generatedContent: number;
-    settings: number;
-  };
-  timestamp: string;
-}
 
 // ==================== API INFO ====================
 

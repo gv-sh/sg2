@@ -1,10 +1,10 @@
 // src/pages/Generation.jsx
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import StoryLibrary from '../components/stories/StoryLibrary';
-import StoryViewer from '../components/stories/StoryViewer';
-import StoryGenerator from '../components/stories/StoryGenerator';
-import GenerationControls from '../components/generation/GenerationControls';
+import StoryLibrary from '../../shared/components/user/stories/StoryLibrary';
+import StoryViewer from '../../shared/components/user/stories/StoryViewer';
+import StoryGenerator from '../../shared/components/user/stories/StoryGenerator';
+import GenerationControls from '../../shared/components/user/generation/GenerationControls';
 import { useGeneration } from '../hooks/useGeneration';
 import { Alert, AlertDescription } from '../../shared/components/ui/alert.tsx';
 import { RefreshCw, AlertTriangle } from 'lucide-react';

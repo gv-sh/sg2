@@ -1,8 +1,8 @@
 // src/routes/AppRoutes.jsx
 import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import ResponsiveLayout, { Column } from '../components/layout/ResponsiveLayout';
-import GuidedTour from '../components/GuidedTour';
+import ResponsiveLayout, { Column } from '../../shared/components/user/layout/ResponsiveLayout';
+import GuidedTour from '../../shared/components/user/GuidedTour';
 import { randomizeParameterValue } from '../utils/parameterUtils';
 
 // Loading Spinner Component

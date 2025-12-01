@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
-import { Button, Input, Select } from '../components/ui/form-controls.js';
+import { Button, Input, Select } from '../../shared/components/ui/form-controls.js';
 import { Badge } from '../../shared/components/ui/badge.tsx';
 import { Alert } from '../../shared/components/ui/alert.tsx';
 import config from '../config.js';

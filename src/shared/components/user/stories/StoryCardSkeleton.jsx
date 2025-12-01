@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent } from '#shared/components/ui/card.tsx';
+import { Card, CardContent } from '../../ui/card.tsx';
 import { Skeleton } from '../ui/skeleton';
 
 /**

@@ -1,9 +1,9 @@
 // src/pages/LibraryPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StoryLibrary from '../components/stories/StoryLibrary';
-import LibrarySkeleton from '../components/stories/LibrarySkeleton';
-import GenerationControls from '../components/generation/GenerationControls';
+import StoryLibrary from '../../shared/components/user/stories/StoryLibrary';
+import LibrarySkeleton from '../../shared/components/user/stories/LibrarySkeleton';
+import GenerationControls from '../../shared/components/user/generation/GenerationControls';
 import { fetchContentSummary } from '../services/api';
 
 const LibraryPage = () => {

@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { isMobileDevice } from './utils/deviceUtils.js';
 
 // Theme and Layout Components
-import { ThemeProvider } from './components/theme/theme-provider.jsx';
-import MainLayout from './components/layout/MainLayout.jsx';
+import { ThemeProvider } from '../shared/components/user/theme/theme-provider.jsx';
+import MainLayout from '../shared/components/user/layout/MainLayout.jsx';
 import AppRoutes from './routes/AppRoutes.jsx';
 import { ParameterProvider } from './contexts/ParameterContext.jsx';
 

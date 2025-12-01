@@ -3,8 +3,8 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { BadgePlus } from 'lucide-react';
-import GalaxyParticles from '../components/ui/GalaxyParticles';
-import Shaders from '../components/ui/Shaders';
+import GalaxyParticles from '../../shared/components/ui/GalaxyParticles';
+import Shaders from '../../shared/components/ui/Shaders';
 import { useParameters } from '../contexts/ParameterContext.jsx';
 
 const Landing = ({ onClearSession }) => {

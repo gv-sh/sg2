@@ -3,7 +3,7 @@ import axios from 'axios';
 import config from '../config.js';
 import '../../index.css';
 import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
-import { Button, Input, Textarea, Select } from '../components/ui/form-controls.js';
+import { Button, Input, Textarea, Select } from '../../shared/components/ui/form-controls.js';
 import { Badge } from '../../shared/components/ui/badge.tsx';
 import { Alert } from '../../shared/components/ui/alert.tsx';
 

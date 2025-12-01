@@ -78,7 +78,7 @@ interface ParameterData {
   type: 'select' | 'text' | 'number' | 'boolean' | 'range';
   category_id: string;
   sort_order?: number;
-  parameter_values?: any[];
+  parameter_values?: any[] | { on: string; off: string };
 }
 
 interface ContentData {
@@ -140,6 +140,7 @@ interface CombinedGenerationResult {
   imageFormat?: string;
   imageSizeBytes?: number;
   thumbnailSizeBytes?: number;
+  error?: string;
   imageUrl?: string;
   metadata: {
     fiction: {
@@ -733,7 +734,7 @@ class AIService {
   }
 
   async generateFiction(parameters: AIGenerationParameters, year: number | null): Promise<FictionGenerationResult> {
-    const aiConfig = config.getAIConfig('fiction');
+    const aiConfig = config.getAIConfig('fiction') as any;
     const prompt = this.buildFictionPrompt(parameters, year);
     
     try {
@@ -772,7 +773,7 @@ class AIService {
   }
 
   async generateImage(year: number | null, generatedText: string | null = null): Promise<ImageGenerationResult> {
-    const aiConfig = config.getAIConfig('image');
+    const aiConfig = config.getAIConfig('image') as any;
     const prompt = this.buildImagePrompt(year, generatedText);
     
     try {
@@ -882,7 +883,7 @@ class AIService {
   }
 
   private buildImagePrompt(year: number | null, generatedText: string | null): string {
-    const aiConfig = config.getAIConfig('image');
+    const aiConfig = config.getAIConfig('image') as any;
     let prompt = 'Create a beautiful, detailed image';
     
     if (generatedText) {
@@ -902,8 +903,8 @@ class AIService {
     const elements: string[] = [];
     const cleanText = text.replace(/\*\*Title:.*?\*\*/g, '').trim();
     
-    Object.values(VISUAL_PATTERNS).forEach(patterns => {
-      patterns.forEach(pattern => {
+    Object.values(VISUAL_PATTERNS).forEach((patterns: RegExp[]) => {
+      patterns.forEach((pattern: RegExp) => {
         const matches = cleanText.match(pattern) || [];
         matches.slice(0, 2).forEach(match => {
           const cleaned = match.replace(/\s+(stood|walked|ran|sat|looked|gazed).*$/i, '').trim();

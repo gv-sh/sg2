@@ -141,25 +141,25 @@ export const requestLoggingMiddleware = (req: Request, res: Response, next: Next
 // ==================== ERROR HANDLING MIDDLEWARE ====================
 
 // JSON parsing error handler
-export const jsonParsingErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
+export const jsonParsingErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof SyntaxError && 'body' in error) {
     return next(boom.badRequest('Invalid JSON payload'));
   }
-  next(error);
+  return next(error);
 };
 
 // Validation error handler
-export const validationErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
+export const validationErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof ZodError) {
     const boomError = boom.badRequest('Validation failed');
     boomError.output.payload.details = error.issues;
     return next(boomError);
   }
-  next(error);
+  return next(error);
 };
 
 // Boom error handler
-export const boomErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
+export const boomErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
   if (boom.isBoom(error)) {
     logger.error({
       error: error.message,
@@ -168,22 +168,26 @@ export const boomErrorHandler = (error: any, req: Request, res: Response, next: 
       url: req.url
     });
     
-    return res.status(error.output.statusCode).json({
+    const response: any = {
       success: false,
       error: error.output.payload.message,
-      ...(config.isDevelopment() && { 
-        stack: error.stack
-      }),
-      ...(error.output.payload.details && { 
-        details: error.output.payload.details 
-      })
-    });
+    };
+    
+    if (config.isDevelopment()) {
+      response.stack = error.stack;
+    }
+    
+    if (error.output.payload.details) {
+      response.details = error.output.payload.details;
+    }
+    
+    return res.status(error.output.statusCode).json(response);
   }
-  next(error);
+  return next(error);
 };
 
 // Generic error handler
-export const genericErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
+export const genericErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
   logger.error({
     error: error.message,
     stack: error.stack,
@@ -191,13 +195,16 @@ export const genericErrorHandler = (error: any, req: Request, res: Response, nex
     url: req.url
   });
 
-  res.status(500).json({
+  const response: any = {
     success: false,
     error: 'Internal Server Error',
-    ...(config.isDevelopment() && { 
-      stack: error.stack 
-    })
-  });
+  };
+  
+  if (config.isDevelopment()) {
+    response.stack = error.stack;
+  }
+  
+  return res.status(500).json(response);
 };
 
 // ==================== HELPER FUNCTIONS ====================

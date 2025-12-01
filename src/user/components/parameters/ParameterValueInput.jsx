@@ -3,8 +3,8 @@ import React from 'react';
 import { Select } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
-import { Checkbox } from '#shared/components/ui/checkbox.jsx';
-import { Input } from '#shared/components/ui/input.jsx';
+import { Checkbox } from '#shared/components/ui/checkbox.tsx';
+import { Input } from '#shared/components/ui/input.tsx';
 
 const ParameterValueInput = ({ parameter, value, onChange }) => {
   switch (parameter.type) {

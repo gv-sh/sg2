@@ -98,7 +98,7 @@ app.get('*', (req: Request, res: Response) => {
     });
   }
   
-  res.sendFile(path.join(buildPath, 'index.html'));
+  return res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 // ==================== SERVER STARTUP ====================

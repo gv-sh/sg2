@@ -1,6 +1,6 @@
 // src/components/parameters/YearInput.jsx
 import React from 'react';
-import { Button } from '#shared/components/ui/button.jsx';
+import { Button } from '#shared/components/ui/button.tsx';
 import { Calendar, Dices } from 'lucide-react';
 
 const YearInput = ({ value, onChange }) => {

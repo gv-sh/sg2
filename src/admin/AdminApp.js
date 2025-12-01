@@ -8,7 +8,7 @@ import Database from './pages/Database.js';
 import Generate from './pages/Generate.js';
 import { Layout, Footer } from './components/layout/index.js';
 import Navbar from './components/ui/Navbar.js';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../shared/components/ui/card.jsx';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../shared/components/ui/card.tsx';
 import { Button } from './components/ui/form-controls.js';
 import config from './config.js';
 

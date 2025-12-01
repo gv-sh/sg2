@@ -1,6 +1,6 @@
 // src/components/stories/StoryViewer.jsx
 import React from 'react';
-import { Button } from '#shared/components/ui/button.jsx';
+import { Button } from '#shared/components/ui/button.tsx';
 import {
   Calendar,
   Download,

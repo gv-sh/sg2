@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.jsx';
+import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
 import { Button, Input } from '../components/ui/form-controls.js';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../components/ui/dialog.js';
-import { Alert } from '../../shared/components/ui/alert.jsx';
+import { Alert } from '../../shared/components/ui/alert.tsx';
 import config from '../config.js';
 
 function Database() {

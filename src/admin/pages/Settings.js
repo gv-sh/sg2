@@ -2,10 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import config from '../config.js';
 import '../../index.css';
-import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.jsx';
+import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
 import { Button, Input, Textarea, Select } from '../components/ui/form-controls.js';
-import { Badge } from '../../shared/components/ui/badge.jsx';
-import { Alert } from '../../shared/components/ui/alert.jsx';
+import { Badge } from '../../shared/components/ui/badge.tsx';
+import { Alert } from '../../shared/components/ui/alert.tsx';
 
 // Default settings for highlighting
 const DEFAULT_SETTINGS = {

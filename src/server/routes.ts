@@ -44,7 +44,7 @@ type ParameterFiltersSchema = z.infer<typeof parameterFiltersSchema>;
 type IdParamSchema = z.infer<typeof idParamSchema>;
 
 // Express route handler types
-interface TypedRequestParams<T = any> extends Request {
+interface TypedRequestParams<T extends Record<string, string> = Record<string, string>> extends Request {
   params: T;
 }
 
@@ -52,11 +52,11 @@ interface TypedRequestBody<T = any> extends Request {
   body: T;
 }
 
-interface TypedRequestQuery<T = any> extends Request {
+interface TypedRequestQuery<T extends Record<string, any> = Record<string, any>> extends Request {
   query: T;
 }
 
-interface TypedRequest<P = any, B = any, Q = any> extends Request {
+interface TypedRequest<P extends Record<string, string> = Record<string, string>, B = any, Q extends Record<string, any> = Record<string, any>> extends Request {
   params: P;
   body: B;
   query: Q;
@@ -107,7 +107,7 @@ interface DatabaseStatsData {
 // ==================== API INFO ====================
 
 // API info endpoint
-router.get('/api', (req: Request, res: Response<ApiResponse>) => {
+router.get('/api', (req: Request, res: Response) => {
   res.json({
     name: config.get('app.name'),
     version: config.get('app.version'),
@@ -831,7 +831,7 @@ router.put('/api/admin/settings', async (req: TypedRequestBody<Record<string, an
     
     for (const [key, value] of Object.entries(validatedData)) {
       // Auto-detect data type
-      let dataType = 'string';
+      let dataType: 'string' | 'number' | 'boolean' | 'json' = 'string';
       if (typeof value === 'number') dataType = 'number';
       else if (typeof value === 'boolean') dataType = 'boolean';
       else if (typeof value === 'object') dataType = 'json';
@@ -970,9 +970,21 @@ router.post('/api/generate', async (req: TypedRequestBody<GenerationRequestSchem
     const savedContent = await dataService.saveGeneratedContent(contentData);
     const apiContent = await dataService.getGeneratedContentForApi(savedContent.id);
     
+    // Convert to API format
+    const contentApiData: ContentApiData = {
+      id: apiContent.id,
+      title: apiContent.title,
+      fiction_content: apiContent.fiction_content,
+      image_original_url: apiContent.image_original_url,
+      image_thumbnail_url: apiContent.image_thumbnail_url,
+      prompt_data: apiContent.prompt_data,
+      metadata: apiContent.metadata || undefined,
+      created_at: apiContent.created_at.toISOString()
+    };
+    
     res.status(201).json({ 
       success: true, 
-      data: apiContent
+      data: contentApiData
     });
   } catch (error) {
     next(error);
@@ -1049,10 +1061,23 @@ router.post('/api/generate', async (req: TypedRequestBody<GenerationRequestSchem
 router.get('/api/content', async (req: TypedRequestQuery<ContentFiltersSchema>, res: Response<ApiResponse<ContentApiData[]>>, next: NextFunction) => {
   try {
     const filters = contentFiltersSchema.parse(req.query);
-    const limit = parseInt(filters.limit) || 20;
+    const limit = filters.limit || 20;
     
     const content = await dataService.getRecentContent(limit);
-    res.json({ success: true, data: content });
+    
+    // Convert to API format
+    const contentApiData: ContentApiData[] = content.map(item => ({
+      id: item.id,
+      title: item.title,
+      fiction_content: item.fiction_content,
+      image_original_url: item.image_original_url,
+      image_thumbnail_url: item.image_thumbnail_url,
+      prompt_data: item.prompt_data,
+      metadata: item.metadata || undefined,
+      created_at: item.created_at.toISOString()
+    }));
+    
+    res.json({ success: true, data: contentApiData });
   } catch (error) {
     next(error);
   }
@@ -1088,15 +1113,14 @@ router.get('/api/content', async (req: TypedRequestQuery<ContentFiltersSchema>, 
 router.get('/api/content/summary', async (req: TypedRequestQuery<ContentFiltersSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const filters = contentFiltersSchema.parse(req.query);
-    const limit = parseInt(filters.limit) || 20;
+    const limit = filters.limit || 20;
     const contentType = filters.type || null;
 
-    const content = await dataService.getRecentContent(limit, contentType);
+    const content = await dataService.getRecentContent(limit);
     const summary = content.map(item => ({
       id: item.id,
       title: item.title,
-      content_type: item.content_type,
-      created_at: item.created_at
+      created_at: item.created_at.toISOString()
     }));
 
     res.json({ success: true, data: summary });
@@ -1179,9 +1203,9 @@ router.get('/api/images/:id/original', async (req: TypedRequestParams<IdParamSch
       'ETag': `"${id}-original"`
     });
     
-    res.send(content.image_blob);
+    return res.send(content.image_blob);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -1226,9 +1250,9 @@ router.get('/api/images/:id/thumbnail', async (req: TypedRequestParams<IdParamSc
       'ETag': `"${id}-thumbnail"`
     });
     
-    res.send(content.image_thumbnail);
+    return res.send(content.image_thumbnail);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -1285,7 +1309,20 @@ router.get('/api/content/:id', async (req: TypedRequestParams<IdParamSchema>, re
   try {
     const { id } = idParamSchema.parse(req.params);
     const content = await dataService.getGeneratedContentForApi(id);
-    res.json({ success: true, data: content });
+    
+    // Convert to API format
+    const contentApiData: ContentApiData = {
+      id: content.id,
+      title: content.title,
+      fiction_content: content.fiction_content,
+      image_original_url: content.image_original_url,
+      image_thumbnail_url: content.image_thumbnail_url,
+      prompt_data: content.prompt_data,
+      metadata: content.metadata || undefined,
+      created_at: content.created_at.toISOString()
+    };
+    
+    res.json({ success: true, data: contentApiData });
   } catch (error) {
     next(error);
   }
@@ -1296,7 +1333,7 @@ router.get('/api/content/:id/image', async (req: TypedRequestParams<IdParamSchem
     const { id } = idParamSchema.parse(req.params);
     const content = await dataService.getGeneratedContentById(id);
 
-    if (!content.image_blob && !content.image_url) {
+    if (!content.image_blob && !content.image_original_url) {
       throw boom.notFound('Image not found');
     }
 
@@ -1304,8 +1341,8 @@ router.get('/api/content/:id/image', async (req: TypedRequestParams<IdParamSchem
     if (content.image_blob) {
       responseData.imageOriginalUrl = `/api/images/${id}/original`;
       responseData.imageThumbnailUrl = `/api/images/${id}/thumbnail`;
-    } else if (content.image_url) {
-      responseData.imageUrl = content.image_url;
+    } else if (content.image_original_url) {
+      responseData.imageUrl = content.image_original_url;
     }
 
     res.json({

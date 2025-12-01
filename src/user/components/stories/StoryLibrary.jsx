@@ -1,7 +1,7 @@
 // src/components/stories/StoryLibrary.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button } from '#shared/components/ui/button.jsx';
-import { Alert, AlertDescription } from '#shared/components/ui/alert.jsx';
+import { Button } from '#shared/components/ui/button.tsx';
+import { Alert, AlertDescription } from '#shared/components/ui/alert.tsx';
 import { PlusCircle, AlertTriangle, RefreshCw, X } from 'lucide-react';
 import StoryCard from './StoryCard.jsx';
 import StoryFilters from './StoryFilters.jsx';

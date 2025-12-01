@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from './navigation-menu.js';
-import { Badge } from '#shared/components/ui/badge.jsx';
+import { Badge } from '#shared/components/ui/badge.tsx';
 
 const routes = [
   { path: '/admin/categories', label: 'Categories' },

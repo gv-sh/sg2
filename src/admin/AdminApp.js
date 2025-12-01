@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import Categories from './pages/Categories';
-import Parameters from './pages/Parameters';
-import Content from './pages/Content';
-import Settings from './pages/Settings';
-import Database from './pages/Database';
-import Generate from './pages/Generate';
-import { Layout, Footer } from './components/layout';
-import Navbar from './components/ui/Navbar';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './components/ui/card';
-import { Button } from './components/ui/form-controls';
-import config from './config';
+import Categories from './pages/Categories.js';
+import Parameters from './pages/Parameters.js';
+import Content from './pages/Content.js';
+import Settings from './pages/Settings.js';
+import Database from './pages/Database.js';
+import Generate from './pages/Generate.js';
+import { Layout, Footer } from './components/layout/index.js';
+import Navbar from './components/ui/Navbar.js';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../shared/components/ui/card.jsx';
+import { Button } from './components/ui/form-controls.js';
+import config from './config.js';
 
 function AdminApp() {
   const [serverStatus, setServerStatus] = useState('offline');

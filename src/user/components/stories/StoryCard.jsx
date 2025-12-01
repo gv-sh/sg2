@@ -1,7 +1,7 @@
 // src/components/stories/StoryCard.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent } from '#shared/components/ui/card.jsx';
 import { Calendar, BookOpen } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import LazyImage from '../ui/LazyImage';

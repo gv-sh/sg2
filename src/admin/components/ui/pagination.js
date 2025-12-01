@@ -1,6 +1,6 @@
 import * as React from "react"
-import { cn } from "../../lib/utils"
-import { Button, Select, Input } from "./form-controls"
+import { cn } from "../../lib/utils.js"
+import { Button, Select, Input } from "./form-controls.js"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal } from 'lucide-react'
 
 const Pagination = React.forwardRef(({ 

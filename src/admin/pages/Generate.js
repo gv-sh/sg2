@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { Button, Input, Select } from '../components/ui/form-controls';
-import { Badge } from '../components/ui/badge';
-import { Alert } from '../components/ui/alert';
-import config from '../config';
+import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.jsx';
+import { Button, Input, Select } from '../components/ui/form-controls.js';
+import { Badge } from '../../shared/components/ui/badge.jsx';
+import { Alert } from '../../shared/components/ui/alert.jsx';
+import config from '../config.js';
 
 function Generate() {
   const [categories, setCategories] = useState([]);

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
-import LibraryPage from './LibraryPage';
+import LibraryPage from './LibraryPage.jsx';
 import * as api from '../services/api';
 
 // Mock the API module

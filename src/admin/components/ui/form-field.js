@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils.js"
 
 // HelperText Component
 const HelperText = React.forwardRef(({ className, ...props }, ref) => (

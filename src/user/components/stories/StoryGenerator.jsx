@@ -1,7 +1,7 @@
 // src/components/stories/StoryGenerator.jsx
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
-import { Alert, AlertDescription } from '../ui/alert';
+import { Alert, AlertDescription } from '#shared/components/ui/alert.jsx';
 
 const StoryGenerator = ({
   loading,

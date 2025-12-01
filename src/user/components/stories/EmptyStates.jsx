@@ -1,6 +1,6 @@
 // src/components/stories/EmptyStates.jsx
 import React from 'react';
-import { Button } from '../ui/button';
+import { Button } from '#shared/components/ui/button.jsx';
 import { BookOpen, Search, PlusCircle } from 'lucide-react';
 
 export const EmptyLibrary = ({ onCreateNew }) => {

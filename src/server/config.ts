@@ -3,16 +3,146 @@
  * Replaces the entire config/ directory with a single file
  */
 
-import path from 'path';
-import dotenv from 'dotenv';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
 
 // Load environment variables from .env file
 dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
 
+// Type definitions
+interface ServerConfig {
+  port: number;
+  host: string;
+  timeouts: {
+    gracefulShutdown: number;
+    request: number;
+  };
+  bodyLimit: string;
+}
+
+interface SecurityConfig {
+  rateLimiting: {
+    windowMs: number;
+    maxRequests: number;
+  };
+  cors: {
+    origins: {
+      development: string[];
+      production: string[];
+      test: string[];
+    };
+    credentials: boolean;
+  };
+  helmet: {
+    crossOriginEmbedderPolicy: boolean;
+    contentSecurityPolicy: boolean;
+  };
+}
+
+interface DatabaseConfig {
+  type: string;
+  sqlite: {
+    path: string;
+    testPath: string;
+  };
+  options: {
+    connectionTimeout: number;
+    busyTimeout: number;
+  };
+}
+
+interface AIConfig {
+  openai: {
+    apiKey: string;
+    baseUrl: string;
+  };
+  models: {
+    fiction: string;
+    image: string;
+  };
+  parameters: {
+    fiction: {
+      temperature: number;
+      maxTokens: number;
+      defaultStoryLength: number;
+      systemPrompt: string;
+    };
+    image: {
+      size: string;
+      quality: string;
+      promptSuffix: string;
+    };
+  };
+}
+
+interface BusinessConfig {
+  years: { min: number; max: number };
+  pagination: { defaultLimit: number; maxLimit: number; minLimit: number };
+  content: { defaultType: string; idRandomMultiplier: number };
+}
+
+interface LoggingConfig {
+  level: string;
+  prettyPrint: boolean;
+  colorize: boolean;
+}
+
+interface DocsConfig {
+  swagger: {
+    title: string;
+    version: string;
+    description: string;
+    servers: {
+      development: string;
+      production: string;
+      test: string;
+    };
+  };
+}
+
+interface FeaturesConfig {
+  enableMetrics: boolean;
+  enableCache: boolean;
+  enableRateLimit: boolean;
+}
+
+interface ValidationConfig {
+  maxNameLength: number;
+  maxDescriptionLength: number;
+  maxTitleLength: number;
+  maxContentLength: number;
+  maxPromptLength: number;
+  maxParametersPerRequest: number;
+  maxSettingsKeys: number;
+  maxPageSize: number;
+  defaultPageSize: number;
+  yearRange: { min: number; max: number };
+}
+
+interface AppConfig {
+  name: string;
+  version: string;
+  description: string;
+}
+
+interface Config {
+  env: string;
+  app: AppConfig;
+  server: ServerConfig;
+  security: SecurityConfig;
+  database: DatabaseConfig;
+  ai: AIConfig;
+  business: BusinessConfig;
+  logging: LoggingConfig;
+  docs: DocsConfig;
+  features: FeaturesConfig;
+  validation: ValidationConfig;
+}
+
 // Base configuration that merges all config files
-const config = {
+const config: Config = {
   env,
   
   // Application Information
@@ -187,11 +317,11 @@ if (env === 'test') {
  */
 export default {
   // Direct property access
-  get(path) {
-    return path.split('.').reduce((obj, key) => obj?.[key], config);
+  get(path: string): any {
+    return path.split('.').reduce((obj: any, key) => obj?.[key], config);
   },
 
-  has(path) {
+  has(path: string): boolean {
     try {
       return this.get(path) !== undefined;
     } catch {
@@ -200,21 +330,21 @@ export default {
   },
 
   // Environment checks
-  isDevelopment: () => env === 'development',
-  isProduction: () => env === 'production',
-  isTest: () => env === 'test',
+  isDevelopment: (): boolean => env === 'development',
+  isProduction: (): boolean => env === 'production',
+  isTest: (): boolean => env === 'test',
 
   // Helper functions
-  getDatabasePath() {
+  getDatabasePath(): string {
     return env === 'test' ? config.database.sqlite.testPath : config.database.sqlite.path;
   },
 
-  getCorsOrigins() {
-    return config.security.cors.origins[env] || config.security.cors.origins.development;
+  getCorsOrigins(): string[] {
+    return (config.security.cors.origins as any)[env] || config.security.cors.origins.development;
   },
 
-  getSwaggerServer() {
-    const url = config.docs.swagger.servers[env] || config.docs.swagger.servers.development;
+  getSwaggerServer(): string {
+    const url = (config.docs.swagger.servers as any)[env] || config.docs.swagger.servers.development;
     const port = config.server.port;
     
     if (env === 'development' && port !== 3000) {
@@ -224,11 +354,11 @@ export default {
     return url;
   },
 
-  isFeatureEnabled(featureName) {
+  isFeatureEnabled(featureName: keyof FeaturesConfig): boolean {
     return config.features[featureName] || false;
   },
 
-  getAIConfig(type = 'fiction') {
+  getAIConfig(type: keyof typeof config.ai.models = 'fiction') {
     const modelName = config.ai.models[type];
     const parameters = config.ai.parameters[type];
     const openai = config.ai.openai;

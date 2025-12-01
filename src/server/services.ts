@@ -4,7 +4,7 @@
  */
 
 import sqlite3 from 'sqlite3';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
@@ -12,16 +12,196 @@ import path from 'path';
 import config from './config.js';
 import schema from './schema.js';
 
+// Type definitions
+interface DatabaseResult {
+  lastID: number;
+  changes: number;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+  visibility?: string;
+  sort_order: number;
+  created_at: Date;
+}
+
+interface Parameter {
+  id: string;
+  name: string;
+  description: string;
+  type: 'select' | 'text' | 'number' | 'boolean' | 'range';
+  category_id: string;
+  category_name?: string;
+  visibility?: string;
+  required: boolean;
+  sort_order: number;
+  parameter_values: any[] | null;
+  parameter_config: Record<string, any> | null;
+  created_at: Date;
+}
+
+interface GeneratedContent {
+  id: string;
+  title: string;
+  fiction_content: string;
+  image_blob?: Buffer | null;
+  image_thumbnail?: Buffer | null;
+  image_format: string;
+  image_size_bytes: number;
+  thumbnail_size_bytes: number;
+  prompt_data: Record<string, any>;
+  metadata: Record<string, any> | null;
+  created_at: Date;
+  image_original_url?: string;
+  image_thumbnail_url?: string;
+}
+
+interface Setting {
+  key: string;
+  value: any;
+  data_type: 'string' | 'number' | 'boolean' | 'json';
+}
+
+interface CategoryData {
+  id?: string;
+  name: string;
+  description?: string;
+  sort_order?: number;
+}
+
+interface ParameterData {
+  id?: string;
+  name: string;
+  description?: string;
+  type: 'select' | 'text' | 'number' | 'boolean' | 'range';
+  category_id: string;
+  sort_order?: number;
+  parameter_values?: any[];
+}
+
+interface ContentData {
+  title: string;
+  fiction_content: string;
+  image_blob?: Buffer | null;
+  image_thumbnail?: Buffer | null;
+  image_format?: string;
+  image_size_bytes?: number;
+  thumbnail_size_bytes?: number;
+  prompt_data?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+interface AIGenerationParameters {
+  [category: string]: {
+    [parameter: string]: any;
+  } | any;
+}
+
+interface FictionGenerationResult {
+  success: boolean;
+  title: string;
+  content: string;
+  type: 'fiction';
+  wordCount: number;
+  metadata: {
+    model: string;
+    tokens: number;
+  };
+}
+
+interface ImageGenerationResult {
+  success: boolean;
+  imageBlob?: Buffer;
+  imageThumbnail?: Buffer;
+  imageFormat?: string;
+  imageSizeBytes?: number;
+  thumbnailSizeBytes?: number;
+  imageUrl?: string;
+  imagePrompt: string;
+  type: 'image';
+  metadata: {
+    model: string;
+    prompt: string;
+    originalSize?: number;
+    thumbnailSize?: number;
+  };
+}
+
+interface CombinedGenerationResult {
+  success: boolean;
+  title: string;
+  content: string;
+  imagePrompt: string;
+  wordCount: number;
+  imageBlob?: Buffer;
+  imageThumbnail?: Buffer;
+  imageFormat?: string;
+  imageSizeBytes?: number;
+  thumbnailSizeBytes?: number;
+  imageUrl?: string;
+  metadata: {
+    fiction: {
+      model: string;
+      tokens: number;
+    };
+    image: {
+      model: string;
+      prompt: string;
+      originalSize?: number;
+      thumbnailSize?: number;
+    };
+  };
+}
+
+interface OpenAIChatResponse {
+  data: {
+    choices: Array<{
+      message: {
+        content: string;
+      };
+    }>;
+    model: string;
+    usage: {
+      total_tokens: number;
+    };
+  };
+}
+
+interface OpenAIImageResponse {
+  data: {
+    data: Array<{
+      url: string;
+    }>;
+  };
+}
+
+interface VisualPatterns {
+  characters: RegExp[];
+  locations: RegExp[];
+  objects: RegExp[];
+  atmosphere: RegExp[];
+}
+
+interface ProcessedImageData {
+  original: Buffer;
+  thumbnail: Buffer;
+  format: string;
+  originalSize: number;
+  thumbnailSize: number;
+}
+
 // Check if Sharp is available
-let sharp = null;
+let sharp: any = null;
 try {
   sharp = (await import('sharp')).default;
-} catch (error) {
+} catch (error: any) {
   console.warn('Sharp not available - using URL-only mode:', error.message);
 }
 
 // Visual elements patterns for image generation
-const VISUAL_PATTERNS = {
+const VISUAL_PATTERNS: VisualPatterns = {
   characters: [
     /(Dr\.|Professor|Captain|Agent|Detective|Pandit|Guru|Swami)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi,
     /(Arjun|Priya|Raj|Kavya|Dev|Meera|Ravi|Anita|Vikram|Shreya)\s+(?:stood|walked|ran|sat|looked|gazed)/gi
@@ -42,12 +222,14 @@ const VISUAL_PATTERNS = {
  * Data Service - Handles all database operations
  */
 class DataService {
+  private db: sqlite3.Database | null = null;
+  private dbPath: string;
+
   constructor() {
-    this.db = null;
     this.dbPath = config.getDatabasePath();
   }
 
-  async init() {
+  async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       // Ensure the database directory exists
       const dbDir = path.dirname(this.dbPath);
@@ -60,7 +242,7 @@ class DataService {
           reject(boom.internal('Failed to connect to database', err));
         } else {
           try {
-            this.db.run('PRAGMA foreign_keys = ON');
+            this.db!.run('PRAGMA foreign_keys = ON');
             await this.ensureSchema();
             await this.importJsonDataIfNeeded();
             resolve();
@@ -75,7 +257,7 @@ class DataService {
   /**
    * Ensure database schema exists
    */
-  async ensureSchema() {
+  private async ensureSchema(): Promise<void> {
     // Check if tables exist
     const tableCheck = await this.get(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='categories'"
@@ -90,7 +272,7 @@ class DataService {
   /**
    * Create complete database schema using schema.js
    */
-  async createDatabaseSchema() {
+  private async createDatabaseSchema(): Promise<void> {
     console.log('Creating database schema from schema.js...');
 
     // Get all SQL statements from schema
@@ -107,7 +289,7 @@ class DataService {
   /**
    * Import JSON data if database is empty and JSON files exist
    */
-  async importJsonDataIfNeeded() {
+  private async importJsonDataIfNeeded(): Promise<void> {
     try {
       // Check if categories exist
       const existingCategories = await this.query('SELECT COUNT(*) as count FROM categories');
@@ -125,7 +307,7 @@ class DataService {
   /**
    * Import data from JSON files
    */
-  async importJsonData() {
+  private async importJsonData(): Promise<void> {
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
@@ -152,7 +334,7 @@ class DataService {
           id: param.id,
           name: param.name,
           description: param.description || '',
-          type: param.type === 'Dropdown' ? 'select' : param.type.toLowerCase(),
+          type: param.type === 'Dropdown' ? 'select' : param.type.toLowerCase() as any,
           category_id: param.categoryId,
           sort_order: param.sort_order || 0,
           parameter_values: param.values || param.parameter_values
@@ -161,16 +343,16 @@ class DataService {
 
       console.log('✅ JSON data import completed successfully');
       
-    } catch (error) {
+    } catch (error: any) {
       console.log('No JSON data to import or import failed:', error.message);
     }
   }
 
-  async query(sql, params = []) {
+  async query(sql: string, params: any[] = []): Promise<any[]> {
     if (!this.db) await this.init();
     
     return new Promise((resolve, reject) => {
-      this.db.all(sql, params, (err, rows) => {
+      this.db!.all(sql, params, (err, rows) => {
         if (err) {
           reject(boom.internal(`Database query failed: ${sql}`, err));
         } else {
@@ -180,11 +362,11 @@ class DataService {
     });
   }
 
-  async run(sql, params = []) {
+  async run(sql: string, params: any[] = []): Promise<DatabaseResult> {
     if (!this.db) await this.init();
     
     return new Promise((resolve, reject) => {
-      this.db.run(sql, params, function(err) {
+      this.db!.run(sql, params, function(err) {
         if (err) {
           reject(boom.internal(`Database operation failed: ${sql}`, err));
         } else {
@@ -194,11 +376,11 @@ class DataService {
     });
   }
 
-  async get(sql, params = []) {
+  async get(sql: string, params: any[] = []): Promise<any> {
     if (!this.db) await this.init();
     
     return new Promise((resolve, reject) => {
-      this.db.get(sql, params, (err, row) => {
+      this.db!.get(sql, params, (err, row) => {
         if (err) {
           reject(boom.internal(`Database query failed: ${sql}`, err));
         } else {
@@ -209,7 +391,7 @@ class DataService {
   }
 
   // Categories
-  async getCategories() {
+  async getCategories(): Promise<Category[]> {
     const categories = await this.query(
       `SELECT * FROM categories ORDER BY sort_order ASC, name ASC`
     );
@@ -219,7 +401,7 @@ class DataService {
     }));
   }
 
-  async getCategoryById(id) {
+  async getCategoryById(id: string): Promise<Category> {
     const category = await this.get('SELECT * FROM categories WHERE id = ?', [id]);
     if (!category) throw boom.notFound(`Category with id ${id} not found`);
     return {
@@ -228,7 +410,7 @@ class DataService {
     };
   }
 
-  async createCategory(categoryData) {
+  async createCategory(categoryData: CategoryData): Promise<Category> {
     const id = categoryData.id || this.generateId(categoryData.name);
     await this.run(
       `INSERT INTO categories (id, name, description, sort_order)
@@ -243,7 +425,7 @@ class DataService {
     return await this.getCategoryById(id);
   }
 
-  async updateCategory(id, updates) {
+  async updateCategory(id: string, updates: Partial<CategoryData>): Promise<Category> {
     const existing = await this.getCategoryById(id);
     await this.run(
       `UPDATE categories SET name = ?, description = ?, sort_order = ? WHERE id = ?`,
@@ -257,14 +439,14 @@ class DataService {
     return await this.getCategoryById(id);
   }
 
-  async deleteCategory(id) {
+  async deleteCategory(id: string): Promise<{ success: boolean; message: string }> {
     const result = await this.run('DELETE FROM categories WHERE id = ?', [id]);
     if (result.changes === 0) throw boom.notFound(`Category with id ${id} not found`);
     return { success: true, message: 'Category deleted successfully' };
   }
 
   // Parameters
-  async getParametersByCategory(categoryId) {
+  async getParametersByCategory(categoryId: string): Promise<Parameter[]> {
     const parameters = await this.query(
       `SELECT * FROM parameters WHERE category_id = ? ORDER BY sort_order ASC, name ASC`,
       [categoryId]
@@ -272,7 +454,7 @@ class DataService {
     return this.parseParameters(parameters);
   }
 
-  async getParameters() {
+  async getParameters(): Promise<Parameter[]> {
     const parameters = await this.query(
       `SELECT p.*, c.name as category_name FROM parameters p 
        LEFT JOIN categories c ON p.category_id = c.id
@@ -281,13 +463,13 @@ class DataService {
     return this.parseParameters(parameters);
   }
 
-  async getParameterById(id) {
+  async getParameterById(id: string): Promise<Parameter> {
     const parameter = await this.get('SELECT * FROM parameters WHERE id = ?', [id]);
     if (!parameter) throw boom.notFound(`Parameter with id ${id} not found`);
     return this.parseParameters([parameter])[0];
   }
 
-  async createParameter(parameterData) {
+  async createParameter(parameterData: ParameterData): Promise<Parameter> {
     const id = parameterData.id || this.generateId(parameterData.name);
     await this.getCategoryById(parameterData.category_id); // Verify category exists
     
@@ -307,7 +489,7 @@ class DataService {
     return await this.getParameterById(id);
   }
 
-  async updateParameter(id, updates) {
+  async updateParameter(id: string, updates: Partial<ParameterData>): Promise<Parameter> {
     const existing = await this.getParameterById(id);
     if (updates.category_id) await this.getCategoryById(updates.category_id);
     
@@ -326,14 +508,14 @@ class DataService {
     return await this.getParameterById(id);
   }
 
-  async deleteParameter(id) {
+  async deleteParameter(id: string): Promise<{ success: boolean; message: string }> {
     const result = await this.run('DELETE FROM parameters WHERE id = ?', [id]);
     if (result.changes === 0) throw boom.notFound(`Parameter with id ${id} not found`);
     return { success: true, message: 'Parameter deleted successfully' };
   }
 
   // Content
-  async saveGeneratedContent(contentData) {
+  async saveGeneratedContent(contentData: ContentData): Promise<GeneratedContent> {
     const id = uuidv4();
 
     await this.run(
@@ -355,7 +537,7 @@ class DataService {
     return await this.getGeneratedContentById(id);
   }
 
-  async getGeneratedContentById(id) {
+  async getGeneratedContentById(id: string): Promise<GeneratedContent> {
     const content = await this.get('SELECT * FROM generated_content WHERE id = ?', [id]);
     if (!content) throw boom.notFound(`Content with id ${id} not found`);
     return {
@@ -366,14 +548,14 @@ class DataService {
     };
   }
 
-  async getGeneratedContentForApi(id) {
+  async getGeneratedContentForApi(id: string): Promise<GeneratedContent> {
     const content = await this.get(
       'SELECT * FROM generated_content WHERE id = ?',
       [id]
     );
     if (!content) throw boom.notFound(`Content with id ${id} not found`);
 
-    const result = {
+    const result: GeneratedContent = {
       ...content,
       prompt_data: JSON.parse(content.prompt_data),
       metadata: content.metadata ? JSON.parse(content.metadata) : null,
@@ -389,13 +571,13 @@ class DataService {
     return result;
   }
 
-  async getRecentContent(limit = 20) {
+  async getRecentContent(limit = 20): Promise<GeneratedContent[]> {
     const content = await this.query(
       'SELECT * FROM generated_content ORDER BY created_at DESC LIMIT ?',
       [limit]
     );
     return content.map(item => {
-      const result = {
+      const result: GeneratedContent = {
         ...item,
         prompt_data: JSON.parse(item.prompt_data),
         metadata: item.metadata ? JSON.parse(item.metadata) : null,
@@ -412,7 +594,7 @@ class DataService {
     });
   }
 
-  async updateGeneratedContent(id, updates) {
+  async updateGeneratedContent(id: string, updates: { title?: string }): Promise<GeneratedContent> {
     const existing = await this.getGeneratedContentById(id);
 
     await this.run(
@@ -425,18 +607,18 @@ class DataService {
     return await this.getGeneratedContentById(id);
   }
 
-  async deleteGeneratedContent(id) {
+  async deleteGeneratedContent(id: string): Promise<{ success: boolean; message: string }> {
     const result = await this.run('DELETE FROM generated_content WHERE id = ?', [id]);
     if (result.changes === 0) throw boom.notFound(`Content with id ${id} not found`);
     return { success: true, message: 'Content deleted successfully' };
   }
 
-  async getAvailableYears() {
+  async getAvailableYears(): Promise<number[]> {
     const content = await this.query(
       'SELECT prompt_data FROM generated_content WHERE prompt_data IS NOT NULL'
     );
 
-    const years = new Set();
+    const years = new Set<number>();
     content.forEach(item => {
       try {
         const promptData = JSON.parse(item.prompt_data);
@@ -452,15 +634,15 @@ class DataService {
   }
 
   // Settings
-  async getSetting(key) {
+  async getSetting(key: string): Promise<Setting> {
     const setting = await this.get('SELECT * FROM settings WHERE key = ?', [key]);
     if (!setting) throw boom.notFound(`Setting with key ${key} not found`);
     return this.parseSetting(setting);
   }
 
-  async getSettings() {
+  async getSettings(): Promise<Record<string, any>> {
     const settings = await this.query('SELECT * FROM settings ORDER BY key ASC');
-    const parsed = {};
+    const parsed: Record<string, any> = {};
     settings.forEach(setting => {
       const parsedSetting = this.parseSetting(setting);
       parsed[setting.key] = parsedSetting.value;
@@ -468,7 +650,7 @@ class DataService {
     return parsed;
   }
 
-  async setSetting(key, value, dataType = 'string') {
+  async setSetting(key: string, value: any, dataType: 'string' | 'number' | 'boolean' | 'json' = 'string'): Promise<Setting> {
     const stringValue = this.stringifySettingValue(value, dataType);
     await this.run(
       `INSERT OR REPLACE INTO settings (key, value, data_type) VALUES (?, ?, ?)`,
@@ -478,7 +660,7 @@ class DataService {
   }
 
   // Utility methods
-  generateId(name) {
+  generateId(name: string): string {
     return name
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
@@ -487,7 +669,7 @@ class DataService {
       .replace(/^-|-$/g, '');
   }
 
-  parseParameters(parameters) {
+  private parseParameters(parameters: any[]): Parameter[] {
     return parameters.map(param => ({
       ...param,
       required: Boolean(param.required),
@@ -497,7 +679,7 @@ class DataService {
     }));
   }
 
-  parseSetting(setting) {
+  private parseSetting(setting: any): Setting {
     let value = setting.value;
     switch (setting.data_type) {
       case 'number': value = Number(setting.value); break;
@@ -510,7 +692,7 @@ class DataService {
     };
   }
 
-  stringifySettingValue(value, dataType) {
+  private stringifySettingValue(value: any, dataType: string): string {
     switch (dataType) {
       case 'json': return JSON.stringify(value);
       case 'boolean':
@@ -519,10 +701,10 @@ class DataService {
     }
   }
 
-  async close() {
+  async close(): Promise<void> {
     if (this.db) {
       return new Promise((resolve) => {
-        this.db.close(resolve);
+        this.db!.close(() => resolve());
       });
     }
   }
@@ -532,13 +714,17 @@ class DataService {
  * AI Service - Handles OpenAI API interactions
  */
 class AIService {
+  private apiKey: string;
+  private baseUrl: string;
+  public isConfigured: boolean;
+
   constructor() {
     this.apiKey = config.get('ai.openai.apiKey');
     this.baseUrl = config.get('ai.openai.baseUrl');
     this.isConfigured = Boolean(this.apiKey);
   }
 
-  async generate(parameters, year = null) {
+  async generate(parameters: AIGenerationParameters, year: number | null = null): Promise<CombinedGenerationResult> {
     if (!this.isConfigured) {
       throw boom.internal('OpenAI API key not configured');
     }
@@ -546,12 +732,12 @@ class AIService {
     return this.generateCombined(parameters, year);
   }
 
-  async generateFiction(parameters, year) {
+  async generateFiction(parameters: AIGenerationParameters, year: number | null): Promise<FictionGenerationResult> {
     const aiConfig = config.getAIConfig('fiction');
     const prompt = this.buildFictionPrompt(parameters, year);
     
     try {
-      const response = await axios.post(
+      const response: AxiosResponse<OpenAIChatResponse['data']> = await axios.post(
         `${this.baseUrl}/chat/completions`,
         {
           model: aiConfig.model,
@@ -585,12 +771,12 @@ class AIService {
     }
   }
 
-  async generateImage(year, generatedText = null) {
+  async generateImage(year: number | null, generatedText: string | null = null): Promise<ImageGenerationResult> {
     const aiConfig = config.getAIConfig('image');
     const prompt = this.buildImagePrompt(year, generatedText);
     
     try {
-      const response = await axios.post(
+      const response: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
         `${this.baseUrl}/images/generations`,
         {
           model: aiConfig.model,
@@ -641,15 +827,15 @@ class AIService {
     }
   }
 
-  async generateCombined(parameters, year) {
+  async generateCombined(parameters: AIGenerationParameters, year: number | null): Promise<CombinedGenerationResult> {
     const fictionResult = await this.generateFiction(parameters, year);
-    if (!fictionResult.success) return fictionResult;
+    if (!fictionResult.success) return fictionResult as any;
 
     const imageResult = await this.generateImage(year, fictionResult.content);
-    if (!imageResult.success) return imageResult;
+    if (!imageResult.success) return imageResult as any;
 
     // Handle both BLOB and URL responses
-    const result = {
+    const result: CombinedGenerationResult = {
       success: true,
       title: fictionResult.title,
       content: fictionResult.content,
@@ -676,7 +862,7 @@ class AIService {
     return result;
   }
 
-  buildFictionPrompt(parameters, year) {
+  private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null): string {
     let prompt = 'Create a compelling speculative fiction story with the following elements:\n\n';
     
     if (year) prompt += `Setting: Year ${year}\n`;
@@ -695,7 +881,7 @@ class AIService {
     return prompt;
   }
 
-  buildImagePrompt(year, generatedText) {
+  private buildImagePrompt(year: number | null, generatedText: string | null): string {
     const aiConfig = config.getAIConfig('image');
     let prompt = 'Create a beautiful, detailed image';
     
@@ -712,8 +898,8 @@ class AIService {
     return prompt;
   }
 
-  extractVisualElements(text) {
-    const elements = [];
+  private extractVisualElements(text: string): string[] {
+    const elements: string[] = [];
     const cleanText = text.replace(/\*\*Title:.*?\*\*/g, '').trim();
     
     Object.values(VISUAL_PATTERNS).forEach(patterns => {
@@ -731,7 +917,7 @@ class AIService {
     return [...new Set(elements)].slice(0, 5);
   }
 
-  async downloadAndProcessImage(imageUrl) {
+  private async downloadAndProcessImage(imageUrl: string): Promise<ProcessedImageData> {
     try {
       // Download the image from DALL-E URL
       const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
@@ -760,7 +946,7 @@ class AIService {
     }
   }
 
-  extractTitle(content) {
+  private extractTitle(content: string): string {
     const titleMatch = content.match(/\*\*Title:\s*([^*\n]+)\*\*/);
     if (titleMatch) return titleMatch[1].trim();
     

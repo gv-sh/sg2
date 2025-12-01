@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import config from '../config';
+import config from '../config.js';
 
 /**
  * Custom hook for standardized API calls with consistent error handling

@@ -3,11 +3,12 @@
  * Centralized location for admin, content, and system routes
  */
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import boom from '@hapi/boom';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 
 import config from './config.js';
 import { dataService, aiService } from './services.js';
@@ -29,10 +30,84 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ==================== TYPE DEFINITIONS ====================
+
+// Zod schema types
+type CategorySchema = z.infer<typeof categorySchema>;
+type CategoryUpdateSchema = z.infer<typeof categoryUpdateSchema>;
+type ParameterSchema = z.infer<typeof parameterSchema>;
+type ParameterUpdateSchema = z.infer<typeof parameterUpdateSchema>;
+type GenerationRequestSchema = z.infer<typeof generationRequestSchema>;
+type ContentUpdateSchema = z.infer<typeof contentUpdateSchema>;
+type ContentFiltersSchema = z.infer<typeof contentFiltersSchema>;
+type ParameterFiltersSchema = z.infer<typeof parameterFiltersSchema>;
+type IdParamSchema = z.infer<typeof idParamSchema>;
+
+// Express route handler types
+interface TypedRequestParams<T = any> extends Request {
+  params: T;
+}
+
+interface TypedRequestBody<T = any> extends Request {
+  body: T;
+}
+
+interface TypedRequestQuery<T = any> extends Request {
+  query: T;
+}
+
+interface TypedRequest<P = any, B = any, Q = any> extends Request {
+  params: P;
+  body: B;
+  query: Q;
+}
+
+// API response types
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+  details?: any[];
+}
+
+// Content types
+interface ContentApiData {
+  id: string;
+  title: string;
+  fiction_content: string;
+  image_original_url?: string;
+  image_thumbnail_url?: string;
+  prompt_data: Record<string, any>;
+  metadata?: Record<string, any>;
+  created_at?: string;
+}
+
+interface HealthStatusData {
+  status: string;
+  timestamp: string;
+  uptime: number;
+  environment: string;
+  version: string;
+  database: string;
+  ai: string;
+}
+
+interface DatabaseStatsData {
+  status: string;
+  statistics: {
+    categories: number;
+    parameters: number;
+    generatedContent: number;
+    settings: number;
+  };
+  timestamp: string;
+}
+
 // ==================== API INFO ====================
 
 // API info endpoint
-router.get('/api', (req, res) => {
+router.get('/api', (req: Request, res: Response<ApiResponse>) => {
   res.json({
     name: config.get('app.name'),
     version: config.get('app.version'),
@@ -88,7 +163,7 @@ router.get('/api', (req, res) => {
  *                         type: number
  *                         example: 0
  */
-router.get('/api/admin/categories', async (req, res, next) => {
+router.get('/api/admin/categories', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const categories = await dataService.getCategories();
     res.json({ success: true, data: categories });
@@ -151,7 +226,7 @@ router.get('/api/admin/categories', async (req, res, next) => {
  *                   type: string
  *                   example: "Category with id science-fiction not found"
  */
-router.get('/api/admin/categories/:id', async (req, res, next) => {
+router.get('/api/admin/categories/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const category = await dataService.getCategoryById(id);
@@ -237,7 +312,7 @@ router.get('/api/admin/categories/:id', async (req, res, next) => {
  *                   type: string
  *                   example: "Validation failed"
  */
-router.post('/api/admin/categories', async (req, res, next) => {
+router.post('/api/admin/categories', async (req: TypedRequestBody<CategorySchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const validatedData = categorySchema.parse(req.body);
     const category = await dataService.createCategory(validatedData);
@@ -305,7 +380,7 @@ router.post('/api/admin/categories', async (req, res, next) => {
  *       400:
  *         description: Validation failed
  */
-router.put('/api/admin/categories/:id', async (req, res, next) => {
+router.put('/api/admin/categories/:id', async (req: TypedRequest<IdParamSchema, CategoryUpdateSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const updates = categoryUpdateSchema.parse(req.body);
@@ -358,7 +433,7 @@ router.put('/api/admin/categories/:id', async (req, res, next) => {
  *                   type: string
  *                   example: "Category with id cyberpunk not found"
  */
-router.delete('/api/admin/categories/:id', async (req, res, next) => {
+router.delete('/api/admin/categories/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const result = await dataService.deleteCategory(id);
@@ -487,7 +562,7 @@ router.delete('/api/admin/categories/:id', async (req, res, next) => {
  *       400:
  *         description: Validation failed
  */
-router.get('/api/admin/parameters', async (req, res, next) => {
+router.get('/api/admin/parameters', async (req: TypedRequestQuery<ParameterFiltersSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { categoryId } = parameterFiltersSchema.parse(req.query);
     const parameters = categoryId 
@@ -542,7 +617,7 @@ router.get('/api/admin/parameters', async (req, res, next) => {
  *       404:
  *         description: Parameter not found
  */
-router.get('/api/admin/parameters/:id', async (req, res, next) => {
+router.get('/api/admin/parameters/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const parameter = await dataService.getParameterById(id);
@@ -552,7 +627,7 @@ router.get('/api/admin/parameters/:id', async (req, res, next) => {
   }
 });
 
-router.post('/api/admin/parameters', async (req, res, next) => {
+router.post('/api/admin/parameters', async (req: TypedRequestBody<ParameterSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const validatedData = parameterSchema.parse(req.body);
     const parameter = await dataService.createParameter(validatedData);
@@ -614,7 +689,7 @@ router.post('/api/admin/parameters', async (req, res, next) => {
  *       404:
  *         description: Parameter not found
  */
-router.put('/api/admin/parameters/:id', async (req, res, next) => {
+router.put('/api/admin/parameters/:id', async (req: TypedRequest<IdParamSchema, ParameterUpdateSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const updates = parameterUpdateSchema.parse(req.body);
@@ -656,7 +731,7 @@ router.put('/api/admin/parameters/:id', async (req, res, next) => {
  *       404:
  *         description: Parameter not found
  */
-router.delete('/api/admin/parameters/:id', async (req, res, next) => {
+router.delete('/api/admin/parameters/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const result = await dataService.deleteParameter(id);
@@ -736,7 +811,7 @@ router.delete('/api/admin/parameters/:id', async (req, res, next) => {
  *       500:
  *         description: Server error updating settings
  */
-router.get('/api/admin/settings', async (req, res, next) => {
+router.get('/api/admin/settings', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const settings = await dataService.getSettings();
     res.json({ success: true, data: settings });
@@ -745,7 +820,7 @@ router.get('/api/admin/settings', async (req, res, next) => {
   }
 });
 
-router.put('/api/admin/settings', async (req, res, next) => {
+router.put('/api/admin/settings', async (req: TypedRequestBody<Record<string, any>>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     // Simple validation - just check it's an object
     if (!req.body || typeof req.body !== 'object') {
@@ -869,7 +944,7 @@ router.put('/api/admin/settings', async (req, res, next) => {
  *                   type: string
  *                   example: "OpenAI API key not configured"
  */
-router.post('/api/generate', async (req, res, next) => {
+router.post('/api/generate', async (req: TypedRequestBody<GenerationRequestSchema>, res: Response<ApiResponse<ContentApiData>>, next: NextFunction) => {
   try {
     const { parameters, year } = generationRequestSchema.parse(req.body);
     
@@ -971,7 +1046,7 @@ router.post('/api/generate', async (req, res, next) => {
  *                   type: string
  *                   example: "Validation failed"
  */
-router.get('/api/content', async (req, res, next) => {
+router.get('/api/content', async (req: TypedRequestQuery<ContentFiltersSchema>, res: Response<ApiResponse<ContentApiData[]>>, next: NextFunction) => {
   try {
     const filters = contentFiltersSchema.parse(req.query);
     const limit = parseInt(filters.limit) || 20;
@@ -1010,7 +1085,7 @@ router.get('/api/content', async (req, res, next) => {
  *                       type: number
  *                       example: 5
  */
-router.get('/api/content/summary', async (req, res, next) => {
+router.get('/api/content/summary', async (req: TypedRequestQuery<ContentFiltersSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const filters = contentFiltersSchema.parse(req.query);
     const limit = parseInt(filters.limit) || 20;
@@ -1053,7 +1128,7 @@ router.get('/api/content/summary', async (req, res, next) => {
  *                     type: number
  *                   example: [2150, 2100, 2077, 1890]
  */
-router.get('/api/content/years', async (req, res, next) => {
+router.get('/api/content/years', async (req: Request, res: Response<ApiResponse<number[]>>, next: NextFunction) => {
   try {
     const years = await dataService.getAvailableYears();
     res.json({ success: true, data: years });
@@ -1088,7 +1163,7 @@ router.get('/api/content/years', async (req, res, next) => {
  *       404:
  *         description: Image not found
  */
-router.get('/api/images/:id/original', async (req, res, next) => {
+router.get('/api/images/:id/original', async (req: TypedRequestParams<IdParamSchema>, res: Response, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const content = await dataService.getGeneratedContentById(id);
@@ -1099,7 +1174,7 @@ router.get('/api/images/:id/original', async (req, res, next) => {
     
     res.set({
       'Content-Type': `image/${content.image_format || 'png'}`,
-      'Content-Length': content.image_size_bytes,
+      'Content-Length': content.image_size_bytes?.toString(),
       'Cache-Control': 'public, max-age=31536000', // 1 year cache
       'ETag': `"${id}-original"`
     });
@@ -1135,7 +1210,7 @@ router.get('/api/images/:id/original', async (req, res, next) => {
  *       404:
  *         description: Image not found
  */
-router.get('/api/images/:id/thumbnail', async (req, res, next) => {
+router.get('/api/images/:id/thumbnail', async (req: TypedRequestParams<IdParamSchema>, res: Response, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const content = await dataService.getGeneratedContentById(id);
@@ -1146,7 +1221,7 @@ router.get('/api/images/:id/thumbnail', async (req, res, next) => {
     
     res.set({
       'Content-Type': 'image/png',
-      'Content-Length': content.thumbnail_size_bytes,
+      'Content-Length': content.thumbnail_size_bytes?.toString(),
       'Cache-Control': 'public, max-age=31536000', // 1 year cache
       'ETag': `"${id}-thumbnail"`
     });
@@ -1206,7 +1281,7 @@ router.get('/api/images/:id/thumbnail', async (req, res, next) => {
  *       404:
  *         description: Content not found
  */
-router.get('/api/content/:id', async (req, res, next) => {
+router.get('/api/content/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse<ContentApiData>>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const content = await dataService.getGeneratedContentForApi(id);
@@ -1216,7 +1291,7 @@ router.get('/api/content/:id', async (req, res, next) => {
   }
 });
 
-router.get('/api/content/:id/image', async (req, res, next) => {
+router.get('/api/content/:id/image', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const content = await dataService.getGeneratedContentById(id);
@@ -1225,7 +1300,7 @@ router.get('/api/content/:id/image', async (req, res, next) => {
       throw boom.notFound('Image not found');
     }
 
-    const responseData = {};
+    const responseData: Record<string, any> = {};
     if (content.image_blob) {
       responseData.imageOriginalUrl = `/api/images/${id}/original`;
       responseData.imageThumbnailUrl = `/api/images/${id}/thumbnail`;
@@ -1291,7 +1366,7 @@ router.get('/api/content/:id/image', async (req, res, next) => {
  *       400:
  *         description: Validation failed
  */
-router.put('/api/content/:id', async (req, res, next) => {
+router.put('/api/content/:id', async (req: TypedRequest<IdParamSchema, ContentUpdateSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const updates = contentUpdateSchema.parse(req.body);
@@ -1344,7 +1419,7 @@ router.put('/api/content/:id', async (req, res, next) => {
  *                   type: string
  *                   example: "Content with id uuid-string not found"
  */
-router.delete('/api/content/:id', async (req, res, next) => {
+router.delete('/api/content/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     const result = await dataService.deleteGeneratedContent(id);
@@ -1363,8 +1438,8 @@ router.delete('/api/content/:id', async (req, res, next) => {
  *     summary: Health check endpoint
  *     tags: [System]
  */
-router.get('/api/system/health', async (req, res) => {
-  const healthStatus = {
+router.get('/api/system/health', async (req: Request, res: Response<ApiResponse<HealthStatusData>>) => {
+  const healthStatus: HealthStatusData = {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
@@ -1427,7 +1502,7 @@ router.get('/api/system/health', async (req, res) => {
  *       500:
  *         description: Database initialization failed
  */
-router.post('/api/system/database/init', async (req, res, next) => {
+router.post('/api/system/database/init', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     await dataService.init();
     res.json({ 
@@ -1475,7 +1550,7 @@ router.post('/api/system/database/init', async (req, res, next) => {
  *                           type: number
  *                           example: 42
  */
-router.get('/api/system/database/status', async (req, res, next) => {
+router.get('/api/system/database/status', async (req: Request, res: Response<ApiResponse<DatabaseStatsData>>, next: NextFunction) => {
   try {
     await dataService.init();
     
@@ -1514,7 +1589,7 @@ router.get('/api/system/database/status', async (req, res, next) => {
  *               type: object
  *               description: Complete OpenAPI 3.0 specification for the API
  */
-router.get('/api/system/docs.json', async (req, res) => {
+router.get('/api/system/docs.json', async (req: Request, res: Response) => {
   // Import swaggerSpec from middleware where it's configured
   const { swaggerSpec } = await import('./middleware.js');
   res.json(swaggerSpec);
@@ -1538,7 +1613,7 @@ router.get('/api/system/docs.json', async (req, res) => {
  *                   type: string
  *                   example: "pong"
  */
-router.get('/api/health/ping', async (req, res) => {
+router.get('/api/health/ping', async (req: Request, res: Response<{message: string}>) => {
   try {
     // Simple ping check - just verify server is running
     res.json({ message: 'pong' });
@@ -1549,7 +1624,7 @@ router.get('/api/health/ping', async (req, res) => {
 
 // Swagger documentation UI
 router.use('/api/system/docs', swaggerUi.serve);
-router.get('/api/system/docs', async (req, res, next) => {
+router.get('/api/system/docs', async (req: Request, res: Response, next: NextFunction) => {
   const { swaggerSpec } = await import('./middleware.js');
   swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',

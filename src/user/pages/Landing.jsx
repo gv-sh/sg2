@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { BadgePlus } from 'lucide-react';
 import GalaxyParticles from '../components/ui/GalaxyParticles';
 import Shaders from '../components/ui/Shaders';
-import { useParameters } from '../contexts/ParameterContext';
+import { useParameters } from '../contexts/ParameterContext.jsx';
 
 const Landing = ({ onClearSession }) => {
   const { removeAllParameters } = useParameters();

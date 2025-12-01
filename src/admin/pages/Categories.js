@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { Button, Input, Select } from '../components/ui/form-controls';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../components/ui/dialog';
-import { Alert } from '../components/ui/alert';
-import config from '../config';
+import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.jsx';
+import { Button, Input, Select } from '../components/ui/form-controls.js';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table.js';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../components/ui/dialog.js';
+import { Alert } from '../../shared/components/ui/alert.jsx';
+import config from '../config.js';
 
 function Categories() {
   const [categories, setCategories] = useState([]);

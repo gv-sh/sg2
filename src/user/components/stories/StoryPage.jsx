@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import StoryViewer from '../components/stories/StoryViewer';
 import GenerationControls from '../components/generation/GenerationControls';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { Alert, AlertDescription } from '../../shared/components/ui/alert.jsx';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { generateContent } from '../services/api';
 

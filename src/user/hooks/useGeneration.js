@@ -1,7 +1,7 @@
 // src/hooks/useGeneration.js
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { generateContent, fetchPreviousGenerations } from '../services/api';
-import { generateRandomYear } from '../utils/parameterUtils';
+import { generateContent, fetchPreviousGenerations } from '../services/api.js';
+import { generateRandomYear } from '../utils/parameterUtils.js';
 
 export const useGeneration = (
   selectedParameters,

@@ -1,7 +1,7 @@
 // src/pages/SelectedParameters.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
+import { Button } from '../../shared/components/ui/button.jsx';
+import { Badge } from '../../shared/components/ui/badge.jsx';
 import { Trash2, Folder, Zap, Dices, HelpCircle } from 'lucide-react';
 import {
   Accordion,

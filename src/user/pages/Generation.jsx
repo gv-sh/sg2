@@ -6,7 +6,7 @@ import StoryViewer from '../components/stories/StoryViewer';
 import StoryGenerator from '../components/stories/StoryGenerator';
 import GenerationControls from '../components/generation/GenerationControls';
 import { useGeneration } from '../hooks/useGeneration';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { Alert, AlertDescription } from '../../shared/components/ui/alert.jsx';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 // Separate view components

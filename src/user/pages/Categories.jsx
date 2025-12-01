@@ -1,7 +1,7 @@
 // src/pages/Categories.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchCategories, fetchParameters } from '../services/api';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { Alert, AlertDescription } from '../../shared/components/ui/alert.jsx';
 import { Folder, FolderOpen } from 'lucide-react';
 import { cn } from '../lib/utils';
 

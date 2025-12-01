@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
-import { Button, Input } from '../components/ui/form-controls';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../components/ui/dialog';
-import { Alert } from '../components/ui/alert';
-import config from '../config';
+import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.jsx';
+import { Button, Input } from '../components/ui/form-controls.js';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../components/ui/dialog.js';
+import { Alert } from '../../shared/components/ui/alert.jsx';
+import config from '../config.js';
 
 function Database() {
   const [selectedFile, setSelectedFile] = useState(null);

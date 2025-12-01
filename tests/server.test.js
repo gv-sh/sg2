@@ -7,9 +7,9 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import fs from 'fs/promises';
 
-import app from '../src/server/server.js';
-import { dataService } from '../src/server/services.js';
-import config from '../src/server/config.js';
+import app from '../src/server/server.ts';
+import { dataService } from '../src/server/services.ts';
+import config from '../src/server/config.ts';
 
 global.jest = jest;
 

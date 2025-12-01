@@ -3,13 +3,14 @@
  * Coordinates middleware, routes, and server startup
  */
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Server } from 'http';
 
 import config from './config.js';
 import { dataService } from './services.js';
@@ -87,7 +88,7 @@ const buildPath = path.join(__dirname, '..', '..', 'build');
 app.use(express.static(buildPath));
 
 // Handle client-side routing - serve index.html for all non-API routes
-app.get('*', (req, res) => {
+app.get('*', (req: Request, res: Response) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith('/api')) {
     return res.status(404).json({
@@ -102,8 +103,11 @@ app.get('*', (req, res) => {
 
 // ==================== SERVER STARTUP ====================
 
+// Declare server variable for type checking
+let server: Server;
+
 // Graceful shutdown handler
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = (signal: string): void => {
   logger.info(`Received ${signal}. Starting graceful shutdown...`);
   
   server.close(() => {
@@ -118,7 +122,7 @@ const gracefulShutdown = (signal) => {
 };
 
 // Start server
-const server = app.listen(PORT, () => {
+server = app.listen(PORT, () => {
   logger.info({
     message: 'SpecGen API Server started',
     port: PORT,
@@ -132,7 +136,7 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
   logger.error({
     message: 'Unhandled Promise Rejection',
     reason: reason,
@@ -141,7 +145,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error: Error) => {
   logger.error({
     message: 'Uncaught Exception',
     error: error.message,

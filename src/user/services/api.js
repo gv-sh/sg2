@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
-import config from '../config';
-import { apiCache } from '../utils/performanceUtils';
+import config from '../config.js';
+import { apiCache } from '../utils/performanceUtils.js';
 
 // Use environment variable for API URL with fallback to config
 const API_BASE_URL = `${config.API_URL}/api`;

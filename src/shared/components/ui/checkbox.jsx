@@ -1,5 +1,4 @@
 import * as React from "react"
-
 import { cn } from "../../lib/utils"
 
 const Checkbox = React.forwardRef(({ className, checked, onChange, ...props }, ref) => (

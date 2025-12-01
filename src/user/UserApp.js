@@ -1,12 +1,12 @@
 // src/user/UserApp.js
 import React, { useState, useEffect } from 'react';
-import { isMobileDevice } from './utils/deviceUtils';
+import { isMobileDevice } from './utils/deviceUtils.js';
 
 // Theme and Layout Components
-import { ThemeProvider } from './components/theme/theme-provider';
-import MainLayout from './components/layout/MainLayout';
-import AppRoutes from './routes/AppRoutes';
-import { ParameterProvider } from './contexts/ParameterContext';
+import { ThemeProvider } from './components/theme/theme-provider.jsx';
+import MainLayout from './components/layout/MainLayout.jsx';
+import AppRoutes from './routes/AppRoutes.jsx';
+import { ParameterProvider } from './contexts/ParameterContext.jsx';
 
 // User App Component
 function UserApp() {

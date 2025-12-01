@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import LazyImage from './LazyImage';
+import LazyImage from './LazyImage.jsx';
 
 // Performance testing utilities
 const measurePerformance = (name, fn) => {

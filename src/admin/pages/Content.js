@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import config from '../config';
+import config from '../config.js';
 import '../../index.css';
-import { Card, CardContent } from '../components/ui/card';
-import { Button, Select, Input } from '../components/ui/form-controls';
-import { Alert } from '../components/ui/alert';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
-import { PaginationControls } from '../components/ui/pagination';
+import { Card, CardContent } from '../../shared/components/ui/card.jsx';
+import { Button, Select, Input } from '../components/ui/form-controls.js';
+import { Alert } from '../../shared/components/ui/alert.jsx';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table.js';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog.js';
+import { PaginationControls } from '../components/ui/pagination.js';
 import { Clipboard, Download, Search, Trash2, CheckSquare, Square } from 'lucide-react';
 
 function Content() {

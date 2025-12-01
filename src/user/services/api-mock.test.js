@@ -3,7 +3,7 @@
  * Uses direct function mocking to avoid axios complexity
  */
 
-import * as apiService from './api';
+import * as apiService from './api.jsx';
 
 // Mock the entire API service module
 jest.mock('./api', () => ({

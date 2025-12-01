@@ -6,6 +6,7 @@ import { z, ZodError } from 'zod';
 import boom from '@hapi/boom';
 import pino from 'pino';
 import swaggerJsdoc from 'swagger-jsdoc';
+import { Request, Response, NextFunction } from 'express';
 import config from './config.js';
 
 // ==================== LOGGER ====================
@@ -120,7 +121,7 @@ export const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // ==================== REQUEST LOGGING MIDDLEWARE ====================
 
-export const requestLoggingMiddleware = (req, res, next) => {
+export const requestLoggingMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const startTime = Date.now();
   
   res.on('finish', () => {
@@ -140,7 +141,7 @@ export const requestLoggingMiddleware = (req, res, next) => {
 // ==================== ERROR HANDLING MIDDLEWARE ====================
 
 // JSON parsing error handler
-export const jsonParsingErrorHandler = (error, req, res, next) => {
+export const jsonParsingErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   if (error instanceof SyntaxError && 'body' in error) {
     return next(boom.badRequest('Invalid JSON payload'));
   }
@@ -148,7 +149,7 @@ export const jsonParsingErrorHandler = (error, req, res, next) => {
 };
 
 // Validation error handler
-export const validationErrorHandler = (error, req, res, next) => {
+export const validationErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   if (error instanceof ZodError) {
     const boomError = boom.badRequest('Validation failed');
     boomError.output.payload.details = error.issues;
@@ -158,7 +159,7 @@ export const validationErrorHandler = (error, req, res, next) => {
 };
 
 // Boom error handler
-export const boomErrorHandler = (error, req, res, next) => {
+export const boomErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   if (boom.isBoom(error)) {
     logger.error({
       error: error.message,
@@ -182,7 +183,7 @@ export const boomErrorHandler = (error, req, res, next) => {
 };
 
 // Generic error handler
-export const genericErrorHandler = (error, req, res, next) => {
+export const genericErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   logger.error({
     error: error.message,
     stack: error.stack,
@@ -202,7 +203,7 @@ export const genericErrorHandler = (error, req, res, next) => {
 // ==================== HELPER FUNCTIONS ====================
 
 // 404 handler for API routes
-export const apiNotFoundHandler = (req, res) => {
+export const apiNotFoundHandler = (req: Request, res: Response): Response | null => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({
       success: false,

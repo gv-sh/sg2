@@ -9,6 +9,33 @@
  * - Code references (all fields actually used)
  */
 
+// Type definitions
+interface TableDefinition {
+  name: string;
+  columns: string[];
+  indexes: string[];
+}
+
+interface TablesDefinition {
+  categories: TableDefinition;
+  parameters: TableDefinition;
+  generated_content: TableDefinition;
+  settings: TableDefinition;
+}
+
+interface DefaultSetting {
+  key: string;
+  value: string;
+  data_type: 'string' | 'number' | 'boolean' | 'json';
+}
+
+interface ExpectedFields {
+  categories: string[];
+  parameters: string[];
+  generated_content: string[];
+  settings: string[];
+}
+
 /**
  * Schema version for migration tracking
  */
@@ -18,7 +45,7 @@ export const SCHEMA_VERSION = '2.0.0';
  * Table Definitions
  * Each table includes: columns, constraints, and indexes
  */
-export const TABLES = {
+export const TABLES: TablesDefinition = {
   categories: {
     name: 'categories',
     columns: [
@@ -95,7 +122,7 @@ export const TABLES = {
  * Default Settings Data
  * Inserted when database is first created
  */
-export const DEFAULT_SETTINGS = [
+export const DEFAULT_SETTINGS: DefaultSetting[] = [
   { key: 'app_version', value: '2.0.0', data_type: 'string' },
   { key: 'max_content_length', value: '10000', data_type: 'number' },
   { key: 'max_generations_per_session', value: '50', data_type: 'number' },
@@ -107,10 +134,10 @@ export const DEFAULT_SETTINGS = [
 
 /**
  * Generate CREATE TABLE statement for a table
- * @param {string} tableName - Name of the table
- * @param {boolean} ifNotExists - Add IF NOT EXISTS clause (default: false)
+ * @param tableName - Name of the table
+ * @param ifNotExists - Add IF NOT EXISTS clause (default: false)
  */
-export function createTableSQL(tableName, ifNotExists = false) {
+export function createTableSQL(tableName: keyof TablesDefinition, ifNotExists = false): string {
   const table = TABLES[tableName];
   if (!table) {
     throw new Error(`Table ${tableName} not found in schema`);
@@ -122,10 +149,10 @@ export function createTableSQL(tableName, ifNotExists = false) {
 
 /**
  * Generate all CREATE INDEX statements for a table
- * @param {string} tableName - Name of the table
- * @param {boolean} ifNotExists - Add IF NOT EXISTS clause (default: false)
+ * @param tableName - Name of the table
+ * @param ifNotExists - Add IF NOT EXISTS clause (default: false)
  */
-export function createIndexesSQL(tableName, ifNotExists = false) {
+export function createIndexesSQL(tableName: keyof TablesDefinition, ifNotExists = false): string[] {
   const table = TABLES[tableName];
   if (!table) {
     throw new Error(`Table ${tableName} not found in schema`);
@@ -140,14 +167,14 @@ export function createIndexesSQL(tableName, ifNotExists = false) {
 /**
  * Get all table names in creation order (respects foreign keys)
  */
-export function getTableNames() {
+export function getTableNames(): (keyof TablesDefinition)[] {
   return ['categories', 'parameters', 'generated_content', 'settings'];
 }
 
 /**
  * Generate SQL to insert default settings
  */
-export function insertDefaultSettingsSQL() {
+export function insertDefaultSettingsSQL(): string {
   const values = DEFAULT_SETTINGS.map(s =>
     `('${s.key}', '${s.value}', '${s.data_type}')`
   ).join(',\n      ');
@@ -158,7 +185,7 @@ export function insertDefaultSettingsSQL() {
 /**
  * Get field list for a table (useful for INSERT/SELECT operations)
  */
-export function getTableFields(tableName) {
+export function getTableFields(tableName: keyof TablesDefinition): string[] {
   const table = TABLES[tableName];
   if (!table) {
     throw new Error(`Table ${tableName} not found in schema`);
@@ -172,10 +199,10 @@ export function getTableFields(tableName) {
 /**
  * Complete schema initialization script
  * Returns array of SQL statements to execute in order
- * @param {boolean} ifNotExists - Add IF NOT EXISTS clauses (useful for tests)
+ * @param ifNotExists - Add IF NOT EXISTS clauses (useful for tests)
  */
-export function getSchemaInitSQL(ifNotExists = false) {
-  const statements = [];
+export function getSchemaInitSQL(ifNotExists = false): string[] {
+  const statements: string[] = [];
 
   // Enable foreign keys
   statements.push('PRAGMA foreign_keys = ON');
@@ -203,7 +230,7 @@ export function getSchemaInitSQL(ifNotExists = false) {
  * Schema validation helper
  * Returns the expected fields for each table
  */
-export const EXPECTED_FIELDS = {
+export const EXPECTED_FIELDS: ExpectedFields = {
   categories: ['id', 'name', 'description', 'visibility', 'sort_order', 'created_at'],
   parameters: ['id', 'name', 'description', 'type', 'category_id', 'visibility', 'required', 'sort_order', 'parameter_values', 'parameter_config', 'created_at'],
   generated_content: ['id', 'title', 'fiction_content', 'image_blob', 'image_thumbnail', 'image_format', 'image_size_bytes', 'thumbnail_size_bytes', 'prompt_data', 'metadata', 'created_at'],

@@ -1,6 +1,6 @@
 // src/components/layout/Header.jsx
 import React, { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '#shared/components/ui/button.jsx';
 import { Menu, X, Sliders, Home, Info, Library } from 'lucide-react';
 import { ThemeToggle } from '../theme/theme-toggle';
 import { Tooltip } from '../ui/tooltip';

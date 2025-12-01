@@ -1,5 +1,5 @@
 import React from 'react';
-import StoryCardSkeleton from './StoryCardSkeleton';
+import StoryCardSkeleton from './StoryCardSkeleton.jsx';
 import { Skeleton } from '../ui/skeleton';
 
 /**

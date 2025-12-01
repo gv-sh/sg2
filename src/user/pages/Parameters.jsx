@@ -1,8 +1,8 @@
 // src/pages/Parameters.jsx
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { fetchParameters } from '../services/api';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { Button } from '../components/ui/button';
+import { Alert, AlertDescription } from '../../shared/components/ui/alert.jsx';
+import { Button } from '../../shared/components/ui/button.jsx';
 import { Frown } from 'lucide-react';
 
 

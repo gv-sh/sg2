@@ -1,7 +1,7 @@
 // src/components/generation/GenerationControls.jsx
 import React from 'react';
 import { ChevronLeft, BookOpen } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '#shared/components/ui/button.jsx';
 
 const GenerationControls = ({ 
   activeStory, 

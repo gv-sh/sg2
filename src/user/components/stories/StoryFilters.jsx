@@ -1,7 +1,7 @@
 // src/components/stories/StoryFilters.jsx
 import React from 'react';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { Input } from '#shared/components/ui/input.jsx';
+import { Button } from '#shared/components/ui/button.jsx';
 import { Search, X, Calendar, SortAsc, SortDesc } from 'lucide-react';
 
 const StoryFilters = ({ 

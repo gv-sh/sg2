@@ -5,20 +5,15 @@
   "private": true,
   "main": "src/server/server.js",
   "scripts": {
-    "dev": "npm run build && npm run server:dev",
-    "dev:watch": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
-    "server:dev": "cd src/server && NODE_ENV=development node --watch server.js",
-    "client:dev": "cross-env PORT=3001 REACT_APP_API_URL=http://localhost:3000 react-scripts start",
-    "build": "cross-env REACT_APP_API_URL=/api react-scripts build",
+    "dev": "npm run build && cd src/server && NODE_ENV=development node --watch server.js",
     "start": "npm run build && cd src/server && NODE_ENV=production node server.js",
-    "start:server": "cd src/server && node server.js",
-    "test": "npm run test:server && npm run test:client",
+    "build": "react-scripts build",
+    "test": "npm run test:server && npm run test:client && npm run test:integration",
     "test:server": "cd src/server && NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config jest.config.js --colors=true",
     "test:client": "react-scripts test --watchAll=false",
     "test:integration": "NODE_ENV=test jest --config=tests/integration/jest.config.js",
-    "test:all": "npm run test && npm run test:integration",
     "lint": "cd src/server && eslint .",
-    "clean": "rm -rf node_modules src/server/build build"
+    "clean": "rm -rf node_modules build src/server/data/*.db"
   },
   "keywords": [
     "specgen",

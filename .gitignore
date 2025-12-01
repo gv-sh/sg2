@@ -4,6 +4,7 @@ package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+yarn.lock
 lerna-debug.log*
 .pnpm-debug.log*
 playwright-report/
@@ -11,14 +12,19 @@ playwright-report/
 # Production builds
 /build
 /dist
+build/
+dist/
 packages/*/build
 packages/*/dist
 
 # Testing
 /coverage
+coverage/
 *.log
+logs/
 test-results/
 .nyc_output
+performance-results/
 
 # Environment variables
 .env
@@ -26,6 +32,7 @@ test-results/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
 *.env
 
 # Database
@@ -33,18 +40,32 @@ test-results/
 *.sqlite
 *.sqlite3
 data/
+data/*.db
+data/generated-content.db
+data/*.json
+!data/settings.json
+
+# Uploads
+uploads/
 
 # IDEs and editors
 .vscode/
 .idea/
+.claude/
+*.sublime-project
+*.sublime-workspace
 *.swp
 *.swo
 *~
-.DS_Store
 
 # OS
 Thumbs.db
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
 # Misc
 .cache/

@@ -24,7 +24,7 @@ function Generate() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${config.API_URL}/api/categories`);
+        const response = await axios.get(`${config.API_URL}/api/admin/categories`);
         setCategories(response.data.data || []);
       } catch (error) {
         showAlert('destructive', 'Failed to fetch categories. Please try again.');
@@ -44,18 +44,18 @@ function Generate() {
       }
 
       try {
-        const response = await axios.get(`${config.API_URL}/api/parameters?categoryId=${selectedCategory}`);
+        const response = await axios.get(`${config.API_URL}/api/admin/parameters?categoryId=${selectedCategory}`);
         setParameters(response.data.data || []);
         
         // Initialize parameter values
         const initialValues = {};
         response.data.data.forEach(param => {
-          if (param.type === 'Toggle Switch') {
+          if (param.type === 'boolean') {
             initialValues[param.id] = false;
-          } else if (param.type === 'Slider') {
+          } else if (param.type === 'range') {
             initialValues[param.id] = param.parameter_config?.min || 0;
-          } else if (param.type === 'Checkbox') {
-            initialValues[param.id] = [];
+          } else if (param.type === 'number') {
+            initialValues[param.id] = 0;
           } else {
             initialValues[param.id] = param.parameter_values && param.parameter_values.length > 0 ? 
               (param.parameter_values[0].id || param.parameter_values[0].label) : '';
@@ -163,7 +163,7 @@ function Generate() {
 
   const renderParameterInput = (param) => {
     switch (param.type) {
-      case 'Dropdown':
+      case 'select':
         return (
           <Select
             id={`param-${param.id}`}
@@ -179,7 +179,7 @@ function Generate() {
           </Select>
         );
       
-      case 'Slider':
+      case 'range':
         return (
           <div className="space-y-2">
             <Input
@@ -200,7 +200,7 @@ function Generate() {
           </div>
         );
       
-      case 'Toggle Switch':
+      case 'boolean':
         return (
           <div className="flex items-center space-x-2">
             <input
@@ -218,60 +218,28 @@ function Generate() {
           </div>
         );
       
-      case 'Radio Buttons':
+      case 'text':
         return (
-          <div className="space-y-2">
-            {param.parameter_values && param.parameter_values.map((value, index) => (
-              <div key={value.id || index} className="flex items-center space-x-2">
-                <input
-                  id={`param-${param.id}-${value.id || index}`}
-                  type="radio"
-                  name={`param-${param.id}`}
-                  value={value.id || value.label}
-                  checked={(parameterValues[param.id] || '') === (value.id || value.label)}
-                  onChange={(e) => handleParameterChange(param.id, e.target.value)}
-                  className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                />
-                <label htmlFor={`param-${param.id}-${value.id || index}`} className="text-sm">
-                  {value.label}
-                </label>
-              </div>
-            ))}
-          </div>
+          <Input
+            id={`param-${param.id}`}
+            type="text"
+            value={parameterValues[param.id] || ''}
+            onChange={(e) => handleParameterChange(param.id, e.target.value)}
+            className="w-full"
+            placeholder={`Enter ${param.name.toLowerCase()}`}
+          />
         );
-      
-      case 'Checkbox':
+
+      case 'number':
         return (
-          <div className="space-y-2">
-            {param.parameter_values && param.parameter_values.map((value, index) => (
-              <div key={value.id || index} className="flex items-center space-x-2">
-                <input
-                  id={`param-${param.id}-${value.id || index}`}
-                  type="checkbox"
-                  value={value.id || value.label}
-                  checked={Array.isArray(parameterValues[param.id]) && 
-                    parameterValues[param.id].includes(value.id || value.label)}
-                  onChange={(e) => {
-                    const currentValues = Array.isArray(parameterValues[param.id]) ? 
-                      [...parameterValues[param.id]] : [];
-                    
-                    if (e.target.checked) {
-                      handleParameterChange(param.id, [...currentValues, e.target.value]);
-                    } else {
-                      handleParameterChange(
-                        param.id, 
-                        currentValues.filter(v => v !== e.target.value)
-                      );
-                    }
-                  }}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <label htmlFor={`param-${param.id}-${value.id || index}`} className="text-sm">
-                  {value.label}
-                </label>
-              </div>
-            ))}
-          </div>
+          <Input
+            id={`param-${param.id}`}
+            type="number"
+            value={parameterValues[param.id] || 0}
+            onChange={(e) => handleParameterChange(param.id, parseInt(e.target.value) || 0)}
+            className="w-full"
+            placeholder={`Enter ${param.name.toLowerCase()}`}
+          />
         );
       
       default:

@@ -21,7 +21,7 @@ function Categories() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get(`${config.API_URL}/api/categories`);
+      const response = await axios.get(`${config.API_URL}/api/admin/categories`);
       setCategories(response.data.data || []);
     } catch (error) {
       // Don't show alert for empty database

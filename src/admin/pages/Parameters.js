@@ -13,7 +13,7 @@ function Parameters() {
   const [newParameter, setNewParameter] = useState({
     name: '',
     description: '',
-    type: 'Dropdown',
+    type: 'select',
     category_id: '',
     parameter_values: [],
     visibility: 'Basic',
@@ -33,7 +33,7 @@ function Parameters() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get(`${config.API_URL}/api/categories`);
+      const response = await axios.get(`${config.API_URL}/api/admin/categories`);
       setCategories(response.data.data || []);
     } catch (error) {
       // Don't show alert for empty database
@@ -45,7 +45,7 @@ function Parameters() {
 
   const fetchParameters = useCallback(async () => {
     try {
-      const response = await axios.get(`${config.API_URL}/api/parameters`);
+      const response = await axios.get(`${config.API_URL}/api/admin/parameters`);
       setParameters(response.data.data || []);
     } catch (error) {
       // Don't show alert for empty database
@@ -64,11 +64,11 @@ function Parameters() {
     e.preventDefault();
     try {
       setIsLoading(true);
-      await axios.post(`${config.API_URL}/api/parameters`, newParameter);
+      await axios.post(`${config.API_URL}/api/admin/parameters`, newParameter);
       setNewParameter({
         name: '',
         description: '',
-        type: 'Dropdown',
+        type: 'select',
         category_id: '',
         parameter_values: [],
         visibility: 'Basic',
@@ -93,7 +93,7 @@ function Parameters() {
     e.preventDefault();
     try {
       setIsLoading(true);
-      await axios.put(`${config.API_URL}/api/parameters/${editingParameter.id}`, editingParameter);
+      await axios.put(`${config.API_URL}/api/admin/parameters/${editingParameter.id}`, editingParameter);
       setShowModal(false);
       setEditingParameter(null);
       fetchParameters();
@@ -109,7 +109,7 @@ function Parameters() {
     if (window.confirm('Are you sure you want to delete this parameter?')) {
       try {
         setIsLoading(true);
-        await axios.delete(`${config.API_URL}/api/parameters/${id}`);
+        await axios.delete(`${config.API_URL}/api/admin/parameters/${id}`);
         fetchParameters();
         showAlert('default', 'Parameter deleted successfully');
       } catch (error) {
@@ -273,11 +273,11 @@ function Parameters() {
                     }}
                     required
                   >
-                    <option value="Dropdown">Dropdown</option>
-                    <option value="Slider">Slider</option>
-                    <option value="Toggle Switch">Toggle Switch</option>
-                    <option value="Radio Buttons">Radio Buttons</option>
-                    <option value="Checkbox">Checkbox</option>
+                    <option value="select">Dropdown Selection</option>
+                    <option value="text">Text Input</option>
+                    <option value="number">Number Input</option>
+                    <option value="boolean">True/False Toggle</option>
+                    <option value="range">Range Slider</option>
                   </Select>
                   <p className="text-xs text-muted-foreground">Choose the input type</p>
                 </div>
@@ -347,7 +347,7 @@ function Parameters() {
                 </div>
                 
                 {/* Type-specific Configuration */}
-                {(editingParameter?.type === 'Slider' || (!editingParameter && newParameter.type === 'Slider')) && (
+                {(editingParameter?.type === 'range' || (!editingParameter && newParameter.type === 'range')) && (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Slider Configuration</label>
@@ -531,8 +531,8 @@ function Parameters() {
                   </div>
                 )}
                 
-                {((editingParameter && ['Dropdown', 'Radio Buttons', 'Checkbox'].includes(editingParameter.type)) || 
-                  (!editingParameter && ['Dropdown', 'Radio Buttons', 'Checkbox'].includes(newParameter.type))) && (
+                {((editingParameter && ['select'].includes(editingParameter.type)) || 
+                  (!editingParameter && ['select'].includes(newParameter.type))) && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Values</label>
                     <div className="flex gap-2">
@@ -602,8 +602,8 @@ function Parameters() {
                   </div>
                 )}
                 
-                {((editingParameter && editingParameter.type === 'Toggle Switch') || 
-                  (!editingParameter && newParameter.type === 'Toggle Switch')) && (
+                {((editingParameter && editingParameter.type === 'boolean') || 
+                  (!editingParameter && newParameter.type === 'boolean')) && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Toggle Labels</label>
                     <div className="grid grid-cols-2 gap-4">

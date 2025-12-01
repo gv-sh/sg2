@@ -36,7 +36,7 @@ function Settings() {
   const fetchSettings = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${config.API_URL}/api/settings`);
+      const response = await axios.get(`${config.API_URL}/api/admin/settings`);
       
       // Ensure we have valid settings data with proper structure
       const fetchedSettings = response.data?.data || {};
@@ -107,7 +107,7 @@ function Settings() {
     e.preventDefault();
     try {
       setIsLoading(true);
-      await axios.put(`${config.API_URL}/api/settings`, settings);
+      await axios.put(`${config.API_URL}/api/admin/settings`, settings);
       showAlert('success', 'Settings updated successfully');
     } catch (error) {
       showAlert('danger', 'Failed to update settings. Please try again.');

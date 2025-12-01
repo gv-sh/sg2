@@ -1,36 +1,27 @@
 /**
- * Comprehensive Tests for SpecGen Server
- * Single file testing all endpoints with SQLite database support
+ * Admin Tests for SpecGen
+ * Tests admin endpoints for categories, parameters, and settings management
  */
 
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import fs from 'fs/promises';
 
-import app from './server.js';
-import { dataService } from './services.js';
-import config from './config.js';
-import schema from './schema.js';
+import app from '../src/server/server.js';
+import { dataService } from '../src/server/services.js';
+import config from '../src/server/config.js';
 
-// Global jest for compatibility
 global.jest = jest;
 
-// Test database path
 const TEST_DB_PATH = config.getDatabasePath();
 
-/**
- * Test Database Initialization
- * Creates clean SQLite database with test data
- */
 async function initTestDatabase() {
-  // Delete existing test database
   try {
     await fs.unlink(TEST_DB_PATH);
   } catch (err) {
     // File might not exist, that's ok
   }
 
-  // Initialize new database (this will create schema automatically)
   await dataService.init();
 
   // Create test categories
@@ -43,7 +34,7 @@ async function initTestDatabase() {
 
   await dataService.createCategory({
     id: 'fantasy',
-    name: 'Fantasy', 
+    name: 'Fantasy',
     description: 'Stories with magic and mythical creatures',
     sort_order: 2
   });
@@ -104,9 +95,6 @@ async function initTestDatabase() {
   await dataService.setSetting('enable_image_generation', true, 'boolean');
 }
 
-/**
- * Clean up test database
- */
 async function cleanupTestDatabase() {
   try {
     await dataService.close();
@@ -116,7 +104,6 @@ async function cleanupTestDatabase() {
   }
 }
 
-// Setup and teardown
 beforeAll(async () => {
   await initTestDatabase();
 });
@@ -125,85 +112,18 @@ afterAll(async () => {
   await cleanupTestDatabase();
 });
 
-// Refresh database between tests to avoid conflicts
 beforeEach(async () => {
   await initTestDatabase();
 });
 
-describe('SpecGen Server - System Endpoints', () => {
-  test('GET / - Should serve HTML file or handle gracefully', async () => {
-    const response = await request(app).get('/');
-    
-    // Should either serve HTML (200) or return 404 if build doesn't exist
-    expect([200, 404]).toContain(response.status);
-    
-    if (response.status === 200) {
-      // Should serve HTML content
-      expect(response.headers['content-type']).toMatch(/html/);
-    }
-  });
-
-  test('GET /api/system/health - Should return health status', async () => {
-    const response = await request(app).get('/api/system/health');
-    
-    expect(response.status).toBeGreaterThanOrEqual(200);
-    expect(response.body.success).toBeDefined();
-    expect(response.body.data.status).toMatch(/^(ok|degraded)$/);
-    expect(response.body.data.database).toBe('connected');
-    expect(response.body.data.environment).toBe('test');
-    expect(typeof response.body.data.uptime).toBe('number');
-  });
-
-  test('POST /api/system/database/init - Should initialize database', async () => {
-    const response = await request(app).post('/api/system/database/init');
-    
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.message).toBe('Database initialized successfully');
-  });
-
-  test('GET /api/system/database/status - Should return database statistics', async () => {
-    const response = await request(app).get('/api/system/database/status');
-    
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.status).toBe('connected');
-    expect(response.body.data.statistics).toHaveProperty('categories');
-    expect(response.body.data.statistics).toHaveProperty('parameters');
-    expect(typeof response.body.data.statistics.categories).toBe('number');
-  });
-
-  test('GET /api/system/docs.json - Should return OpenAPI specification', async () => {
-    const response = await request(app).get('/api/system/docs.json');
-    
-    expect(response.status).toBe(200);
-    expect(response.body.openapi).toBe('3.0.0');
-    expect(response.body.info.title).toBe('SpecGen API');
-    expect(response.body.paths).toBeDefined();
-  });
-
-  test('GET /api/nonexistent - Should return 404 with helpful message', async () => {
-    const response = await request(app).get('/api/nonexistent-endpoint');
-    
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toBe('Endpoint not found');
-    expect(response.body.availableEndpoints).toEqual([
-      '/api/admin', 
-      '/api/content', 
-      '/api/system'
-    ]);
-  });
-});
-
-describe('SpecGen Server - Admin Categories', () => {
+describe('SpecGen Admin - Categories', () => {
   test('GET /api/admin/categories - Should return all categories', async () => {
     const response = await request(app).get('/api/admin/categories');
     
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(Array.isArray(response.body.data)).toBe(true);
-    expect(response.body.data).toHaveLength(3); // All categories (no visibility filtering)
+    expect(response.body.data).toHaveLength(3);
     
     const categoryNames = response.body.data.map(c => c.name);
     expect(categoryNames).toContain('Science Fiction');
@@ -266,7 +186,7 @@ describe('SpecGen Server - Admin Categories', () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.description).toBe('Updated description for sci-fi');
-    expect(response.body.data.name).toBe('Science Fiction'); // Should remain unchanged
+    expect(response.body.data.name).toBe('Science Fiction');
   });
 
   test('DELETE /api/admin/categories/:id - Should delete category', async () => {
@@ -276,13 +196,12 @@ describe('SpecGen Server - Admin Categories', () => {
     expect(response.body.success).toBe(true);
     expect(response.body.message).toContain('deleted successfully');
 
-    // Verify category is gone
     const getResponse = await request(app).get('/api/admin/categories/fantasy');
     expect(getResponse.status).toBe(404);
   });
 });
 
-describe('SpecGen Server - Admin Parameters', () => {
+describe('SpecGen Admin - Parameters', () => {
   test('GET /api/admin/parameters - Should return all parameters', async () => {
     const response = await request(app).get('/api/admin/parameters');
     
@@ -291,7 +210,6 @@ describe('SpecGen Server - Admin Parameters', () => {
     expect(Array.isArray(response.body.data)).toBe(true);
     expect(response.body.data.length).toBeGreaterThan(0);
     
-    // Check parameter structure
     const param = response.body.data[0];
     expect(param).toHaveProperty('id');
     expect(param).toHaveProperty('name');
@@ -308,7 +226,6 @@ describe('SpecGen Server - Admin Parameters', () => {
     expect(response.body.success).toBe(true);
     expect(Array.isArray(response.body.data)).toBe(true);
     
-    // All parameters should belong to science-fiction category
     response.body.data.forEach(param => {
       expect(param.category_id).toBe('science-fiction');
     });
@@ -363,19 +280,34 @@ describe('SpecGen Server - Admin Parameters', () => {
     expect(response.body.success).toBe(false);
   });
 
+  test('PUT /api/admin/parameters/:id - Should update parameter', async () => {
+    const updates = {
+      name: 'Updated Technology Level',
+      description: 'Updated description'
+    };
+
+    const response = await request(app)
+      .put('/api/admin/parameters/sci-fi-tech-level')
+      .send(updates);
+    
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.name).toBe('Updated Technology Level');
+    expect(response.body.data.description).toBe('Updated description');
+  });
+
   test('DELETE /api/admin/parameters/:id - Should delete parameter', async () => {
     const response = await request(app).delete('/api/admin/parameters/story-length');
     
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
 
-    // Verify parameter is gone
     const getResponse = await request(app).get('/api/admin/parameters/story-length');
     expect(getResponse.status).toBe(404);
   });
 });
 
-describe('SpecGen Server - Admin Settings', () => {
+describe('SpecGen Admin - Settings', () => {
   test('GET /api/admin/settings - Should return all settings', async () => {
     const response = await request(app).get('/api/admin/settings');
     
@@ -404,159 +336,52 @@ describe('SpecGen Server - Admin Settings', () => {
     expect(response.body.data.enable_image_generation).toBe(false);
     expect(response.body.data.new_setting).toBe('test value');
   });
-});
 
-describe('SpecGen Server - Content Management', () => {
-  test('GET /api/content - Should return empty content list initially', async () => {
-    const response = await request(app).get('/api/content');
+  test('PUT /api/admin/settings - Should handle empty updates', async () => {
+    const response = await request(app)
+      .put('/api/admin/settings')
+      .send({});
     
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
-    expect(Array.isArray(response.body.data)).toBe(true);
-    expect(response.body.data).toHaveLength(0);
-  });
-
-  test('GET /api/content/summary - Should return content summary', async () => {
-    const response = await request(app).get('/api/content/summary');
-    
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(Array.isArray(response.body.data)).toBe(true);
-  });
-
-  test('POST /api/generate - Should handle generation request with validation error', async () => {
-    // Test without OpenAI key configured - should fail
-    const response = await request(app)
-      .post('/api/generate')
-      .send({
-        parameters: { category: 'science-fiction' },
-        year: 2150
-      });
-    
-    expect(response.status).toBe(500);
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toBe('Internal Server Error'); // Generic error in test env
-  });
-
-  test('POST /api/generate - Should validate generation request schema', async () => {
-    const response = await request(app)
-      .post('/api/generate')
-      .send({
-        parameters: 'not-an-object'
-      });
-    
-    expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toBe('Validation failed');
-  });
-
-  test('GET /api/content/:id - Should return 404 for non-existent content', async () => {
-    const response = await request(app).get('/api/content/non-existent-id');
-    
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-  });
-
-  test('PUT /api/content/:id - Should update content title', async () => {
-    // First create some content
-    const contentData = {
-      title: 'Original Title',
-      fiction_content: 'Test story content',
-      prompt_data: { test: 'data' },
-      metadata: {}
-    };
-    const savedContent = await dataService.saveGeneratedContent(contentData);
-
-    // Update the title
-    const response = await request(app)
-      .put(`/api/content/${savedContent.id}`)
-      .send({ title: 'Updated Title' });
-
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.title).toBe('Updated Title');
-  });
-
-  test('PUT /api/content/:id - Should return 404 for non-existent content', async () => {
-    const response = await request(app)
-      .put('/api/content/non-existent-id')
-      .send({ title: 'Updated Title' });
-
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-  });
-
-  test('DELETE /api/content/:id - Should delete content', async () => {
-    // First create some content
-    const contentData = {
-      title: 'Test Title',
-      fiction_content: 'Test story content',
-      prompt_data: { test: 'data' },
-      metadata: {}
-    };
-    const savedContent = await dataService.saveGeneratedContent(contentData);
-
-    // Delete it
-    const response = await request(app).delete(`/api/content/${savedContent.id}`);
-
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.message).toContain('deleted successfully');
-
-    // Verify it's gone
-    const getResponse = await request(app).get(`/api/content/${savedContent.id}`);
-    expect(getResponse.status).toBe(404);
-  });
-
-  test('DELETE /api/content/:id - Should return 404 for non-existent content', async () => {
-    const response = await request(app).delete('/api/content/non-existent-id');
-
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
   });
 });
 
-
-describe('SpecGen Server - Error Handling', () => {
-  test('Should handle validation errors properly', async () => {
-    const response = await request(app)
-      .post('/api/admin/categories')
-      .send({ name: '' }); // Empty name should fail validation
-    
-    expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toBe('Validation failed');
-    expect(response.body.details).toBeDefined();
-  });
-
-  test('Should handle Boom errors properly', async () => {
-    const response = await request(app).get('/api/admin/categories/non-existent');
-    
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-    expect(response.body.error).toContain('not found');
-  });
-
-  test('Should handle malformed JSON', async () => {
-    const response = await request(app)
-      .post('/api/admin/categories')
-      .set('Content-Type', 'application/json')
-      .send('{ invalid json }');
-    
-    expect(response.status).toBe(400);
-  });
-
-  test('Should handle large payloads within limits', async () => {
-    const largeDescription = 'x'.repeat(400); // Within limit (500 char max)
-    
-    const response = await request(app)
+describe('SpecGen Admin - Integration', () => {
+  test('Should create category with parameters and retrieve them', async () => {
+    // Create category
+    const categoryResponse = await request(app)
       .post('/api/admin/categories')
       .send({
-        name: 'Large Category',
-        description: largeDescription
+        name: 'Test Integration Category',
+        description: 'Testing category-parameter relationship'
       });
     
-    expect(response.status).toBe(201);
-    expect(response.body.success).toBe(true);
+    expect(categoryResponse.status).toBe(201);
+    const categoryId = categoryResponse.body.data.id;
+
+    // Create parameter for category
+    const paramResponse = await request(app)
+      .post('/api/admin/parameters')
+      .send({
+        name: 'Test Parameter',
+        type: 'text',
+        category_id: categoryId
+      });
+    
+    expect(paramResponse.status).toBe(201);
+
+    // Retrieve parameters for category
+    const paramsResponse = await request(app)
+      .get('/api/admin/parameters')
+      .query({ categoryId });
+    
+    expect(paramsResponse.status).toBe(200);
+    expect(paramsResponse.body.data).toHaveLength(1);
+    expect(paramsResponse.body.data[0].category_id).toBe(categoryId);
+
+    // Clean up
+    await request(app).delete(`/api/admin/parameters/${paramResponse.body.data.id}`);
+    await request(app).delete(`/api/admin/categories/${categoryId}`);
   });
 });

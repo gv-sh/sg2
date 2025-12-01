@@ -93,12 +93,12 @@ If tests fail with "Server not ready" error, increase the timeout in `setup.js` 
 ### Database errors
 If you encounter database errors, try reinitializing:
 ```bash
-rm packages/server/*.db
+rm src/server/data/*.db
 npm run dev:server
 ```
 
 ### Port already in use
 If port 3000 is already in use, either:
 - Stop the conflicting process
-- Change the port in `packages/server/.env` or config
+- Change the port in `src/server/.env` or config
 - Set `API_URL` environment variable to a different port

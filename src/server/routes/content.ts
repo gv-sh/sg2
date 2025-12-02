@@ -188,10 +188,8 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       title: result.title,
       fiction_content: result.content,
       image_blob: result.imageBlob,
-      image_thumbnail: result.imageThumbnail,
-      image_format: result.imageFormat || 'jpeg',
+      image_format: result.imageFormat || 'png',
       image_size_bytes: result.imageSizeBytes || 0,
-      thumbnail_size_bytes: result.thumbnailSizeBytes || 0,
       prompt_data: validatedData.parameters,
       metadata: {
         ...result.metadata,
@@ -200,11 +198,6 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       }
     };
 
-    // Handle URL-only mode when Sharp is not available
-    if (result.imageUrl && !result.imageBlob) {
-      contentToSave.metadata.imageUrl = result.imageUrl;
-    }
-
     const savedContent = await dataService.saveGeneratedContent(contentToSave);
     
     // Convert to API format
@@ -212,8 +205,8 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       id: savedContent.id,
       title: savedContent.title,
       content: savedContent.fiction_content,
-      image_original_url: savedContent.image_original_url || savedContent.metadata?.imageUrl,
-      image_thumbnail_url: savedContent.image_thumbnail_url || savedContent.metadata?.imageUrl,
+      image_original_url: savedContent.image_blob ? `/api/images/${savedContent.id}/original` : null,
+      image_thumbnail_url: savedContent.image_blob ? `/api/images/${savedContent.id}/thumbnail` : null,
       parameters: savedContent.prompt_data,
       year: savedContent.metadata?.year || validatedData.year,
       metadata: savedContent.metadata || undefined,
@@ -375,7 +368,10 @@ router.get('/summary', async (req: TypedRequestQuery<ContentFiltersSchema>, res:
     const summary = {
       total: content.length,
       withImages: content.filter(c => c.image_original_url).length,
-      recentCount: content.filter(c => new Date(c.created_at) > new Date(Date.now() - 7*24*60*60*1000)).length
+      recentCount: content.filter(c => new Date(c.created_at) > new Date(Date.now() - 7*24*60*60*1000)).length,
+      byType: {
+        fiction: content.length // All content is currently fiction
+      }
     };
     
     res.json({
@@ -457,6 +453,9 @@ router.get('/:id', async (req: TypedRequestParams<IdParamSchema>, res: Response<
       }
     });
   } catch (error: any) {
+    if (error.isBoom && error.output?.statusCode === 404) {
+      return next(error);
+    }
     next(boom.internal('Failed to retrieve content', error));
   }
 });
@@ -493,7 +492,7 @@ router.get('/:id/image', async (req: TypedRequestParams<IdParamSchema>, res: Res
     }
     
     const imageInfo = {
-      url: content.image_original_url,
+      imageUrl: content.image_original_url || (content.image_blob ? `/api/images/${id}/original` : null),
       hasProcessedData: !!content.image_blob,
       prompt: content.metadata?.imagePrompt || 'Generated image',
       generatedAt: content.created_at
@@ -589,6 +588,9 @@ router.put('/:id', async (req: TypedRequest<IdParamSchema, ContentUpdateSchema>,
     if (error.name === 'ZodError') {
       return next(boom.badRequest('Validation failed', error.errors));
     }
+    if (error.isBoom && error.output?.statusCode === 404) {
+      return next(error);
+    }
     next(boom.internal('Failed to update content', error));
   }
 });
@@ -624,6 +626,9 @@ router.delete('/:id', async (req: TypedRequestParams<IdParamSchema>, res: Respon
       }
     });
   } catch (error: any) {
+    if (error.isBoom && error.output?.statusCode === 404) {
+      return next(error);
+    }
     next(boom.internal('Failed to delete content', error));
   }
 });
@@ -703,18 +708,18 @@ router.get('/images/:id/thumbnail', async (req: TypedRequestParams<IdParamSchema
     const { id } = req.params;
     const content = await dataService.getGeneratedContentById(id);
     
-    if (!content || !content.image_thumbnail) {
+    if (!content || !content.image_blob) {
       return next(boom.notFound('Thumbnail not found'));
     }
     
-    // Set appropriate headers and serve the thumbnail blob
+    // Serve the original image as thumbnail (no separate thumbnail generation)
     res.set({
       'Content-Type': `image/${content.image_format || 'png'}`,
-      'Content-Length': content.thumbnail_size_bytes?.toString() || '0',
+      'Content-Length': content.image_size_bytes?.toString() || '0',
       'Cache-Control': 'public, max-age=31536000' // 1 year cache
     });
     
-    res.end(content.image_thumbnail);
+    res.end(content.image_blob);
   } catch (error: any) {
     next(boom.internal('Failed to retrieve thumbnail', error));
   }

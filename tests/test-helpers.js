@@ -6,10 +6,26 @@
 import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import app from '../src/server/server.js';
-import { dataService } from '../src/server/services.js';
+import { dataService, aiService } from '../src/server/services.js';
 import config from '../src/server/config.js';
 
 global.jest = jest;
+
+// Mock AI service for tests
+const mockAIResponse = {
+  success: true,
+  title: 'Test Story Title',
+  content: 'This is a test story content generated for testing purposes.',
+  imageBlob: Buffer.from('fake-image-data'),
+  imageFormat: 'png',
+  imageSizeBytes: 1024,
+  imagePrompt: 'Test image prompt',
+  wordCount: 12,
+  metadata: {
+    fiction: { tokens: 150 },
+    image: { model: 'dall-e-3' }
+  }
+};
 
 const TEST_DB_PATH = config.getDatabasePath();
 
@@ -54,8 +70,10 @@ export function createParameterData(categoryId, overrides = {}) {
 export function createContentGenerationData(overrides = {}) {
   return {
     parameters: {
-      genre: 'science-fiction',
-      setting: 'future-city'
+      "Story Settings": {
+        genre: 'science-fiction',
+        setting: 'future-city'
+      }
     },
     year: 2050,
     ...overrides
@@ -101,10 +119,13 @@ export function expectSecurityHeaders(response) {
 export function setupTestSuite() {
   beforeAll(async () => {
     await initTestDatabase();
+    // Mock AI service for all tests
+    jest.spyOn(aiService, 'generate').mockResolvedValue(mockAIResponse);
   });
 
   afterAll(async () => {
     await cleanupTestDatabase();
+    jest.restoreAllMocks();
   });
 
   beforeEach(async () => {

@@ -30,13 +30,6 @@ import type {
   ProcessedImageData
 } from '../types/services.js';
 
-// Check if Sharp is available
-let sharp: any = null;
-try {
-  sharp = (await import('sharp')).default;
-} catch (error: any) {
-  console.warn('Sharp not available - using URL-only mode:', error.message);
-}
 
 // Visual elements patterns for image generation
 const VISUAL_PATTERNS: VisualPatterns = {
@@ -629,38 +622,21 @@ class AIService {
 
       const imageUrl = response.data.data[0].url;
       
-      // Download and process the image if Sharp is available
-      if (sharp) {
-        const imageData = await this.downloadAndProcessImage(imageUrl);
-        return {
-          success: true,
-          imageBlob: imageData.original,
-          imageThumbnail: imageData.thumbnail,
-          imageFormat: imageData.format,
-          imageSizeBytes: imageData.originalSize,
-          thumbnailSizeBytes: imageData.thumbnailSize,
-          imagePrompt: prompt.substring(0, 100) + '...',
-          type: 'image',
-          metadata: {
-            model: aiConfig.model,
-            prompt: prompt.substring(0, 100) + '...',
-            originalSize: imageData.originalSize,
-            thumbnailSize: imageData.thumbnailSize
-          }
-        };
-      } else {
-        // Fallback to URL mode when Sharp is not available
-        return {
-          success: true,
-          imageUrl: imageUrl, // Keep for backward compatibility
-          imagePrompt: prompt.substring(0, 100) + '...',
-          type: 'image',
-          metadata: {
-            model: aiConfig.model,
-            prompt: prompt.substring(0, 100) + '...'
-          }
-        };
-      }
+      // Always download and store image data
+      const imageData = await this.downloadImage(imageUrl);
+      return {
+        success: true,
+        imageBlob: imageData.buffer,
+        imageFormat: imageData.format,
+        imageSizeBytes: imageData.size,
+        imagePrompt: prompt.substring(0, 100) + '...',
+        type: 'image',
+        metadata: {
+          model: aiConfig.model,
+          prompt: prompt.substring(0, 100) + '...',
+          originalSize: imageData.size
+        }
+      };
     } catch (error) {
       throw boom.internal('Image generation failed', error);
     }
@@ -686,16 +662,11 @@ class AIService {
       }
     };
 
-    // Add BLOB data if available (Sharp working)
+    // Add image data
     if (imageResult.imageBlob) {
       result.imageBlob = imageResult.imageBlob;
-      result.imageThumbnail = imageResult.imageThumbnail;
       result.imageFormat = imageResult.imageFormat;
       result.imageSizeBytes = imageResult.imageSizeBytes;
-      result.thumbnailSizeBytes = imageResult.thumbnailSizeBytes;
-    } else {
-      // Fallback to URL mode
-      result.imageUrl = imageResult.imageUrl;
     }
 
     return result;
@@ -803,32 +774,28 @@ class AIService {
     return [...new Set(elements)].slice(0, 5);
   }
 
-  private async downloadAndProcessImage(imageUrl: string): Promise<ProcessedImageData> {
+  private async downloadImage(imageUrl: string): Promise<{ buffer: Buffer; format: string; size: number }> {
     try {
       // Download the image from DALL-E URL
       const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-      const originalBuffer = Buffer.from(response.data);
+      const buffer = Buffer.from(response.data);
       
-      // Process with Sharp to generate thumbnail
-      const thumbnailBuffer = await sharp(originalBuffer)
-        .resize(150, 150, { fit: 'cover' })
-        .png()
-        .toBuffer();
-      
-      // Convert original to PNG for consistency
-      const processedOriginal = await sharp(originalBuffer)
-        .png()
-        .toBuffer();
+      // Detect format from content-type header or default to png
+      const contentType = response.headers['content-type'] || '';
+      let format = 'png';
+      if (contentType.includes('jpeg') || contentType.includes('jpg')) {
+        format = 'jpeg';
+      } else if (contentType.includes('webp')) {
+        format = 'webp';
+      }
       
       return {
-        original: processedOriginal,
-        thumbnail: thumbnailBuffer,
-        format: 'png',
-        originalSize: processedOriginal.length,
-        thumbnailSize: thumbnailBuffer.length
+        buffer,
+        format,
+        size: buffer.length
       };
     } catch (error) {
-      throw boom.internal('Failed to download and process image', error);
+      throw boom.internal('Failed to download image', error);
     }
   }
 

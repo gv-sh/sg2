@@ -54,9 +54,60 @@ export const parameterSchema = z.object({
     z.array(parameterValueSchema),
     z.object({ on: z.string(), off: z.string() })
   ]).optional()
+}).superRefine((data, ctx) => {
+  // Type-specific validation for parameter_values
+  if (data.parameter_values !== undefined && data.parameter_values !== null) {
+    switch (data.type) {
+      case 'select':
+        if (!Array.isArray(data.parameter_values)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['parameter_values'],
+            message: 'Select parameters must have parameter_values as an array'
+          });
+        } else if (data.parameter_values.length === 0) {
+          // Allow empty arrays - service layer will handle initialization
+          // This prevents UI from breaking during type transitions
+        }
+        break;
+        
+      case 'boolean':
+        if (Array.isArray(data.parameter_values) || 
+            typeof data.parameter_values !== 'object' ||
+            typeof (data.parameter_values as any).on !== 'string' ||
+            typeof (data.parameter_values as any).off !== 'string') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['parameter_values'],
+            message: 'Boolean parameters must have parameter_values with on/off string properties'
+          });
+        }
+        break;
+        
+      case 'text':
+      case 'number':
+      case 'range':
+        if (data.parameter_values !== null) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['parameter_values'],
+            message: `${data.type} parameters should not have parameter_values`
+          });
+        }
+        break;
+    }
+  }
 });
 
-export const parameterUpdateSchema = parameterSchema.partial().omit({ category_id: true });
+// Enhanced update schema that allows category_id and handles type transitions better
+export const parameterUpdateSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(config.get('validation.maxNameLength')).optional(),
+  description: z.string().max(config.get('validation.maxDescriptionLength')).optional(),
+  type: z.enum(['select', 'text', 'number', 'boolean', 'range']).optional(),
+  category_id: z.string().min(1, 'Category ID is required').optional(), // Allow category_id in updates
+  parameter_values: z.any().optional() // Accept any parameter_values during updates - service layer validates compatibility
+});
+// No superRefine for updates - let service layer handle all parameter_values compatibility
 
 // Content generation schemas - category-grouped parameters
 export const generationRequestSchema = z.object({

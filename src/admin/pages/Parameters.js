@@ -77,13 +77,24 @@ function Parameters() {
     e.preventDefault();
     try {
       setIsLoading(true);
-      await axios.put(`${config.API_URL}/api/admin/parameters/${editingParameter.id}`, editingParameter);
+      
+      // Clean payload: remove undefined values to let backend handle defaults
+      const cleanPayload = Object.fromEntries(
+        Object.entries(editingParameter).filter(([key, value]) => 
+          value !== undefined && key !== 'id' && key !== 'created_at'
+        )
+      );
+      
+      console.log('Sending update payload:', cleanPayload);
+      
+      await axios.put(`${config.API_URL}/api/admin/parameters/${editingParameter.id}`, cleanPayload);
       setShowModal(false);
       setEditingParameter(null);
       fetchParameters();
       toast.success('Parameter updated successfully!');
     } catch (error) {
-      toast.error('Failed to update parameter. Please try again.');
+      console.error('Parameter update failed:', error.response?.data || error);
+      toast.error(error.response?.data?.error || 'Failed to update parameter. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -238,30 +249,36 @@ function Parameters() {
                     onChange={(e) => {
                       const newType = e.target.value;
                       
-                      // Initialize type-specific default values
+                      // For type changes, let the backend initialize appropriate defaults
+                      // Don't send conflicting parameter_values during type transitions
                       let typeSpecificData = {};
+                      
+                      // Only clear parameter_values/config, don't set specific values
+                      // This allows the backend to properly initialize defaults
                       switch (newType) {
                         case 'select':
+                          // Don't send parameter_values - let backend initialize empty array
                           typeSpecificData = {
-                            parameter_values: [],
                             parameter_config: null
                           };
+                          // Remove any existing parameter_values to avoid conflicts
                           break;
                         case 'boolean':
+                          // Don't send parameter_values - let backend initialize default labels
                           typeSpecificData = {
-                            parameter_values: { on: 'Yes', off: 'No' },
                             parameter_config: null
                           };
                           break;
                         case 'range':
+                          // Don't send parameter_config - let backend initialize defaults
                           typeSpecificData = {
-                            parameter_values: null,
-                            parameter_config: { min: 0, max: 100, step: 1 }
+                            parameter_values: null
                           };
                           break;
                         case 'text':
                         case 'number':
                         default:
+                          // Clear both for simple types
                           typeSpecificData = {
                             parameter_values: null,
                             parameter_config: null
@@ -270,11 +287,24 @@ function Parameters() {
                       }
                       
                       if (editingParameter) {
-                        setEditingParameter({ 
+                        // For existing parameters, remove conflicting values during type changes
+                        const updatedParameter = { 
                           ...editingParameter, 
                           type: newType,
                           ...typeSpecificData
-                        });
+                        };
+                        
+                        // Remove parameter_values if not compatible with new type
+                        if ((newType === 'select' || newType === 'boolean') && !typeSpecificData.hasOwnProperty('parameter_values')) {
+                          delete updatedParameter.parameter_values;
+                        }
+                        
+                        // Remove parameter_config if not compatible with new type  
+                        if (newType === 'range' && !typeSpecificData.hasOwnProperty('parameter_config')) {
+                          delete updatedParameter.parameter_config;
+                        }
+                        
+                        setEditingParameter(updatedParameter);
                       } else {
                         setNewParameter({ 
                           ...newParameter, 

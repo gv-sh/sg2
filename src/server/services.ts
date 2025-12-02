@@ -350,11 +350,14 @@ class DataService {
     let parameterValues: string | null;
     let parameterConfig: string | null;
     
-    if (updates.parameter_values !== undefined) {
-      // Explicitly provided parameter_values
-      parameterValues = updates.parameter_values ? JSON.stringify(updates.parameter_values) : null;
-    } else if (isTypeChanging) {
-      // Type is changing - initialize appropriate default values
+    // Enhanced logic to handle type-value compatibility
+    const shouldUseDefaults = isTypeChanging && (
+      updates.parameter_values === undefined || 
+      !this.isParameterValueCompatible(newType, updates.parameter_values)
+    );
+    
+    if (shouldUseDefaults) {
+      // Type is changing or incompatible values - initialize appropriate defaults
       switch (newType) {
         case 'select':
           // Initialize empty array for select options
@@ -376,9 +379,36 @@ class DataService {
         default:
           parameterValues = null;
       }
+      
+      console.log('Parameter update using type defaults:', { 
+        id, 
+        newType, 
+        isTypeChanging,
+        providedValues: updates.parameter_values,
+        resultValues: parameterValues 
+      });
+      
+    } else if (updates.parameter_values !== undefined) {
+      // Explicitly provided parameter_values that are compatible
+      parameterValues = updates.parameter_values ? JSON.stringify(updates.parameter_values) : null;
+      
+      console.log('Parameter update using provided values:', { 
+        id, 
+        newType, 
+        providedValues: updates.parameter_values,
+        resultValues: parameterValues 
+      });
+      
     } else {
       // No type change, no explicit parameter_values - keep existing
       parameterValues = existing.parameter_values ? JSON.stringify(existing.parameter_values) : null;
+      
+      console.log('Parameter update keeping existing values:', { 
+        id, 
+        newType, 
+        existingValues: existing.parameter_values,
+        resultValues: parameterValues 
+      });
     }
     
     // Handle parameter_config for range parameters
@@ -415,6 +445,39 @@ class DataService {
       ]
     );
     return await this.getParameterById(id);
+  }
+
+  /**
+   * Check if parameter_values is compatible with the given parameter type
+   */
+  private isParameterValueCompatible(type: string, values: any): boolean {
+    if (values === null || values === undefined) {
+      return true; // null/undefined is always compatible (will be initialized)
+    }
+
+    switch (type) {
+      case 'select':
+        // Should be non-empty array with valid structure
+        return Array.isArray(values) && 
+               values.length > 0 && 
+               values.every(v => v && typeof v.label === 'string');
+        
+      case 'boolean':
+        // Should be object with 'on' and 'off' string properties
+        return typeof values === 'object' && 
+               !Array.isArray(values) &&
+               typeof values.on === 'string' && 
+               typeof values.off === 'string';
+        
+      case 'text':
+      case 'number':
+      case 'range':
+        // These types should not have parameter_values
+        return values === null;
+        
+      default:
+        return false;
+    }
   }
 
   async deleteParameter(id: string): Promise<{ success: boolean; message: string }> {

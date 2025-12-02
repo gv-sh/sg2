@@ -22,7 +22,7 @@
     "type-check:server": "tsc --noEmit --project tsconfig.server.json",
     "test": "npm run test:unit && npm run test:client",
     "test:unit": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config tests/jest.config.mjs --colors=true",
-    "test:server": "npm run test:admin && npm run test:content && npm run test:system",
+    "test:server": "npm run test:server-admin && npm run test:server-content && npm run test:server-wsystem",
     "test:server-admin": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --runInBand tests/server-admin.test.js --config tests/jest.config.mjs --colors=true",
     "test:server-content": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --runInBand tests/server-content.test.js --config tests/jest.config.mjs --colors=true",
     "test:server-system": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --runInBand tests/server-system.test.js --config tests/jest.config.mjs --colors=true",

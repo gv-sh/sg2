@@ -99,17 +99,16 @@ function Categories() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="w-[180px]">ID</TableHead>
-                    <TableHead className="w-[180px]">Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="w-[100px]">Parameters</TableHead>
-                    <TableHead className="w-[140px]">Actions</TableHead>
+                    <TableHead className="w-[220px] text-left">Category</TableHead>
+                    <TableHead className="text-left">Description</TableHead>
+                    <TableHead className="w-[100px] text-center">Parameters</TableHead>
+                    <TableHead className="w-[140px] text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan="5" className="text-center text-muted-foreground py-12 px-6">
+                      <TableCell colSpan="4" className="text-center text-muted-foreground py-12 px-6">
                         <div className="flex flex-col items-center gap-2">
                           <p>No categories found</p>
                           <p className="text-xs">Click "Add New Category" to create one</p>
@@ -119,19 +118,21 @@ function Categories() {
                   ) : (
                     categories.map((category) => (
                       <TableRow key={category.id} className="hover:bg-muted/30">
-                        <TableCell className="whitespace-nowrap">
-                          <code className="text-xs px-1.5 py-0.5 font-mono truncate block">
-                            {category.id}
-                          </code>
+                        <TableCell className="whitespace-nowrap text-left">
+                          <div className="flex flex-col">
+                            <span className="font-medium truncate">{category.name}</span>
+                            <code className="text-xs text-muted-foreground font-mono truncate">
+                              {category.id}
+                            </code>
+                          </div>
                         </TableCell>
-                        <TableCell className="font-medium whitespace-nowrap truncate">{category.name}</TableCell>
-                        <TableCell className="whitespace-nowrap">
+                        <TableCell className="whitespace-nowrap text-left">
                           <span className="text-sm text-muted-foreground truncate block">
                             {category.description || "—"}
                           </span>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          <div className="flex items-center gap-1">
+                        <TableCell className="whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center gap-1">
                             <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                               category.parameter_count > 0 
                                 ? 'bg-blue-50 text-blue-700 border border-blue-200' 
@@ -141,8 +142,8 @@ function Categories() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          <div className="flex items-center gap-2">
+                        <TableCell className="whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <Button
                               variant="ghost"
                               size="xs"

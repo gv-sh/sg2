@@ -323,15 +323,16 @@ class DataService {
     await this.getCategoryById(parameterData.category_id); // Verify category exists
     
     await this.run(
-      `INSERT INTO parameters (id, name, description, type, category_id, parameter_values)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO parameters (id, name, description, type, category_id, parameter_values, parameter_config)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         parameterData.name,
         parameterData.description || '',
         parameterData.type,
         parameterData.category_id,
-        parameterData.parameter_values ? JSON.stringify(parameterData.parameter_values) : null
+        parameterData.parameter_values ? JSON.stringify(parameterData.parameter_values) : null,
+        (parameterData as any).parameter_config ? JSON.stringify((parameterData as any).parameter_config) : null
       ]
     );
     return await this.getParameterById(id);
@@ -341,14 +342,75 @@ class DataService {
     const existing = await this.getParameterById(id);
     if (updates.category_id) await this.getCategoryById(updates.category_id);
     
+    // Determine the new type
+    const newType = updates.type || existing.type;
+    const isTypeChanging = updates.type && updates.type !== existing.type;
+    
+    // Handle parameter_values based on type changes
+    let parameterValues: string | null;
+    let parameterConfig: string | null;
+    
+    if (updates.parameter_values !== undefined) {
+      // Explicitly provided parameter_values
+      parameterValues = updates.parameter_values ? JSON.stringify(updates.parameter_values) : null;
+    } else if (isTypeChanging) {
+      // Type is changing - initialize appropriate default values
+      switch (newType) {
+        case 'select':
+          // Initialize empty array for select options
+          parameterValues = JSON.stringify([]);
+          break;
+        case 'boolean':
+          // Initialize default boolean labels
+          parameterValues = JSON.stringify({ on: 'Yes', off: 'No' });
+          break;
+        case 'text':
+        case 'number':
+          // Clear parameter_values for simple types
+          parameterValues = null;
+          break;
+        case 'range':
+          // Clear parameter_values for range (uses parameter_config instead)
+          parameterValues = null;
+          break;
+        default:
+          parameterValues = null;
+      }
+    } else {
+      // No type change, no explicit parameter_values - keep existing
+      parameterValues = existing.parameter_values ? JSON.stringify(existing.parameter_values) : null;
+    }
+    
+    // Handle parameter_config for range parameters
+    const updatesWithConfig = updates as any;
+    const existingWithConfig = existing as any;
+    
+    if (updatesWithConfig.parameter_config !== undefined) {
+      // Explicitly provided parameter_config
+      parameterConfig = updatesWithConfig.parameter_config ? JSON.stringify(updatesWithConfig.parameter_config) : null;
+    } else if (isTypeChanging) {
+      // Type is changing - handle parameter_config
+      if (newType === 'range') {
+        // Initialize default range config if not provided
+        parameterConfig = JSON.stringify({ min: 0, max: 100, step: 1 });
+      } else {
+        // Clear parameter_config for non-range types
+        parameterConfig = null;
+      }
+    } else {
+      // No type change, no explicit parameter_config - keep existing
+      parameterConfig = existingWithConfig.parameter_config ? JSON.stringify(existingWithConfig.parameter_config) : null;
+    }
+    
     await this.run(
-      `UPDATE parameters SET name = ?, description = ?, type = ?, category_id = ?, parameter_values = ? WHERE id = ?`,
+      `UPDATE parameters SET name = ?, description = ?, type = ?, category_id = ?, parameter_values = ?, parameter_config = ? WHERE id = ?`,
       [
         updates.name || existing.name,
         updates.description !== undefined ? updates.description : existing.description,
-        updates.type || existing.type,
+        newType,
         updates.category_id || existing.category_id,
-        updates.parameter_values ? JSON.stringify(updates.parameter_values) : (existing.parameter_values ? JSON.stringify(existing.parameter_values) : null),
+        parameterValues,
+        parameterConfig,
         id
       ]
     );

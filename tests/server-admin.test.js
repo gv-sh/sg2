@@ -268,6 +268,190 @@ describe('SpecGen API - Admin Routes', () => {
       expect(response.body.data.description).toBe(updateData.description);
     });
 
+    test('PUT /api/admin/parameters/:id - Should update parameter type with category_id', async () => {
+      // Create parameter first
+      const parameterData = createParameterData(testCategoryId, { type: 'text' });
+      const createResponse = await request(app)
+        .post('/api/admin/parameters')
+        .send(parameterData);
+      
+      const parameterId = createResponse.body.data.id;
+      const updateData = { 
+        name: 'Updated Parameter',
+        type: 'select',
+        category_id: testCategoryId,
+        parameter_values: [
+          { label: 'Option 1', id: 'opt1' },
+          { label: 'Option 2', id: 'opt2' }
+        ]
+      };
+      
+      // Update type and values
+      const response = await request(app)
+        .put(`/api/admin/parameters/${parameterId}`)
+        .send(updateData);
+      
+      expectSuccessResponse(response);
+      expect(response.body.data.type).toBe('select');
+      expect(response.body.data.category_id).toBe(testCategoryId);
+      expect(response.body.data.parameter_values).toEqual(updateData.parameter_values);
+    });
+
+    test('PUT /api/admin/parameters/:id - Should convert select parameter to text', async () => {
+      // Create select parameter first
+      const selectParameterData = createParameterData(testCategoryId, { 
+        type: 'select',
+        parameter_values: [
+          { label: 'Option A', id: 'opt-a' },
+          { label: 'Option B', id: 'opt-b' }
+        ]
+      });
+      const createResponse = await request(app)
+        .post('/api/admin/parameters')
+        .send(selectParameterData);
+      
+      const parameterId = createResponse.body.data.id;
+      
+      // Convert to text type (without explicit parameter_values - should auto-clear)
+      const updateData = { 
+        name: 'Converted to Text Parameter',
+        description: 'This was converted from select to text',
+        type: 'text',
+        category_id: testCategoryId
+      };
+      
+      // Update type from select to text
+      const response = await request(app)
+        .put(`/api/admin/parameters/${parameterId}`)
+        .send(updateData);
+      
+      expectSuccessResponse(response);
+      expect(response.body.data.type).toBe('text');
+      expect(response.body.data.name).toBe(updateData.name);
+      expect(response.body.data.description).toBe(updateData.description);
+      expect(response.body.data.category_id).toBe(testCategoryId);
+      expect(response.body.data.parameter_values).toBeNull();
+    });
+
+    test('PUT /api/admin/parameters/:id - Should convert text parameter to boolean with default labels', async () => {
+      // Create text parameter first
+      const textParameterData = createParameterData(testCategoryId, { 
+        type: 'text'
+      });
+      const createResponse = await request(app)
+        .post('/api/admin/parameters')
+        .send(textParameterData);
+      
+      expectSuccessResponse(createResponse, 201);
+      expect(createResponse.body.data).toBeDefined();
+      expect(createResponse.body.data.id).toBeDefined();
+      
+      const parameterId = createResponse.body.data.id;
+      
+      // Convert to boolean type (should auto-initialize labels)
+      const updateData = { 
+        name: 'Converted to Boolean Parameter',
+        description: 'This was converted from text to boolean',
+        type: 'boolean',
+        category_id: testCategoryId
+      };
+      
+      const response = await request(app)
+        .put(`/api/admin/parameters/${parameterId}`)
+        .send(updateData);
+      
+      expectSuccessResponse(response);
+      expect(response.body.data.type).toBe('boolean');
+      expect(response.body.data.parameter_values).toEqual({ on: 'Yes', off: 'No' });
+    });
+
+    test('PUT /api/admin/parameters/:id - Should convert select to boolean with custom labels', async () => {
+      // Create select parameter first
+      const selectParameterData = createParameterData(testCategoryId, { 
+        type: 'select',
+        parameter_values: [{ label: 'Option 1', id: 'opt1' }]
+      });
+      const createResponse = await request(app)
+        .post('/api/admin/parameters')
+        .send(selectParameterData);
+      
+      expectSuccessResponse(createResponse, 201);
+      const parameterId = createResponse.body.data.id;
+      
+      // Convert to boolean type with custom labels
+      const updateData = { 
+        name: 'Boolean with Custom Labels',
+        type: 'boolean',
+        category_id: testCategoryId,
+        parameter_values: { on: 'Enabled', off: 'Disabled' }
+      };
+      
+      const response = await request(app)
+        .put(`/api/admin/parameters/${parameterId}`)
+        .send(updateData);
+      
+      expectSuccessResponse(response);
+      expect(response.body.data.type).toBe('boolean');
+      expect(response.body.data.parameter_values).toEqual({ on: 'Enabled', off: 'Disabled' });
+    });
+
+    test('PUT /api/admin/parameters/:id - Should convert text parameter to range with default config', async () => {
+      // Create text parameter first
+      const textParameterData = createParameterData(testCategoryId, { type: 'text' });
+      const createResponse = await request(app)
+        .post('/api/admin/parameters')
+        .send(textParameterData);
+      
+      expectSuccessResponse(createResponse, 201);
+      const parameterId = createResponse.body.data.id;
+      
+      // Convert to range type (should auto-initialize config)
+      const updateData = { 
+        name: 'Converted to Range Parameter',
+        description: 'This was converted from text to range',
+        type: 'range',
+        category_id: testCategoryId
+      };
+      
+      const response = await request(app)
+        .put(`/api/admin/parameters/${parameterId}`)
+        .send(updateData);
+      
+      expectSuccessResponse(response);
+      expect(response.body.data.type).toBe('range');
+      expect(response.body.data.parameter_values).toBeNull();
+      expect(response.body.data.parameter_config).toEqual({ min: 0, max: 100, step: 1 });
+    });
+
+    test('PUT /api/admin/parameters/:id - Should convert range to text and clear parameter_config', async () => {
+      // Create range parameter first
+      const rangeParameterData = createParameterData(testCategoryId, { 
+        type: 'range'
+      });
+      const createResponse = await request(app)
+        .post('/api/admin/parameters')
+        .send(rangeParameterData);
+      
+      expectSuccessResponse(createResponse, 201);
+      const parameterId = createResponse.body.data.id;
+      
+      // Convert to text type (should clear parameter_config)
+      const updateData = { 
+        name: 'Converted from Range to Text',
+        type: 'text',
+        category_id: testCategoryId
+      };
+      
+      const response = await request(app)
+        .put(`/api/admin/parameters/${parameterId}`)
+        .send(updateData);
+      
+      expectSuccessResponse(response);
+      expect(response.body.data.type).toBe('text');
+      expect(response.body.data.parameter_values).toBeNull();
+      expect(response.body.data.parameter_config).toBeNull();
+    });
+
     test('DELETE /api/admin/parameters/:id - Should delete parameter', async () => {
       // Create parameter first
       const parameterData = createParameterData(testCategoryId);

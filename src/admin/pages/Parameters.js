@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
-import { Button, Input, Select } from '../../shared/components/ui/form-controls.js';
+import { Button, Input, Select, Textarea } from '../../shared/components/ui/form-controls.js';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../shared/components/ui/table.js';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../../shared/components/ui/dialog.js';
 import { useToast } from '../../shared/contexts/ToastContext.jsx';
@@ -127,11 +127,11 @@ function Parameters() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead>Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="w-[140px]">Actions</TableHead>
+                    <TableHead className="text-left">Parameter</TableHead>
+                    <TableHead className="text-center">Type</TableHead>
+                    <TableHead className="text-left">Description</TableHead>
+                    <TableHead className="text-center">Category</TableHead>
+                    <TableHead className="w-[140px] text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -147,20 +147,27 @@ function Parameters() {
                   ) : (
                     parameters.map((parameter) => (
                       <TableRow key={parameter.id} className="hover:bg-muted/30">
-                        <TableCell className="font-medium">{parameter.name}</TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap text-left">
+                          <div className="flex flex-col">
+                            <span className="font-medium truncate">{parameter.name}</span>
+                            <code className="text-xs text-muted-foreground font-mono truncate">
+                              {parameter.id}
+                            </code>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-center">
                           <span className="text-sm text-secondary-foreground">
                             {parameter.type}
                           </span>
                         </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground line-clamp-2">
+                        <TableCell className="whitespace-nowrap text-left">
+                          <span className="text-sm text-muted-foreground truncate block">
                             {parameter.description || "—"}
                           </span>
                         </TableCell>
-                        <TableCell>{categories.find(c => c.id === parameter.category_id)?.name}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
+                        <TableCell className="whitespace-nowrap text-center truncate">{categories.find(c => c.id === parameter.category_id)?.name}</TableCell>
+                        <TableCell className="whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <Button
                               variant="ghost"
                               size="xs"
@@ -229,10 +236,51 @@ function Parameters() {
                     id="parameterType"
                     value={editingParameter ? editingParameter.type : newParameter.type}
                     onChange={(e) => {
+                      const newType = e.target.value;
+                      
+                      // Initialize type-specific default values
+                      let typeSpecificData = {};
+                      switch (newType) {
+                        case 'select':
+                          typeSpecificData = {
+                            parameter_values: [],
+                            parameter_config: null
+                          };
+                          break;
+                        case 'boolean':
+                          typeSpecificData = {
+                            parameter_values: { on: 'Yes', off: 'No' },
+                            parameter_config: null
+                          };
+                          break;
+                        case 'range':
+                          typeSpecificData = {
+                            parameter_values: null,
+                            parameter_config: { min: 0, max: 100, step: 1 }
+                          };
+                          break;
+                        case 'text':
+                        case 'number':
+                        default:
+                          typeSpecificData = {
+                            parameter_values: null,
+                            parameter_config: null
+                          };
+                          break;
+                      }
+                      
                       if (editingParameter) {
-                        setEditingParameter({ ...editingParameter, type: e.target.value });
+                        setEditingParameter({ 
+                          ...editingParameter, 
+                          type: newType,
+                          ...typeSpecificData
+                        });
                       } else {
-                        setNewParameter({ ...newParameter, type: e.target.value });
+                        setNewParameter({ 
+                          ...newParameter, 
+                          type: newType,
+                          ...typeSpecificData
+                        });
                       }
                     }}
                     required
@@ -276,10 +324,10 @@ function Parameters() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="parameterDescription" className="text-sm font-medium">Description</label>
-                  <textarea
+                  <Textarea
                     id="parameterDescription"
                     placeholder="Provide a clear description that explains what this parameter controls..."
-                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="min-h-[120px]"
                     value={editingParameter ? editingParameter.description : newParameter.description}
                     onChange={(e) => {
                       if (editingParameter) {
@@ -331,16 +379,17 @@ function Parameters() {
                       </Button>
                     </div>
                     
+                    {/* Values list or empty state */}
                     {((editingParameter && Array.isArray(editingParameter.parameter_values) && editingParameter.parameter_values.length > 0) || 
-                      (!editingParameter && newParameter.parameter_values.length > 0)) && (
-                      <div className="rounded-md border divide-y mt-2 max-h-[150px] overflow-y-auto">
+                      (!editingParameter && newParameter.parameter_values.length > 0)) ? (
+                      <div className="rounded-none border divide-y mt-2 max-h-[150px] overflow-y-auto bg-muted/30">
                         {(editingParameter ? editingParameter.parameter_values : newParameter.parameter_values).map((value, index) => (
-                          <div key={index} className="flex justify-between items-center p-2">
-                            <span>{value.label || value}</span>
+                          <div key={index} className="flex justify-between items-center p-3 hover:bg-muted/50 transition-colors">
+                            <span className="text-sm font-medium">{value.label || value}</span>
                             <Button
                               type="button"
-                              variant="ghost"
-                              size="sm"
+                              variant="destructive-ghost"
+                              size="xs"
                               onClick={() => {
                                 if (editingParameter) {
                                   setEditingParameter({
@@ -359,6 +408,11 @@ function Parameters() {
                             </Button>
                           </div>
                         ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-none border mt-2 p-4 bg-muted/20 text-center">
+                        <p className="text-sm text-muted-foreground">No values added yet</p>
+                        <p className="text-xs text-muted-foreground mt-1">Add values above to create dropdown options</p>
                       </div>
                     )}
                   </div>
@@ -434,6 +488,117 @@ function Parameters() {
                         />
                       </div>
                     </div>
+                  </div>
+                )}
+                
+                {((editingParameter && editingParameter.type === 'range') || 
+                  (!editingParameter && newParameter.type === 'range')) && (
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium">Range Configuration</label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label htmlFor="rangeMin" className="text-xs font-medium">Min Value</label>
+                        <Input
+                          id="rangeMin"
+                          type="number"
+                          placeholder="0"
+                          value={editingParameter ? 
+                            (typeof editingParameter.parameter_config === 'object' ? 
+                            editingParameter.parameter_config?.min || '' : '') : 
+                            (typeof newParameter.parameter_config === 'object' ? newParameter.parameter_config?.min || '' : '')}
+                          onChange={(e) => {
+                            const value = e.target.value === '' ? '' : Number(e.target.value);
+                            if (editingParameter) {
+                              setEditingParameter({
+                                ...editingParameter,
+                                parameter_config: {
+                                  ...(typeof editingParameter.parameter_config === 'object' ? 
+                                    editingParameter.parameter_config : {}),
+                                  min: value
+                                }
+                              });
+                            } else {
+                              setNewParameter({
+                                ...newParameter,
+                                parameter_config: {
+                                  ...(newParameter.parameter_config || {}),
+                                  min: value
+                                }
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="rangeMax" className="text-xs font-medium">Max Value</label>
+                        <Input
+                          id="rangeMax"
+                          type="number"
+                          placeholder="100"
+                          value={editingParameter ? 
+                            (typeof editingParameter.parameter_config === 'object' ? 
+                            editingParameter.parameter_config?.max || '' : '') : 
+                            (typeof newParameter.parameter_config === 'object' ? newParameter.parameter_config?.max || '' : '')}
+                          onChange={(e) => {
+                            const value = e.target.value === '' ? '' : Number(e.target.value);
+                            if (editingParameter) {
+                              setEditingParameter({
+                                ...editingParameter,
+                                parameter_config: {
+                                  ...(typeof editingParameter.parameter_config === 'object' ? 
+                                    editingParameter.parameter_config : {}),
+                                  max: value
+                                }
+                              });
+                            } else {
+                              setNewParameter({
+                                ...newParameter,
+                                parameter_config: {
+                                  ...(newParameter.parameter_config || {}),
+                                  max: value
+                                }
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="rangeStep" className="text-xs font-medium">Step</label>
+                        <Input
+                          id="rangeStep"
+                          type="number"
+                          placeholder="1"
+                          min="0.01"
+                          step="0.01"
+                          value={editingParameter ? 
+                            (typeof editingParameter.parameter_config === 'object' ? 
+                            editingParameter.parameter_config?.step || '' : '') : 
+                            (typeof newParameter.parameter_config === 'object' ? newParameter.parameter_config?.step || '' : '')}
+                          onChange={(e) => {
+                            const value = e.target.value === '' ? '' : Number(e.target.value);
+                            if (editingParameter) {
+                              setEditingParameter({
+                                ...editingParameter,
+                                parameter_config: {
+                                  ...(typeof editingParameter.parameter_config === 'object' ? 
+                                    editingParameter.parameter_config : {}),
+                                  step: value
+                                }
+                              });
+                            } else {
+                              setNewParameter({
+                                ...newParameter,
+                                parameter_config: {
+                                  ...(newParameter.parameter_config || {}),
+                                  step: value
+                                }
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Configure the range slider limits and increment step</p>
                   </div>
                 )}
               </div>

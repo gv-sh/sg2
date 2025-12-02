@@ -672,11 +672,28 @@ router.post('/parameters', async (req: TypedRequestBody<ParameterSchema>, res: R
  *               success: false
  *               error: "Parameter with id unknown-parameter not found"
  */
-router.put('/parameters/:id', async (req: TypedRequest<IdParamSchema, ParameterUpdateSchema>, res: Response<ApiResponse>, next: NextFunction) => {
+router.put('/parameters/:id', async (req: TypedRequest<IdParamSchema, ParameterUpdateSchema & { category_id?: string }>, res: Response<ApiResponse>, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const validatedData = parameterUpdateSchema.parse(req.body);
-    const parameter = await dataService.updateParameter(id, validatedData);
+    
+    // Filter out category_id from validation but preserve for service layer
+    const { category_id, ...updateData } = req.body;
+    
+    console.log('Parameter update validation:', { 
+      id, 
+      originalBody: req.body, 
+      filteredForValidation: updateData,
+      categoryId: category_id
+    });
+    
+    const validatedData = parameterUpdateSchema.parse(updateData);
+    
+    // Add category_id back if provided for service layer update
+    const serviceData = category_id ? { ...validatedData, category_id } : validatedData;
+    
+    console.log('Parameter update processed:', { validatedData, serviceData });
+    
+    const parameter = await dataService.updateParameter(id, serviceData);
     
     res.json({
       success: true,

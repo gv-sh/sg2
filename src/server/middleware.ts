@@ -6,6 +6,7 @@ import { z, ZodError } from 'zod';
 import boom from '@hapi/boom';
 import pino from 'pino';
 import swaggerJsdoc from 'swagger-jsdoc';
+import multer from 'multer';
 import { Request, Response, NextFunction } from 'express';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -18,6 +19,25 @@ const __dirname = dirname(__filename);
 
 export const logger = pino({
   level: config.get('logging.level')
+});
+
+// ==================== FILE UPLOAD ====================
+
+// Multer configuration for database import files
+export const uploadMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    // Only allow JSON files
+    if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+      cb(null, true);
+    } else {
+      cb(boom.badRequest('Only JSON files are allowed') as any, false);
+    }
+  }
 });
 
 // ==================== VALIDATION SCHEMAS ====================

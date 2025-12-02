@@ -123,19 +123,14 @@ describe('SpecGen API - Content Routes', () => {
       expect(response.body.meta.filters).toHaveProperty('limit', 5);
     });
 
-    test('GET /api/content?type=fiction - Should filter by type', async () => {
-      const response = await request(app).get('/api/content?type=fiction');
-      
-      expectSuccessResponse(response);
-      expect(response.body.meta.filters).toHaveProperty('type', 'fiction');
-    });
 
     test('GET /api/content/summary - Should return content summary', async () => {
       const response = await request(app).get('/api/content/summary');
       
       expectSuccessResponse(response);
       expect(response.body.data).toHaveProperty('total');
-      expect(response.body.data).toHaveProperty('byType');
+      expect(response.body.data).toHaveProperty('withImages');
+      expect(response.body.data).toHaveProperty('recentCount');
     });
 
     test('GET /api/content/years - Should return available years', async () => {

@@ -8,7 +8,7 @@ import swaggerUi from 'swagger-ui-express';
 
 import config from '../config.js';
 import { dataService } from '../services.js';
-import { swaggerSpec } from '../middleware.js';
+import { swaggerSpec, uploadMiddleware } from '../middleware.js';
 import type {
   ApiResponse,
   HealthStatusData,
@@ -122,6 +122,172 @@ router.post('/database/init', async (req: Request, res: Response<ApiResponse>, n
     });
   } catch (error: any) {
     next(boom.internal('Database initialization failed', error));
+  }
+});
+
+/**
+ * @swagger
+ * /api/system/database/export:
+ *   get:
+ *     summary: Export entire database as JSON
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Database exported successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+router.get('/database/export', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const databaseData = await dataService.exportDatabase();
+    
+    res.json({
+      success: true,
+      message: 'Database exported successfully',
+      data: databaseData,
+      meta: {
+        exportedAt: new Date().toISOString(),
+        tables: Object.keys(databaseData)
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Database export failed', error));
+  }
+});
+
+/**
+ * @swagger
+ * /api/system/database/import:
+ *   post:
+ *     summary: Import database from JSON file
+ *     tags: [System]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: JSON file containing database data
+ *     responses:
+ *       200:
+ *         description: Database imported successfully
+ */
+router.post('/database/import', uploadMiddleware.single('file'), async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    // File upload will be handled by multer middleware
+    if (!req.file) {
+      return next(boom.badRequest('No file uploaded'));
+    }
+
+    const fileContent = req.file.buffer.toString('utf8');
+    let databaseData;
+    
+    try {
+      databaseData = JSON.parse(fileContent);
+    } catch (parseError) {
+      return next(boom.badRequest('Invalid JSON file'));
+    }
+
+    await dataService.importDatabase(databaseData);
+    
+    res.json({
+      success: true,
+      message: 'Database imported successfully',
+      meta: {
+        importedAt: new Date().toISOString(),
+        filename: req.file.originalname,
+        fileSize: req.file.size
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Database import failed', error));
+  }
+});
+
+/**
+ * @swagger
+ * /api/system/database/reset:
+ *   post:
+ *     summary: Reset database to initial state
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Database reset successfully
+ */
+router.post('/database/reset', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    await dataService.resetDatabase();
+    
+    res.json({
+      success: true,
+      message: 'Database reset successfully',
+      meta: {
+        resetAt: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Database reset failed', error));
+  }
+});
+
+/**
+ * @swagger
+ * /api/system/database/export/content:
+ *   get:
+ *     summary: Export only generated content as JSON
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Content exported successfully
+ */
+router.get('/database/export/content', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const contentData = await dataService.exportContent();
+    
+    res.json({
+      success: true,
+      message: 'Content exported successfully',
+      data: contentData,
+      meta: {
+        exportedAt: new Date().toISOString(),
+        contentCount: contentData.length
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Content export failed', error));
+  }
+});
+
+/**
+ * @swagger
+ * /api/system/database/reset/content:
+ *   post:
+ *     summary: Clear only generated content
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Content cleared successfully
+ */
+router.post('/database/reset/content', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const result = await dataService.resetContent();
+    
+    res.json({
+      success: true,
+      message: 'Content cleared successfully',
+      data: result,
+      meta: {
+        clearedAt: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Content reset failed', error));
   }
 });
 

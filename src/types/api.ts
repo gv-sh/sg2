@@ -39,6 +39,7 @@ export interface ContentApiData {
   id: string;
   title: string;
   content: string;
+  type: 'fiction' | 'image' | 'combined';
   image_original_url?: string;
   image_thumbnail_url?: string;
   parameters: Record<string, any>;

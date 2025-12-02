@@ -13,7 +13,6 @@ import { Clipboard, Download, Search, Trash2, CheckSquare, Square } from 'lucide
 function Content() {
   // Content and pagination state
   const [filteredContent, setFilteredContent] = useState([]);
-  const [contentTypeFilter, setContentTypeFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
   const [availableYears, setAvailableYears] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,7 +56,7 @@ function Content() {
     setCurrentPage(1);
     setSelectedItems(new Set());
     setSelectAll(false);
-  }, [contentTypeFilter, yearFilter, debouncedSearchQuery]);
+  }, [yearFilter, debouncedSearchQuery]);
 
   // Fetch available years for filtering
   const fetchAvailableYears = useCallback(async () => {
@@ -80,9 +79,6 @@ function Content() {
         limit: itemsPerPage.toString()
       });
       
-      if (contentTypeFilter) {
-        params.append('type', contentTypeFilter);
-      }
       
       if (yearFilter) {
         params.append('year', yearFilter);
@@ -106,7 +102,7 @@ function Content() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, itemsPerPage, contentTypeFilter, yearFilter, debouncedSearchQuery]);
+  }, [currentPage, itemsPerPage, yearFilter, debouncedSearchQuery]);
 
   useEffect(() => {
     fetchContent();
@@ -115,10 +111,6 @@ function Content() {
   useEffect(() => {
     fetchAvailableYears();
   }, [fetchAvailableYears]);
-
-  const handleTypeFilterChange = (e) => {
-    setContentTypeFilter(e.target.value);
-  };
 
   const handleYearFilterChange = (e) => {
     setYearFilter(e.target.value);
@@ -236,7 +228,7 @@ function Content() {
   const handleSaveEdit = async () => {
     try {
       setIsLoading(true);
-      const { id, title, fiction_content, image_blob, year, metadata } = editContent;
+      const { id, title, content: fiction_content, image_original_url, year, metadata } = editContent;
       const payload = { title };
 
       // Add validated year to payload
@@ -244,11 +236,8 @@ function Content() {
         payload.year = parseInt(year, 10);
       }
 
-      // All content has both fiction and image
+      // All content has fiction content  
       payload.fiction_content = fiction_content;
-      if (image_blob) {
-        payload.image_blob = image_blob;
-      }
 
       // Always include metadata in payload (even if it's an empty object)
       payload.metadata = metadata || {};
@@ -341,16 +330,6 @@ function Content() {
               />
             </div>
             
-            <Select
-              className="w-40"
-              value={contentTypeFilter}
-              onChange={handleTypeFilterChange}
-              aria-label="Filter content by type"
-            >
-              <option value="">All Content</option>
-              <option value="fiction">Fiction Only</option>
-              <option value="image">Images Only</option>
-            </Select>
             
             <Select
               className="w-40"
@@ -402,7 +381,8 @@ function Content() {
                         <div className="h-4 w-4 bg-muted animate-pulse rounded"></div>
                       </TableHead>
                       <TableHead>Title</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Story Preview</TableHead>
+                      <TableHead>Image</TableHead>
                       <TableHead>Year</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead className="w-[200px] text-right">Actions</TableHead>
@@ -415,10 +395,10 @@ function Content() {
                           <div className="h-4 w-4 bg-muted animate-pulse rounded"></div>
                         </TableCell>
                         <TableCell>
-                          <div className="h-4 bg-muted animate-pulse rounded" style={{ width: `${Math.random() * 40 + 60}%` }}></div>
+                          <div className="h-4 bg-muted animate-pulse rounded" style={{ width: `${Math.random() * 60 + 40}%` }}></div>
                         </TableCell>
                         <TableCell>
-                          <div className="h-4 w-16 bg-muted animate-pulse rounded"></div>
+                          <div className="h-12 w-12 bg-muted animate-pulse rounded"></div>
                         </TableCell>
                         <TableCell>
                           <div className="h-4 w-12 bg-muted animate-pulse rounded"></div>
@@ -440,18 +420,17 @@ function Content() {
           ) : filteredContent.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-sm text-muted-foreground">
-                {searchQuery || contentTypeFilter || yearFilter 
+                {searchQuery || yearFilter 
                   ? 'No content found matching your filters. Try adjusting your search criteria.'
                   : 'No content found. Generate content through the main application.'}
               </p>
-              {(searchQuery || contentTypeFilter || yearFilter) && (
+              {(searchQuery || yearFilter) && (
                 <Button 
                   variant="outline" 
                   size="sm" 
                   className="mt-4"
                   onClick={() => {
                     setSearchQuery('');
-                    setContentTypeFilter('');
                     setYearFilter('');
                   }}
                 >
@@ -478,7 +457,8 @@ function Content() {
                       </button>
                     </TableHead>
                     <TableHead>Title</TableHead>
-                    <TableHead>Type</TableHead>
+                    <TableHead>Story Preview</TableHead>
+                    <TableHead>Image</TableHead>
                     <TableHead>Year</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead className="w-[200px] text-right">Actions</TableHead>
@@ -501,10 +481,35 @@ function Content() {
                         </button>
                       </TableCell>
                       <TableCell className="font-medium">{item.title}</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-0.5 text-xs rounded-md inline-flex items-center text-green-600 dark:text-green-400">
-                          Story
-                        </span>
+                      <TableCell className="max-w-xs">
+                        <div className="text-sm text-muted-foreground truncate">
+                          {item.content 
+                            ? `${item.content.substring(0, 100)}${item.content.length > 100 ? '...' : ''}`
+                            : 'No story content'
+                          }
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-20">
+                        <div className="flex justify-center">
+                          {item.image_thumbnail_url ? (
+                            <img 
+                              src={item.image_thumbnail_url} 
+                              alt={`${item.title} thumbnail`}
+                              className="w-12 h-12 object-cover rounded border"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'block';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
+                              <span className="text-xs text-muted-foreground">No image</span>
+                            </div>
+                          )}
+                          <div style={{display: 'none'}} className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
+                            <span className="text-xs text-muted-foreground">Error</span>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>{item.year || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{formatDate(item.created_at)}</TableCell>
@@ -579,7 +584,7 @@ function Content() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                      onClick={() => handleCopyContent(selectedContent.fiction_content)}
+                      onClick={() => handleCopyContent(selectedContent.content)}
                     >
                       <Clipboard className="h-3.5 w-3.5 opacity-70" /> Copy
                     </Button>
@@ -587,44 +592,58 @@ function Content() {
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                      onClick={() => handleDownloadText(selectedContent.fiction_content, selectedContent.title)}
+                      onClick={() => handleDownloadText(selectedContent.content, selectedContent.title)}
                     >
                       <Download className="h-3.5 w-3.5 opacity-70" /> Download
                     </Button>
                   </div>
                   <div className="prose prose-sm max-w-none rounded-lg border border-border/50 p-4 bg-transparent">
-                    <p className="text-sm whitespace-pre-line text-foreground/90">{selectedContent.fiction_content}</p>
+                    <p className="text-sm whitespace-pre-line text-foreground/90">{selectedContent.content}</p>
                   </div>
                 </div>
               ) : selectedContent.type === 'image' ? (
                 <div className="image-content">
-                  {selectedContent.image_blob ? (
+                  {selectedContent.image_original_url ? (
                     <>
                       <div className="flex justify-end space-x-2 mb-6">
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                          onClick={() => handleCopyContent(`data:image/png;base64,${selectedContent.image_blob}`)}
+                          onClick={() => handleCopyContent(selectedContent.image_original_url)}
                         >
-                          <Clipboard className="h-3.5 w-3.5 opacity-70" /> Copy Data URL
+                          <Clipboard className="h-3.5 w-3.5 opacity-70" /> Copy Image URL
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                          onClick={() => handleDownloadImage(selectedContent.image_blob, selectedContent.title)}
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = selectedContent.image_original_url;
+                            link.download = `${selectedContent.title.replace(/\s+/g, '-').toLowerCase()}.png`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
                         >
                           <Download className="h-3.5 w-3.5 opacity-70" /> Download
                         </Button>
                       </div>
                       <div className="flex justify-center p-4 rounded-lg border border-border/50 bg-transparent">
                         <img
-                          src={`data:image/png;base64,${selectedContent.image_blob}`}
+                          src={selectedContent.image_original_url}
                           alt={selectedContent.title}
                           className="rounded-md max-w-full mx-auto shadow-md"
                           style={{ maxHeight: '500px' }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
                         />
+                        <div style={{display: 'none'}} className="text-center py-12 rounded-lg border border-border/50 bg-transparent">
+                          <p className="text-sm text-muted-foreground">Failed to load image</p>
+                        </div>
                       </div>
                     </>
                   ) : (
@@ -644,7 +663,7 @@ function Content() {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                        onClick={() => handleCopyContent(selectedContent.fiction_content)}
+                        onClick={() => handleCopyContent(selectedContent.content)}
                       >
                         <Clipboard className="h-3.5 w-3.5 opacity-70" /> Copy
                       </Button>
@@ -652,46 +671,60 @@ function Content() {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                        onClick={() => handleDownloadText(selectedContent.fiction_content, selectedContent.title)}
+                        onClick={() => handleDownloadText(selectedContent.content, selectedContent.title)}
                       >
                         <Download className="h-3.5 w-3.5 opacity-70" /> Download Text
                       </Button>
                     </div>
                     <div className="prose prose-sm max-w-none rounded-lg border border-border/50 p-4 bg-transparent">
-                      <p className="text-sm whitespace-pre-line text-foreground/90">{selectedContent.fiction_content}</p>
+                      <p className="text-sm whitespace-pre-line text-foreground/90">{selectedContent.content}</p>
                     </div>
                   </div>
                   
                   {/* Image Part */}
                   <div className="image-content">
                     <h3 className="text-md font-semibold mb-2">Accompanying Image</h3>
-                    {selectedContent.image_blob ? (
+                    {selectedContent.image_original_url ? (
                       <>
                         <div className="flex justify-end space-x-2 mb-6">
                           <Button
                             variant="outline"
                             size="sm"
                             className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                            onClick={() => handleCopyContent(`data:image/png;base64,${selectedContent.image_blob}`)}
+                            onClick={() => handleCopyContent(selectedContent.image_original_url)}
                           >
-                            <Clipboard className="h-3.5 w-3.5 opacity-70" /> Copy Data URL
+                            <Clipboard className="h-3.5 w-3.5 opacity-70" /> Copy Image URL
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             className="flex items-center gap-1 rounded-md px-3 py-1 h-8 text-xs bg-background/80 hover:bg-background"
-                            onClick={() => handleDownloadImage(selectedContent.image_blob, selectedContent.title)}
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = selectedContent.image_original_url;
+                              link.download = `${selectedContent.title.replace(/\s+/g, '-').toLowerCase()}.png`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
                           >
                             <Download className="h-3.5 w-3.5 opacity-70" /> Download Image
                           </Button>
                         </div>
                         <div className="flex justify-center p-4 rounded-lg border border-border/50 bg-transparent">
                           <img
-                            src={`data:image/png;base64,${selectedContent.image_blob}`}
+                            src={selectedContent.image_original_url}
                             alt={selectedContent.title}
                             className="rounded-md max-w-full mx-auto shadow-md"
                             style={{ maxHeight: '500px' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'block';
+                            }}
                           />
+                          <div style={{display: 'none'}} className="text-center py-12 rounded-lg border border-border/50 bg-transparent">
+                            <p className="text-sm text-muted-foreground">Failed to load image</p>
+                          </div>
                         </div>
                       </>
                     ) : (
@@ -702,7 +735,7 @@ function Content() {
                   </div>
 
                   {/* Download Both Option */}
-                  {selectedContent.fiction_content && selectedContent.image_blob && (
+                  {selectedContent.content && selectedContent.image_original_url && (
                     <div className="combined-download border-t pt-4">
                       <div className="flex justify-center">
                         <Button
@@ -711,8 +744,13 @@ function Content() {
                           className="flex items-center gap-1 rounded-md px-4 py-2 h-10 text-sm"
                           onClick={() => {
                             // Download both text and image
-                            handleDownloadText(selectedContent.fiction_content, `${selectedContent.title}-text`);
-                            handleDownloadImage(selectedContent.image_blob, `${selectedContent.title}-image`);
+                            handleDownloadText(selectedContent.content, `${selectedContent.title}-text`);
+                            const link = document.createElement('a');
+                            link.href = selectedContent.image_original_url;
+                            link.download = `${selectedContent.title.replace(/\s+/g, '-').toLowerCase()}-image.png`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
                           }}
                         >
                           <Download className="h-4 w-4 mr-1" /> Download Both Files
@@ -799,14 +837,14 @@ function Content() {
                 )}
               </div>
 
-              {editContent.type === 'fiction' && (
+              {(editContent.type === 'fiction' || editContent.type === 'combined') && (
                 <div className="space-y-2">
-                  <label htmlFor="contentText" className="text-sm font-medium">Content</label>
+                  <label htmlFor="contentText" className="text-sm font-medium">Story Content</label>
                   <textarea
                     className="flex w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 min-h-[250px]"
                     id="contentText"
-                    value={editContent.fiction_content}
-                    onChange={(e) => setEditContent({ ...editContent, fiction_content: e.target.value })}
+                    value={editContent.content || ''}
+                    onChange={(e) => setEditContent({ ...editContent, content: e.target.value })}
                   />
                 </div>
               )}
@@ -814,10 +852,10 @@ function Content() {
               {editContent.type === 'image' && (
                 <div className="space-y-3">
                   <p className="text-sm font-medium">Image Preview</p>
-                  {editContent.image_blob ? (
+                  {editContent.image_original_url ? (
                     <div className="rounded-lg border border-border/50 bg-transparent p-4 flex justify-center">
                       <img
-                        src={`data:image/png;base64,${editContent.image_blob}`}
+                        src={editContent.image_original_url}
                         alt={editContent.title}
                         className="rounded-md max-w-full mx-auto shadow-md"
                         style={{ maxHeight: '300px' }}

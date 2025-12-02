@@ -32,10 +32,24 @@ type IdParamSchema = z.infer<typeof idParamSchema>;
 
 // Helper function to convert GeneratedContent to ContentApiData
 function toContentApiData(content: any): ContentApiData {
+  // Determine content type based on what exists
+  let contentType: 'fiction' | 'image' | 'combined';
+  const hasFiction = content.fiction_content && content.fiction_content.trim().length > 0;
+  const hasImage = content.image_blob && content.image_blob.length > 0;
+  
+  if (hasFiction && hasImage) {
+    contentType = 'combined';
+  } else if (hasImage) {
+    contentType = 'image';
+  } else {
+    contentType = 'fiction';
+  }
+
   return {
     id: content.id,
     title: content.title,
     content: content.fiction_content,
+    type: contentType,
     image_original_url: content.image_original_url,
     image_thumbnail_url: content.image_thumbnail_url,
     parameters: content.prompt_data,
@@ -205,6 +219,7 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       id: savedContent.id,
       title: savedContent.title,
       content: savedContent.fiction_content,
+      type: savedContent.image_blob ? 'combined' : 'fiction',
       image_original_url: savedContent.image_blob ? `/api/images/${savedContent.id}/original` : undefined,
       image_thumbnail_url: savedContent.image_blob ? `/api/images/${savedContent.id}/thumbnail` : undefined,
       parameters: savedContent.prompt_data,

@@ -673,6 +673,163 @@ class DataService {
     }
   }
 
+  // Database Management
+  async exportDatabase(): Promise<any> {
+    const exportData = {
+      metadata: {
+        exportedAt: new Date().toISOString(),
+        version: '1.0'
+      },
+      categories: await this.getCategories(),
+      parameters: await this.getParameters(),
+      settings: await this.getSettings(),
+      generated_content: await this.getRecentContent(10000) // Get all content
+    };
+
+    // Remove database-specific fields and clean up data for export
+    exportData.generated_content = exportData.generated_content.map(content => ({
+      id: content.id,
+      title: content.title,
+      fiction_content: content.fiction_content,
+      image_blob: content.image_blob,
+      image_thumbnail: content.image_thumbnail,
+      image_format: content.image_format,
+      image_size_bytes: content.image_size_bytes,
+      thumbnail_size_bytes: content.thumbnail_size_bytes,
+      prompt_data: content.prompt_data,
+      metadata: content.metadata,
+      created_at: content.created_at
+    }));
+
+    return exportData;
+  }
+
+  async importDatabase(data: any): Promise<void> {
+    if (!data || typeof data !== 'object') {
+      throw boom.badRequest('Invalid database data format');
+    }
+
+    // Begin transaction-like operations (SQLite autocommit)
+    try {
+      // Clear existing data (except schema)
+      await this.run('DELETE FROM generated_content');
+      await this.run('DELETE FROM parameters');
+      await this.run('DELETE FROM categories');
+      await this.run('DELETE FROM settings');
+
+      // Import categories
+      if (data.categories && Array.isArray(data.categories)) {
+        for (const category of data.categories) {
+          await this.createCategory({
+            id: category.id,
+            name: category.name,
+            description: category.description || ''
+          });
+        }
+      }
+
+      // Import parameters
+      if (data.parameters && Array.isArray(data.parameters)) {
+        for (const param of data.parameters) {
+          await this.createParameter({
+            id: param.id,
+            name: param.name,
+            description: param.description || '',
+            type: param.type,
+            category_id: param.category_id,
+            parameter_values: param.parameter_values
+          });
+        }
+      }
+
+      // Import settings
+      if (data.settings && typeof data.settings === 'object') {
+        for (const [key, value] of Object.entries(data.settings)) {
+          // Determine data type
+          let dataType: 'string' | 'number' | 'boolean' | 'json' = 'string';
+          if (typeof value === 'number') dataType = 'number';
+          else if (typeof value === 'boolean') dataType = 'boolean';
+          else if (typeof value === 'object') dataType = 'json';
+
+          await this.setSetting(key, value, dataType);
+        }
+      }
+
+      // Import generated content
+      if (data.generated_content && Array.isArray(data.generated_content)) {
+        for (const content of data.generated_content) {
+          await this.run(
+            `INSERT INTO generated_content (id, title, fiction_content, image_blob, image_thumbnail, image_format, image_size_bytes, thumbnail_size_bytes, prompt_data, metadata, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              content.id,
+              content.title,
+              content.fiction_content,
+              content.image_blob || null,
+              content.image_thumbnail || null,
+              content.image_format || 'png',
+              content.image_size_bytes || 0,
+              content.thumbnail_size_bytes || 0,
+              JSON.stringify(content.prompt_data || {}),
+              JSON.stringify(content.metadata || {}),
+              content.created_at || new Date().toISOString()
+            ]
+          );
+        }
+      }
+
+    } catch (error) {
+      throw boom.internal('Database import failed', error);
+    }
+  }
+
+  async resetDatabase(): Promise<void> {
+    try {
+      // Clear all data
+      await this.run('DELETE FROM generated_content');
+      await this.run('DELETE FROM parameters');  
+      await this.run('DELETE FROM categories');
+      await this.run('DELETE FROM settings');
+
+      // Reimport default data from JSON if available
+      await this.importJsonDataIfNeeded();
+    } catch (error) {
+      throw boom.internal('Database reset failed', error);
+    }
+  }
+
+  async exportContent(): Promise<any[]> {
+    const content = await this.getRecentContent(10000); // Get all content
+    
+    // Clean up data for export (remove database-specific fields)
+    return content.map(item => ({
+      id: item.id,
+      title: item.title,
+      fiction_content: item.fiction_content,
+      image_blob: item.image_blob,
+      image_thumbnail: item.image_thumbnail,
+      image_format: item.image_format,
+      image_size_bytes: item.image_size_bytes,
+      thumbnail_size_bytes: item.thumbnail_size_bytes,
+      prompt_data: item.prompt_data,
+      metadata: item.metadata,
+      created_at: item.created_at
+    }));
+  }
+
+  async resetContent(): Promise<{ success: boolean; message: string; deletedCount: number }> {
+    try {
+      const result = await this.run('DELETE FROM generated_content');
+      return {
+        success: true,
+        message: 'All generated content cleared successfully',
+        deletedCount: result.changes || 0
+      };
+    } catch (error) {
+      throw boom.internal('Content reset failed', error);
+    }
+  }
+
   async close(): Promise<void> {
     if (this.db) {
       return new Promise((resolve) => {
@@ -729,8 +886,9 @@ class AIService {
         { headers: { Authorization: `Bearer ${this.apiKey}` } }
       );
 
-      fictionContent = fictionResponse.data.choices[0].message.content;
-      fictionTitle = this.extractTitle(fictionContent);
+      const rawFictionContent = fictionResponse.data.choices[0].message.content;
+      fictionTitle = this.extractTitle(rawFictionContent);
+      fictionContent = this.removeTitle(rawFictionContent);
       wordCount = fictionContent.split(/\s+/).length;
       fictionMetadata = {
         model: fictionResponse.data.model,
@@ -931,6 +1089,28 @@ class AIService {
     }
     
     return `Fiction ${new Date().toISOString().slice(0, 10)}`;
+  }
+
+  private removeTitle(content: string): string {
+    // Remove **Title: ...** pattern if found
+    let cleanContent = content.replace(/^\*\*Title:\s*[^*\n]+\*\*\s*\n?/i, '');
+    
+    // If no formal title pattern, check if first line looks like a title
+    if (cleanContent === content) {
+      const lines = content.split('\n');
+      const firstLine = lines[0];
+      
+      // If first line is short, wrapped in ** or looks like a title, remove it
+      if (firstLine.length < 100 && (
+        firstLine.match(/^\*\*.*\*\*$/) || 
+        firstLine.match(/^[A-Z][^.!?]*$/) ||
+        lines.length > 1 && lines[1].trim() === ''
+      )) {
+        cleanContent = lines.slice(1).join('\n').trim();
+      }
+    }
+    
+    return cleanContent;
   }
 }
 

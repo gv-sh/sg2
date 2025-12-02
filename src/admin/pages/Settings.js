@@ -5,7 +5,7 @@ import '../../index.css';
 import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
 import { Button, Input, Textarea, Select } from '../../shared/components/ui/form-controls.js';
 import { Badge } from '../../shared/components/ui/badge.tsx';
-import { Alert } from '../../shared/components/ui/alert.tsx';
+import { useToast } from '../../shared/contexts/ToastContext.jsx';
 
 // Default settings for highlighting
 const DEFAULT_SETTINGS = {
@@ -31,46 +31,52 @@ const DEFAULT_SETTINGS = {
 function Settings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(false);
-  const [alert, setAlert] = useState({ show: false, type: '', message: '' });
+  const toast = useToast();
+
+  // Unflatten settings from backend format
+  const unflattenSettings = (flatSettings) => {
+    const settings = {
+      ai: {
+        models: {
+          fiction: flatSettings['ai.models.fiction'] || DEFAULT_SETTINGS.ai.models.fiction,
+          image: flatSettings['ai.models.image'] || DEFAULT_SETTINGS.ai.models.image
+        },
+        parameters: {
+          fiction: {
+            temperature: flatSettings['ai.parameters.fiction.temperature'] ?? DEFAULT_SETTINGS.ai.parameters.fiction.temperature,
+            max_tokens: flatSettings['ai.parameters.fiction.max_tokens'] ?? DEFAULT_SETTINGS.ai.parameters.fiction.max_tokens,
+            default_story_length: flatSettings['ai.parameters.fiction.default_story_length'] ?? DEFAULT_SETTINGS.ai.parameters.fiction.default_story_length,
+            system_prompt: flatSettings['ai.parameters.fiction.system_prompt'] || DEFAULT_SETTINGS.ai.parameters.fiction.system_prompt
+          },
+          image: {
+            size: flatSettings['ai.parameters.image.size'] || DEFAULT_SETTINGS.ai.parameters.image.size,
+            quality: flatSettings['ai.parameters.image.quality'] || DEFAULT_SETTINGS.ai.parameters.image.quality,
+            prompt_suffix: flatSettings['ai.parameters.image.prompt_suffix'] || DEFAULT_SETTINGS.ai.parameters.image.prompt_suffix
+          }
+        }
+      },
+      defaults: {
+        content_type: flatSettings['defaults.content_type'] || DEFAULT_SETTINGS.defaults.content_type
+      }
+    };
+    return settings;
+  };
 
   const fetchSettings = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`${config.API_URL}/api/admin/settings`);
       
-      // Ensure we have valid settings data with proper structure
+      // Backend returns flat key-value pairs
       const fetchedSettings = response.data?.data || {};
-      const mergedSettings = {
-        ai: {
-          models: {
-            fiction: fetchedSettings.ai?.models?.fiction || DEFAULT_SETTINGS.ai.models.fiction,
-            image: fetchedSettings.ai?.models?.image || DEFAULT_SETTINGS.ai.models.image
-          },
-          parameters: {
-            fiction: {
-              temperature: fetchedSettings.ai?.parameters?.fiction?.temperature ?? DEFAULT_SETTINGS.ai.parameters.fiction.temperature,
-              max_tokens: fetchedSettings.ai?.parameters?.fiction?.max_tokens ?? DEFAULT_SETTINGS.ai.parameters.fiction.max_tokens,
-              default_story_length: fetchedSettings.ai?.parameters?.fiction?.default_story_length ?? DEFAULT_SETTINGS.ai.parameters.fiction.default_story_length,
-              system_prompt: fetchedSettings.ai?.parameters?.fiction?.system_prompt || DEFAULT_SETTINGS.ai.parameters.fiction.system_prompt
-            },
-            image: {
-              size: fetchedSettings.ai?.parameters?.image?.size || DEFAULT_SETTINGS.ai.parameters.image.size,
-              quality: fetchedSettings.ai?.parameters?.image?.quality || DEFAULT_SETTINGS.ai.parameters.image.quality,
-              prompt_suffix: fetchedSettings.ai?.parameters?.image?.prompt_suffix || DEFAULT_SETTINGS.ai.parameters.image.prompt_suffix
-            }
-          }
-        },
-        defaults: {
-          content_type: fetchedSettings.defaults?.content_type || DEFAULT_SETTINGS.defaults.content_type
-        }
-      };
+      const structuredSettings = unflattenSettings(fetchedSettings);
       
-      setSettings(mergedSettings);
+      setSettings(structuredSettings);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
       // On error, use default settings instead of leaving undefined
       setSettings(DEFAULT_SETTINGS);
-      showAlert('danger', 'Failed to fetch settings. Using default values.');
+      toast.error('Failed to fetch settings. Using default values.');
     } finally {
       setIsLoading(false);
     }
@@ -103,14 +109,40 @@ function Settings() {
     }
   };
 
+  // Flatten settings for backend API
+  const flattenSettings = (settingsObj) => {
+    const flattened = {};
+    
+    // AI models
+    flattened['ai.models.fiction'] = settingsObj.ai.models.fiction;
+    flattened['ai.models.image'] = settingsObj.ai.models.image;
+    
+    // AI parameters - fiction
+    flattened['ai.parameters.fiction.temperature'] = settingsObj.ai.parameters.fiction.temperature;
+    flattened['ai.parameters.fiction.max_tokens'] = settingsObj.ai.parameters.fiction.max_tokens;
+    flattened['ai.parameters.fiction.default_story_length'] = settingsObj.ai.parameters.fiction.default_story_length;
+    flattened['ai.parameters.fiction.system_prompt'] = settingsObj.ai.parameters.fiction.system_prompt;
+    
+    // AI parameters - image
+    flattened['ai.parameters.image.size'] = settingsObj.ai.parameters.image.size;
+    flattened['ai.parameters.image.quality'] = settingsObj.ai.parameters.image.quality;
+    flattened['ai.parameters.image.prompt_suffix'] = settingsObj.ai.parameters.image.prompt_suffix;
+    
+    // Defaults
+    flattened['defaults.content_type'] = settingsObj.defaults.content_type;
+    
+    return flattened;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      await axios.put(`${config.API_URL}/api/admin/settings`, settings);
-      showAlert('success', 'Settings updated successfully');
+      const flatSettings = flattenSettings(settings);
+      await axios.put(`${config.API_URL}/api/admin/settings`, flatSettings);
+      toast.success('Settings updated successfully!');
     } catch (error) {
-      showAlert('danger', 'Failed to update settings. Please try again.');
+      toast.error('Failed to update settings. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -120,39 +152,26 @@ function Settings() {
     if (window.confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
       try {
         setIsLoading(true);
-        const response = await axios.post(`${config.API_URL}/api/settings/reset`);
-        // Use the same safe parsing as fetchSettings
-        const resetSettings = response.data?.data || DEFAULT_SETTINGS;
-        setSettings(resetSettings);
-        showAlert('success', 'Settings reset to defaults');
-      } catch (error) {
-        // If reset API fails, just use client-side defaults
+        // Reset to defaults locally since no reset API endpoint exists
         setSettings(DEFAULT_SETTINGS);
-        showAlert('warning', 'Reset API failed, using client defaults');
+        
+        // Optionally save the defaults to backend
+        const flatDefaults = flattenSettings(DEFAULT_SETTINGS);
+        await axios.put(`${config.API_URL}/api/admin/settings`, flatDefaults);
+        
+        toast.success('Settings reset to defaults successfully!');
+      } catch (error) {
+        // If save fails, still keep local defaults
+        toast.warning('Settings reset locally, but failed to save to server.');
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const showAlert = (type, message) => {
-    setAlert({ show: true, type, message });
-    setTimeout(() => setAlert({ show: false, type: '', message: '' }), 5000);
-  };
 
   return (
     <>
-      {/* Alert Messages */}
-      {alert.show && (
-        <Alert 
-          variant={alert.type === 'success' ? 'default' : alert.type === 'danger' ? 'destructive' : 'secondary'} 
-          onDismiss={() => setAlert({ show: false, type: '', message: '' })}
-          className="mb-6"
-        >
-          {alert.message}
-        </Alert>
-      )}
-
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Settings</h1>

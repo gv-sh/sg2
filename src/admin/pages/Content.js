@@ -4,7 +4,7 @@ import config from '../config.js';
 import '../../index.css';
 import { Card, CardContent } from '../../shared/components/ui/card.tsx';
 import { Button, Select, Input } from '../../shared/components/ui/form-controls.js';
-import { Alert } from '../../shared/components/ui/alert.tsx';
+import { useToast } from '../../shared/contexts/ToastContext.jsx';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../shared/components/ui/table.js';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../shared/components/ui/dialog.js';
 import { PaginationControls } from '../../shared/components/ui/pagination.js';
@@ -37,10 +37,10 @@ function Content() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   
-  // Loading and alert state
-  const [alert, setAlert] = useState({ show: false, type: '', message: '' });
+  // Loading state
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFullContent, setIsLoadingFullContent] = useState(false);
+  const toast = useToast();
 
 
   // Debounce search query
@@ -92,14 +92,14 @@ function Content() {
         params.append('search', debouncedSearchQuery.trim());
       }
       
-      const url = `${config.API_URL}/api/content/summary?${params.toString()}`;
+      const url = `${config.API_URL}/api/content?${params.toString()}`;
       const response = await axios.get(url);
       
       setFilteredContent(response.data.data || []);
       setTotalItems(response.data.pagination?.total || 0);
       setTotalPages(response.data.pagination?.totalPages || 0);
     } catch (error) {
-      showAlert('danger', 'Failed to fetch content. Please try again.');
+      toast.error('Failed to fetch content. Please try again.');
       setFilteredContent([]);
       setTotalItems(0);
       setTotalPages(0);
@@ -187,9 +187,9 @@ function Content() {
       setSelectedItems(new Set());
       setSelectAll(false);
       fetchContent();
-      showAlert('success', `Successfully deleted ${selectedItems.size} items`);
+      toast.success(`Successfully deleted ${selectedItems.size} items!`);
     } catch (error) {
-      showAlert('danger', 'Failed to delete some items. Please try again.');
+      toast.error('Failed to delete some items. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -197,10 +197,6 @@ function Content() {
   
   // Helper function to determine content type label
 
-  const showAlert = (type, message) => {
-    setAlert({ show: true, type, message });
-    setTimeout(() => setAlert({ show: false, type: '', message: '' }), 5000);
-  };
 
   // Fetch full content for viewing (since summary doesn't include full content)
   const fetchFullContent = async (contentId) => {
@@ -209,7 +205,7 @@ function Content() {
       const response = await axios.get(`${config.API_URL}/api/content/${contentId}`);
       return response.data.data;
     } catch (error) {
-      showAlert('danger', 'Failed to load content details.');
+      toast.error('Failed to load content details.');
       return null;
     } finally {
       setIsLoadingFullContent(false);
@@ -248,14 +244,9 @@ function Content() {
         payload.year = parseInt(year, 10);
       }
 
-      // Handle different content types
-      if (editContent.type === 'fiction') {
-        payload.fiction_content = fiction_content;
-      } else if (editContent.type === 'image') {
-        payload.image_blob = image_blob;
-      } else if (editContent.type === 'combined') {
-        // For combined type, include both fiction_content and image_blob
-        payload.fiction_content = fiction_content;
+      // All content has both fiction and image
+      payload.fiction_content = fiction_content;
+      if (image_blob) {
         payload.image_blob = image_blob;
       }
 
@@ -265,9 +256,9 @@ function Content() {
       await axios.put(`${config.API_URL}/api/content/${id}`, payload);
       setShowEditModal(false);
       fetchContent();
-      showAlert('success', 'Content updated successfully');
+      toast.success('Content updated successfully!');
     } catch (error) {
-      showAlert('danger', 'Failed to update content. Please try again.');
+      toast.error('Failed to update content. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -279,9 +270,9 @@ function Content() {
       await axios.delete(`${config.API_URL}/api/content/${selectedContent.id}`);
       setShowDeleteModal(false);
       fetchContent();
-      showAlert('success', 'Content deleted successfully');
+      toast.success('Content deleted successfully!');
     } catch (error) {
-      showAlert('danger', 'Failed to delete content. Please try again.');
+      toast.error('Failed to delete content. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -294,9 +285,9 @@ function Content() {
   const handleCopyContent = async (content) => {
     try {
       await navigator.clipboard.writeText(content);
-      showAlert('success', 'Content copied to clipboard');
+      toast.success('Content copied to clipboard!');
     } catch (error) {
-      showAlert('danger', 'Failed to copy to clipboard');
+      toast.error('Failed to copy to clipboard.');
     }
   };
 
@@ -308,9 +299,9 @@ function Content() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showAlert('success', 'Image downloaded successfully');
+      toast.success('Image downloaded successfully!');
     } catch (error) {
-      showAlert('danger', 'Failed to download image');
+      toast.error('Failed to download image.');
     }
   };
 
@@ -325,26 +316,14 @@ function Content() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      showAlert('success', 'Text downloaded successfully');
+      toast.success('Text downloaded successfully!');
     } catch (error) {
-      showAlert('danger', 'Failed to download text');
+      toast.error('Failed to download text.');
     }
   };
 
   return (
     <>
-      {/* Alert Messages */}
-      {alert.show && (
-        <div className="mb-6">
-          <Alert
-            variant={alert.type === 'success' ? 'default' : alert.type === 'danger' ? 'destructive' : 'info'}
-            onDismiss={() => setAlert({ show: false, type: '', message: '' })}
-          >
-            {alert.message}
-          </Alert>
-        </div>
-      )}
-
       <div className="space-y-6 mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Generated Content</h2>
@@ -371,7 +350,6 @@ function Content() {
               <option value="">All Content</option>
               <option value="fiction">Fiction Only</option>
               <option value="image">Images Only</option>
-              <option value="combined">Combined Only</option>
             </Select>
             
             <Select
@@ -524,13 +502,8 @@ function Content() {
                       </TableCell>
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-0.5 text-xs rounded-md inline-flex items-center
-                          ${item.type === 'fiction'
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : item.type === 'image'
-                            ? 'text-purple-600 dark:text-purple-400'
-                            : 'text-green-600 dark:text-green-400'}`}>
-                          {item.type === 'fiction' ? 'Fiction' : item.type === 'image' ? 'Image' : 'Combined'}
+                        <span className="px-2 py-0.5 text-xs rounded-md inline-flex items-center text-green-600 dark:text-green-400">
+                          Story
                         </span>
                       </TableCell>
                       <TableCell>{item.year || "—"}</TableCell>

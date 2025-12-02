@@ -21,9 +21,7 @@ import type {
   ParameterData,
   ContentData,
   AIGenerationParameters,
-  FictionGenerationResult,
-  ImageGenerationResult,
-  CombinedGenerationResult,
+  GenerationResult,
   OpenAIChatResponse,
   OpenAIImageResponse,
   VisualPatterns,
@@ -166,7 +164,6 @@ class DataService {
           description: param.description || '',
           type: param.type === 'Dropdown' ? 'select' : param.type.toLowerCase() as any,
           category_id: param.categoryId,
-          sort_order: param.sort_order || 0,
           parameter_values: param.values || param.parameter_values
         });
       }
@@ -280,7 +277,7 @@ class DataService {
   // Parameters
   async getParametersByCategory(categoryId: string): Promise<Parameter[]> {
     const parameters = await this.query(
-      `SELECT * FROM parameters WHERE category_id = ? ORDER BY sort_order ASC, name ASC`,
+      `SELECT * FROM parameters WHERE category_id = ? ORDER BY name ASC`,
       [categoryId]
     );
     return this.parseParameters(parameters);
@@ -290,7 +287,7 @@ class DataService {
     const parameters = await this.query(
       `SELECT p.*, c.name as category_name FROM parameters p 
        LEFT JOIN categories c ON p.category_id = c.id
-       ORDER BY c.name ASC, p.sort_order ASC, p.name ASC`
+       ORDER BY c.name ASC, p.name ASC`
     );
     return this.parseParameters(parameters);
   }
@@ -306,15 +303,14 @@ class DataService {
     await this.getCategoryById(parameterData.category_id); // Verify category exists
     
     await this.run(
-      `INSERT INTO parameters (id, name, description, type, category_id, sort_order, parameter_values)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO parameters (id, name, description, type, category_id, parameter_values)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         id,
         parameterData.name,
         parameterData.description || '',
         parameterData.type,
         parameterData.category_id,
-        parameterData.sort_order || 0,
         parameterData.parameter_values ? JSON.stringify(parameterData.parameter_values) : null
       ]
     );
@@ -326,13 +322,12 @@ class DataService {
     if (updates.category_id) await this.getCategoryById(updates.category_id);
     
     await this.run(
-      `UPDATE parameters SET name = ?, description = ?, type = ?, category_id = ?, sort_order = ?, parameter_values = ? WHERE id = ?`,
+      `UPDATE parameters SET name = ?, description = ?, type = ?, category_id = ?, parameter_values = ? WHERE id = ?`,
       [
         updates.name || existing.name,
         updates.description !== undefined ? updates.description : existing.description,
         updates.type || existing.type,
         updates.category_id || existing.category_id,
-        updates.sort_order !== undefined ? updates.sort_order : existing.sort_order,
         updates.parameter_values ? JSON.stringify(updates.parameter_values) : (existing.parameter_values ? JSON.stringify(existing.parameter_values) : null),
         id
       ]
@@ -556,120 +551,102 @@ class AIService {
     this.isConfigured = Boolean(this.apiKey);
   }
 
-  async generate(parameters: AIGenerationParameters, year: number | null = null): Promise<CombinedGenerationResult> {
+  async generate(parameters: AIGenerationParameters, year: number | null = null): Promise<GenerationResult> {
     if (!this.isConfigured) {
       throw boom.internal('OpenAI API key not configured');
     }
 
-    return this.generateCombined(parameters, year);
+    return this.generateUnified(parameters, year);
   }
 
-  async generateFiction(parameters: AIGenerationParameters, year: number | null): Promise<FictionGenerationResult> {
-    const aiConfig = config.getAIConfig('fiction') as any;
-    const prompt = this.buildFictionPrompt(parameters, year);
+  async generateUnified(parameters: AIGenerationParameters, year: number | null): Promise<GenerationResult> {
+    // Generate fiction first
+    const fictionConfig = config.getAIConfig('fiction') as any;
+    const fictionPrompt = this.buildFictionPrompt(parameters, year);
+    
+    let fictionContent: string;
+    let fictionTitle: string; 
+    let wordCount: number;
+    let fictionMetadata: any;
     
     try {
-      const response: AxiosResponse<OpenAIChatResponse['data']> = await axios.post(
+      const fictionResponse: AxiosResponse<OpenAIChatResponse['data']> = await axios.post(
         `${this.baseUrl}/chat/completions`,
         {
-          model: aiConfig.model,
+          model: fictionConfig.model,
           messages: [
-            { role: 'system', content: aiConfig.parameters.systemPrompt },
-            { role: 'user', content: prompt }
+            { role: 'system', content: fictionConfig.parameters.systemPrompt },
+            { role: 'user', content: fictionPrompt }
           ],
-          temperature: aiConfig.parameters.temperature,
-          max_tokens: aiConfig.parameters.maxTokens
+          temperature: fictionConfig.parameters.temperature,
+          max_tokens: fictionConfig.parameters.maxTokens
         },
         { headers: { Authorization: `Bearer ${this.apiKey}` } }
       );
 
-      const content = response.data.choices[0].message.content;
-      const title = this.extractTitle(content);
-      const wordCount = content.split(/\s+/).length;
-
-      return {
-        success: true,
-        title,
-        content,
-        type: 'fiction',
-        wordCount,
-        metadata: {
-          model: response.data.model,
-          tokens: response.data.usage.total_tokens
-        }
+      fictionContent = fictionResponse.data.choices[0].message.content;
+      fictionTitle = this.extractTitle(fictionContent);
+      wordCount = fictionContent.split(/\s+/).length;
+      fictionMetadata = {
+        model: fictionResponse.data.model,
+        tokens: fictionResponse.data.usage.total_tokens
       };
     } catch (error) {
       throw boom.internal('Fiction generation failed', error);
     }
-  }
 
-  async generateImage(year: number | null, generatedText: string | null = null): Promise<ImageGenerationResult> {
-    const aiConfig = config.getAIConfig('image') as any;
-    const prompt = this.buildImagePrompt(year, generatedText);
+    // Generate image based on fiction content
+    const imageConfig = config.getAIConfig('image') as any;
+    const imagePrompt = this.buildImagePrompt(year, fictionContent);
     
+    let imageBlob: Buffer | undefined;
+    let imageFormat: string | undefined;
+    let imageSizeBytes: number | undefined;
+    let imageMetadata: any;
+
     try {
-      const response: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
+      const imageResponse: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
         `${this.baseUrl}/images/generations`,
         {
-          model: aiConfig.model,
-          prompt: prompt.substring(0, 4000),
-          size: aiConfig.parameters.size,
-          quality: aiConfig.parameters.quality,
+          model: imageConfig.model,
+          prompt: imagePrompt.substring(0, 4000),
+          size: imageConfig.parameters.size,
+          quality: imageConfig.parameters.quality,
           n: 1
         },
         { headers: { Authorization: `Bearer ${this.apiKey}` } }
       );
 
-      const imageUrl = response.data.data[0].url;
+      const imageUrl = imageResponse.data.data[0].url;
       
       // Always download and store image data
       const imageData = await this.downloadImage(imageUrl);
-      return {
-        success: true,
-        imageBlob: imageData.buffer,
-        imageFormat: imageData.format,
-        imageSizeBytes: imageData.size,
-        imagePrompt: prompt.substring(0, 100) + '...',
-        type: 'image',
-        metadata: {
-          model: aiConfig.model,
-          prompt: prompt.substring(0, 100) + '...',
-          originalSize: imageData.size
-        }
+      imageBlob = imageData.buffer;
+      imageFormat = imageData.format;
+      imageSizeBytes = imageData.size;
+      imageMetadata = {
+        model: imageConfig.model,
+        prompt: imagePrompt.substring(0, 100) + '...',
+        originalSize: imageData.size
       };
     } catch (error) {
       throw boom.internal('Image generation failed', error);
     }
-  }
 
-  async generateCombined(parameters: AIGenerationParameters, year: number | null): Promise<CombinedGenerationResult> {
-    const fictionResult = await this.generateFiction(parameters, year);
-    if (!fictionResult.success) return fictionResult as any;
-
-    const imageResult = await this.generateImage(year, fictionResult.content);
-    if (!imageResult.success) return imageResult as any;
-
-    // Handle both BLOB and URL responses
-    const result: CombinedGenerationResult = {
+    return {
       success: true,
-      title: fictionResult.title,
-      content: fictionResult.content,
-      imagePrompt: imageResult.imagePrompt,
-      wordCount: fictionResult.wordCount,
+      title: fictionTitle,
+      content: fictionContent,
+      imagePrompt: imagePrompt.substring(0, 100) + '...',
+      wordCount,
+      imageBlob,
+      imageFormat,
+      imageSizeBytes,
       metadata: {
-        fiction: fictionResult.metadata,
-        image: imageResult.metadata
+        fiction: fictionMetadata,
+        image: imageMetadata
       }
     };
-
-    // Add image data
-    if (imageResult.imageBlob) {
-      result.imageBlob = imageResult.imageBlob;
-      result.imageFormat = imageResult.imageFormat;
-      result.imageSizeBytes = imageResult.imageSizeBytes;
-    }
-
-    return result;
   }
 
   private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null): string {

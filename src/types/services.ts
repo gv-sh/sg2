@@ -12,8 +12,6 @@ export interface Category {
   id: string;
   name: string;
   description: string;
-  visibility?: string;
-  sort_order: number;
   created_at: Date;
 }
 
@@ -24,11 +22,7 @@ export interface Parameter {
   type: 'select' | 'text' | 'number' | 'boolean' | 'range';
   category_id: string;
   category_name?: string;
-  visibility?: string;
-  required: boolean;
-  sort_order: number;
   parameter_values: any[] | null;
-  parameter_config: Record<string, any> | null;
   created_at: Date;
 }
 
@@ -67,7 +61,6 @@ export interface ParameterData {
   description?: string;
   type: 'select' | 'text' | 'number' | 'boolean' | 'range';
   category_id: string;
-  sort_order?: number;
   parameter_values?: any[] | { on: string; off: string };
 }
 
@@ -89,37 +82,7 @@ export interface AIGenerationParameters {
   } | any;
 }
 
-export interface FictionGenerationResult {
-  success: boolean;
-  title: string;
-  content: string;
-  type: 'fiction';
-  wordCount: number;
-  metadata: {
-    model: string;
-    tokens: number;
-  };
-}
-
-export interface ImageGenerationResult {
-  success: boolean;
-  imageBlob?: Buffer;
-  imageThumbnail?: Buffer;
-  imageFormat?: string;
-  imageSizeBytes?: number;
-  thumbnailSizeBytes?: number;
-  imageUrl?: string;
-  imagePrompt: string;
-  type: 'image';
-  metadata: {
-    model: string;
-    prompt: string;
-    originalSize?: number;
-    thumbnailSize?: number;
-  };
-}
-
-export interface CombinedGenerationResult {
+export interface GenerationResult {
   success: boolean;
   title: string;
   content: string;

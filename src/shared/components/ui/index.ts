@@ -12,7 +12,7 @@ export { Button as FormButton, Input as FormInput, Select, Textarea } from './fo
 export { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './table.js'
 export { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from './dialog.js'
 export { PaginationControls } from './pagination.js'
-export { NavigationMenu, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent } from './navigation-menu.js'
+export { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from './navigation-menu.js'
 
 // User UI Components
 export { default as GalaxyParticles } from './GalaxyParticles.jsx'
@@ -23,7 +23,7 @@ export { Select as UserSelect } from './select.jsx'
 export { Skeleton } from './skeleton.jsx'
 export { Slider } from './slider.jsx'
 export { Switch } from './switch.jsx'
-export { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './tooltip.jsx'
+export { Tooltip } from './tooltip.jsx'
 
 // Re-export types for convenience
 export type { ButtonProps } from './button'

@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
-import { Button, Input, Select } from '../../shared/components/ui/form-controls.js';
+import { Button, Input } from '../../shared/components/ui/form-controls.js';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../shared/components/ui/table.js';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../../shared/components/ui/dialog.js';
-import { Alert } from '../../shared/components/ui/alert.tsx';
+import { useToast } from '../../shared/contexts/ToastContext.jsx';
 import config from '../config.js';
 
 function Categories() {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState({
     name: '',
-    description: '',
-    visibility: 'Show',
-    sort_order: 0
+    description: ''
   });
   const [editingCategory, setEditingCategory] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [alert, setAlert] = useState({ show: false, variant: '', message: '' });
+  const toast = useToast();
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -26,7 +24,7 @@ function Categories() {
     } catch (error) {
       // Don't show alert for empty database
       if (error.response && error.response.status !== 404) {
-        showAlert('destructive', 'Failed to fetch categories. Please try again.');
+        toast.error('Failed to fetch categories. Please try again.');
       }
     }
   }, []);
@@ -39,11 +37,11 @@ function Categories() {
     e.preventDefault();
     try {
       await axios.post(`${config.API_URL}/api/admin/categories`, newCategory);
-      setNewCategory({ name: '', description: '', visibility: 'Show', sort_order: 0 });
+      setNewCategory({ name: '', description: '' });
       fetchCategories();
-      showAlert('default', 'Category added successfully!');
+      toast.success('Category added successfully!');
     } catch (error) {
-      showAlert('destructive', 'Failed to add category. Please try again.');
+      toast.error('Failed to add category. Please try again.');
     }
   };
 
@@ -54,9 +52,9 @@ function Categories() {
       setEditingCategory(null);
       setShowModal(false);
       fetchCategories();
-      showAlert('default', 'Category updated successfully!');
+      toast.success('Category updated successfully!');
     } catch (error) {
-      showAlert('destructive', 'Failed to update category. Please try again.');
+      toast.error('Failed to update category. Please try again.');
     }
   };
 
@@ -65,27 +63,16 @@ function Categories() {
       try {
         await axios.delete(`${config.API_URL}/api/admin/categories/${id}`);
         fetchCategories();
-        showAlert('default', 'Category deleted successfully!');
+        toast.success('Category deleted successfully!');
       } catch (error) {
-        showAlert('destructive', 'Failed to delete category. Please try again.');
+        toast.error('Failed to delete category. Please try again.');
       }
     }
   };
 
-  const showAlert = (variant, message) => {
-    setAlert({ show: true, variant, message });
-    setTimeout(() => setAlert({ show: false, variant: '', message: '' }), 5000);
-  };
 
   return (
     <>
-      {/* Alert Messages */}
-      {alert.show && (
-        <Alert variant={alert.variant} onDismiss={() => setAlert({ show: false, variant: '', message: '' })}>
-          {alert.message}
-        </Alert>
-      )}
-
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Categories</h1>
@@ -103,15 +90,13 @@ function Categories() {
                   <TableRow className="bg-muted/50">
                     <TableHead>Name</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Sort Order</TableHead>
-                    <TableHead>Visibility</TableHead>
                     <TableHead className="w-[140px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan="6" className="text-center text-muted-foreground py-12 px-6">
+                      <TableCell colSpan="3" className="text-center text-muted-foreground py-12 px-6">
                         <div className="flex flex-col items-center gap-2">
                           <p>No categories found</p>
                           <p className="text-xs">Click "Add New Category" to create one</p>
@@ -125,19 +110,6 @@ function Categories() {
                         <TableCell>
                           <span className="text-sm text-muted-foreground line-clamp-2">
                             {category.description || "—"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {category.sort_order ?? 0}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center text-xs
-                            ${category.visibility === 'Show'
-                             ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                             : 'text-slate-600 dark:text-slate-400'}`}>
-                            {category.visibility}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -214,46 +186,6 @@ function Categories() {
                 }}
               />
               <p className="text-xs text-muted-foreground">A detailed description helps users understand what this category is used for</p>
-            </div>
-
-
-            <div className="space-y-2">
-              <label htmlFor="categorySortOrder" className="text-sm font-medium">Sort Order</label>
-              <Input
-                id="categorySortOrder"
-                type="number"
-                value={editingCategory ? editingCategory.sort_order : newCategory.sort_order}
-                onChange={(e) => {
-                  const sortValue = e.target.value ? parseInt(e.target.value, 10) : 0;
-                  if (editingCategory) {
-                    setEditingCategory({ ...editingCategory, sort_order: sortValue });
-                  } else {
-                    setNewCategory({ ...newCategory, sort_order: sortValue });
-                  }
-                }}
-                placeholder="0"
-                min="0"
-              />
-              <p className="text-xs text-muted-foreground">Lower numbers appear first in lists</p>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="categoryVisibility" className="text-sm font-medium">Visibility</label>
-              <Select
-                id="categoryVisibility"
-                value={editingCategory ? editingCategory.visibility : newCategory.visibility}
-                onChange={(e) => {
-                  if (editingCategory) {
-                    setEditingCategory({ ...editingCategory, visibility: e.target.value });
-                  } else {
-                    setNewCategory({ ...newCategory, visibility: e.target.value });
-                  }
-                }}
-              >
-                <option value="Show">Show</option>
-                <option value="Hide">Hide</option>
-              </Select>
-              <p className="text-sm text-muted-foreground">Whether to show or hide this category in the user interface.</p>
             </div>
             
             <DialogFooter className="pt-4">

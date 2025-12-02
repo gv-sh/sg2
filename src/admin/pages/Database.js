@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent } from '../../shared/components/ui/card.tsx';
 import { Button, Input } from '../../shared/components/ui/form-controls.js';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../../shared/components/ui/dialog.js';
-import { Alert } from '../../shared/components/ui/alert.tsx';
+import { useToast } from '../../shared/contexts/ToastContext.jsx';
 import config from '../config.js';
 
 function Database() {
@@ -11,18 +11,14 @@ function Database() {
   const [selectedGenerationsFile, setSelectedGenerationsFile] = useState(null);
   const fileInputRef = useRef(null);
   const generationsFileInputRef = useRef(null);
-  const [alert, setAlert] = useState({ show: false, variant: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showGenerationsRestoreModal, setShowGenerationsRestoreModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showGenerationsResetModal, setShowGenerationsResetModal] = useState(false);
   const [showResetAllModal, setShowResetAllModal] = useState(false);
 
-  const showAlertMessage = (variant, message) => {
-    setAlert({ show: true, variant, message });
-    setTimeout(() => setAlert({ show: false, variant: '', message: '' }), 5000);
-  };
 
   const handleDownloadCategories = async () => {
     try {
@@ -53,9 +49,9 @@ function Database() {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      showAlertMessage('success', 'Database downloaded successfully');
+      toast.success('Database downloaded successfully!');
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to download database');
+      toast.error(err.response?.data?.error || 'Failed to download database.');
     } finally {
       setIsLoading(false);
     }
@@ -90,9 +86,9 @@ function Database() {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      showAlertMessage('success', 'Generations database downloaded successfully');
+      toast.success('Generations database downloaded successfully!');
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to download generations database');
+      toast.error(err.response?.data?.error || 'Failed to download generations database.');
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +110,7 @@ function Database() {
 
   const handleRestore = async () => {
     if (!selectedFile) {
-      showAlertMessage('danger', 'Please select a file first');
+      toast.error('Please select a file first.');
       return;
     }
 
@@ -129,13 +125,13 @@ function Database() {
         }
       });
 
-      showAlertMessage('success', 'Database restored successfully');
+      toast.success('Database restored successfully!');
       setSelectedFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to restore database');
+      toast.error(err.response?.data?.error || 'Failed to restore database.');
     } finally {
       setIsLoading(false);
     }
@@ -143,7 +139,7 @@ function Database() {
   
   const handleGenerationsRestore = async () => {
     if (!selectedGenerationsFile) {
-      showAlertMessage('danger', 'Please select a file first');
+      toast.error('Please select a file first.');
       return;
     }
 
@@ -158,13 +154,13 @@ function Database() {
         }
       });
 
-      showAlertMessage('success', 'Generations database restored successfully');
+      toast.success('Generations database restored successfully!');
       setSelectedGenerationsFile(null);
       if (generationsFileInputRef.current) {
         generationsFileInputRef.current.value = '';
       }
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to restore generations database');
+      toast.error(err.response?.data?.error || 'Failed to restore generations database.');
     } finally {
       setIsLoading(false);
     }
@@ -174,9 +170,9 @@ function Database() {
     try {
       setIsLoading(true);
       await axios.post(`${config.API_URL}/api/database/reset`);
-      showAlertMessage('success', 'Database reset successfully');
+      toast.success('Database reset successfully!');
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to reset database');
+      toast.error(err.response?.data?.error || 'Failed to reset database.');
     } finally {
       setIsLoading(false);
     }
@@ -186,9 +182,9 @@ function Database() {
     try {
       setIsLoading(true);
       await axios.post(`${config.API_URL}/api/database/generations/reset`);
-      showAlertMessage('success', 'Generations database reset successfully');
+      toast.success('Generations database reset successfully!');
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to reset generations database');
+      toast.error(err.response?.data?.error || 'Failed to reset generations database.');
     } finally {
       setIsLoading(false);
     }
@@ -198,9 +194,9 @@ function Database() {
     try {
       setIsLoading(true);
       await axios.post(`${config.API_URL}/api/database/reset-all`);
-      showAlertMessage('success', 'All databases reset successfully');
+      toast.success('All databases reset successfully!');
     } catch (err) {
-      showAlertMessage('danger', err.response?.data?.error || 'Failed to reset all databases');
+      toast.error(err.response?.data?.error || 'Failed to reset all databases.');
     } finally {
       setIsLoading(false);
     }
@@ -208,13 +204,6 @@ function Database() {
 
   return (
     <>
-      {/* Alert Messages */}
-      {alert.show && (
-        <Alert variant={alert.variant} onDismiss={() => setAlert({ show: false, variant: '', message: '' })}>
-          {alert.message}
-        </Alert>
-      )}
-
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Database Management</h1>

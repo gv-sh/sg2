@@ -1,10 +1,6 @@
 // src/components/parameters/ParameterValueInput.jsx
 import React from 'react';
-import { Select } from '../ui/select';
-import { Slider } from '../ui/slider';
-import { Switch } from '../ui/switch';
-import { Checkbox } from '../../ui/checkbox.tsx';
-import { Input } from '../../ui/input.tsx';
+import { UserSelect as Select, Slider, Switch, Checkbox, Input } from '../../ui';
 
 const ParameterValueInput = ({ parameter, value, onChange }) => {
   switch (parameter.type) {

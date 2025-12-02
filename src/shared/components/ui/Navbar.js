@@ -7,7 +7,6 @@ const routes = [
   { path: '/admin/categories', label: 'Categories' },
   { path: '/admin/parameters', label: 'Parameters' },
   { path: '/admin/content', label: 'Content' },
-  { path: '/admin/generate', label: 'Generate' },
   { path: '/admin/settings', label: 'Settings' },
   { path: '/admin/database', label: 'Database' }
 ];

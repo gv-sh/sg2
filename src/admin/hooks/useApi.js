@@ -24,12 +24,13 @@ export function useApi() {
       let errorMessage = 'An unexpected error occurred';
       
       if (err.response) {
-        // Server responded with error
+        // Server responded with error - API contract format: {success: boolean, error?: string, message?: string}
         if (err.response.data?.error) {
           errorMessage = err.response.data.error;
         } else if (err.response.data?.message) {
           errorMessage = err.response.data.message;
         } else {
+          // Fallback to status-based messages
           switch (err.response.status) {
             case 400:
               errorMessage = 'Invalid request data';
@@ -104,10 +105,15 @@ export function usePublicApi() {
       // Extract meaningful error message from server response
       let errorMessage = 'An unexpected error occurred';
       
-      if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
+      if (err.response) {
+        // Public API also follows same contract format: {success: boolean, error?: string, message?: string}
+        if (err.response.data?.error) {
+          errorMessage = err.response.data.error;
+        } else if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        } else {
+          errorMessage = `Server error (${err.response.status})`;
+        }
       } else if (err.request) {
         errorMessage = 'Unable to connect to server';
       } else {

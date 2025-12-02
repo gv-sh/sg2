@@ -13,7 +13,7 @@ const config = {
     PUBLIC: {
       CONTENT: '/content',
       GENERATE: '/generate',
-      HEALTH: '/health/ping'
+      HEALTH: '/system/health'
     }
   },
 

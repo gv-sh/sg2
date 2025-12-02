@@ -205,8 +205,8 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       id: savedContent.id,
       title: savedContent.title,
       content: savedContent.fiction_content,
-      image_original_url: savedContent.image_blob ? `/api/images/${savedContent.id}/original` : null,
-      image_thumbnail_url: savedContent.image_blob ? `/api/images/${savedContent.id}/thumbnail` : null,
+      image_original_url: savedContent.image_blob ? `/api/images/${savedContent.id}/original` : undefined,
+      image_thumbnail_url: savedContent.image_blob ? `/api/images/${savedContent.id}/thumbnail` : undefined,
       parameters: savedContent.prompt_data,
       year: savedContent.metadata?.year || validatedData.year,
       metadata: savedContent.metadata || undefined,
@@ -260,12 +260,6 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
  *           maximum: 100
  *           default: 20
  *         example: 10
- *       - name: type
- *         in: query
- *         description: Filter by content type
- *         schema:
- *           type: string
- *         example: "fiction"
  *     responses:
  *       200:
  *         description: Content list retrieved successfully
@@ -368,10 +362,7 @@ router.get('/summary', async (req: TypedRequestQuery<ContentFiltersSchema>, res:
     const summary = {
       total: content.length,
       withImages: content.filter(c => c.image_original_url).length,
-      recentCount: content.filter(c => new Date(c.created_at) > new Date(Date.now() - 7*24*60*60*1000)).length,
-      byType: {
-        fiction: content.length // All content is currently fiction
-      }
+      recentCount: content.filter(c => new Date(c.created_at) > new Date(Date.now() - 7*24*60*60*1000)).length
     };
     
     res.json({

@@ -115,14 +115,6 @@ export async function validateGenerationParameters(parameters: Record<string, an
         case 'range':
           if (typeof value !== 'number' || isNaN(value)) {
             errors.push(`Parameter '${paramId}' must be a valid number`);
-          } else if (dbParam.parameter_config) {
-            const config = dbParam.parameter_config;
-            if (config.min !== undefined && value < config.min) {
-              errors.push(`Parameter '${paramId}' must be at least ${config.min}`);
-            }
-            if (config.max !== undefined && value > config.max) {
-              errors.push(`Parameter '${paramId}' must be at most ${config.max}`);
-            }
           }
           break;
       }
@@ -143,8 +135,7 @@ export const contentUpdateSchema = z.object({
 
 // Query schemas
 export const contentFiltersSchema = z.object({
-  limit: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(config.get('validation.maxPageSize'))).default('20'),
-  type: z.string().optional()
+  limit: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(config.get('validation.maxPageSize'))).default('20')
 });
 
 export const parameterFiltersSchema = z.object({

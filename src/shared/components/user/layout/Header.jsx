@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '../../ui/button.tsx';
 import { Menu, X, Sliders, Home, Info, Library } from 'lucide-react';
 import { ThemeToggle } from '../theme/theme-toggle';
-import { Tooltip } from '../ui/tooltip';
+import { Tooltip } from '../../ui';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 

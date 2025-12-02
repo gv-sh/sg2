@@ -6,10 +6,12 @@ export type AlertVariant = "default" | "destructive" | "info" | "success" | "war
 export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: AlertVariant
   onDismiss?: () => void
+  isToast?: boolean
+  toastId?: string
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant = "default", children, onDismiss, ...props }, ref) => {
+  ({ className, variant = "default", children, onDismiss, isToast = false, toastId, ...props }, ref) => {
     const variantStyles: Record<AlertVariant, string> = {
       default: "bg-muted border-border text-foreground",
       destructive: "bg-destructive/15 text-destructive border-destructive/50",
@@ -17,13 +19,17 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       success: "bg-green-50 border-green-200 text-green-900 dark:bg-green-950/20 dark:border-green-800/50 dark:text-green-400",
       warning: "bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-950/20 dark:border-yellow-800/50 dark:text-yellow-400"
     }
+
+    const toastStyles = isToast ? "fixed top-4 right-4 z-[100] w-96 max-w-[calc(100vw-2rem)] shadow-lg animate-in slide-in-from-right-full duration-300" : "relative w-full"
     
     return (
       <div
         ref={ref}
         role="alert"
+        data-toast-id={toastId}
         className={cn(
-          "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+          "rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+          toastStyles,
           variantStyles[variant],
           className
         )}

@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../shared/component
 import { Button, Input, Select } from '../../shared/components/ui/form-controls.js';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../shared/components/ui/table.js';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../../shared/components/ui/dialog.js';
-import { Alert } from '../../shared/components/ui/alert.tsx';
+import { useToast } from '../../shared/contexts/ToastContext.jsx';
 import config from '../config.js';
 
 function Parameters() {
@@ -15,21 +15,13 @@ function Parameters() {
     description: '',
     type: 'select',
     category_id: '',
-    parameter_values: [],
-    visibility: 'Basic',
-    required: 0,
-    sort_order: 0,
-    parameter_config: {
-      min: 0,
-      max: 100,
-      step: 1
-    }
+    parameter_values: []
   });
   const [editingParameter, setEditingParameter] = useState(null);
   const [newValue, setNewValue] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [alert, setAlert] = useState({ show: false, variant: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -38,7 +30,7 @@ function Parameters() {
     } catch (error) {
       // Don't show alert for empty database
       if (error.response && error.response.status !== 404) {
-        showAlert('destructive', 'Failed to fetch categories. Please try again.');
+        toast.error('Failed to fetch categories. Please try again.');
       }
     }
   }, []);
@@ -50,7 +42,7 @@ function Parameters() {
     } catch (error) {
       // Don't show alert for empty database
       if (error.response && error.response.status !== 404) {
-        showAlert('destructive', 'Failed to fetch parameters. Please try again.');
+        toast.error('Failed to fetch parameters. Please try again.');
       }
     }
   }, []);
@@ -70,20 +62,12 @@ function Parameters() {
         description: '',
         type: 'select',
         category_id: '',
-        parameter_values: [],
-        visibility: 'Basic',
-        required: 0,
-        sort_order: 0,
-        parameter_config: {
-          min: 0,
-          max: 100,
-          step: 1
-        }
+        parameter_values: []
       });
       fetchParameters();
-      showAlert('default', 'Parameter added successfully');
+      toast.success('Parameter added successfully!');
     } catch (error) {
-      showAlert('destructive', 'Failed to add parameter');
+      toast.error('Failed to add parameter. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -97,9 +81,9 @@ function Parameters() {
       setShowModal(false);
       setEditingParameter(null);
       fetchParameters();
-      showAlert('default', 'Parameter updated successfully');
+      toast.success('Parameter updated successfully!');
     } catch (error) {
-      showAlert('destructive', 'Failed to update parameter');
+      toast.error('Failed to update parameter. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -111,29 +95,18 @@ function Parameters() {
         setIsLoading(true);
         await axios.delete(`${config.API_URL}/api/admin/parameters/${id}`);
         fetchParameters();
-        showAlert('default', 'Parameter deleted successfully');
+        toast.success('Parameter deleted successfully!');
       } catch (error) {
-        showAlert('destructive', 'Failed to delete parameter');
+        toast.error('Failed to delete parameter. Please try again.');
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const showAlert = (variant, message) => {
-    setAlert({ show: true, variant, message });
-    setTimeout(() => setAlert({ show: false, variant: '', message: '' }), 5000);
-  };
 
   return (
     <>
-      {/* Alert Messages */}
-      {alert.show && (
-        <Alert variant={alert.variant} onDismiss={() => setAlert({ show: false, variant: '', message: '' })}>
-          {alert.message}
-        </Alert>
-      )}
-
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Parameters</h1>
@@ -158,14 +131,13 @@ function Parameters() {
                     <TableHead>Type</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Visibility</TableHead>
                     <TableHead className="w-[140px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {parameters.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan="6" className="text-center text-muted-foreground py-12 px-6">
+                      <TableCell colSpan="5" className="text-center text-muted-foreground py-12 px-6">
                         <div className="flex flex-col items-center gap-2">
                           <p>No parameters found</p>
                           <p className="text-xs">Click "Add New Parameter" to create one</p>
@@ -187,14 +159,6 @@ function Parameters() {
                           </span>
                         </TableCell>
                         <TableCell>{categories.find(c => c.id === parameter.category_id)?.name}</TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center text-xs
-                            ${parameter.visibility === 'Basic' 
-                             ? 'text-slate-600 dark:text-slate-400' 
-                             : 'text-indigo-600 dark:text-indigo-400 font-medium'}`}>
-                            {parameter.visibility}
-                          </span>
-                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button
@@ -306,24 +270,6 @@ function Parameters() {
                   <p className="text-xs text-muted-foreground">Choose the category</p>
                 </div>
                 
-                <div className="space-y-2">
-                  <label htmlFor="parameterVisibility" className="text-sm font-medium">Visibility</label>
-                  <Select
-                    id="parameterVisibility"
-                    value={editingParameter ? editingParameter.visibility : newParameter.visibility}
-                    onChange={(e) => {
-                      if (editingParameter) {
-                        setEditingParameter({ ...editingParameter, visibility: e.target.value });
-                      } else {
-                        setNewParameter({ ...newParameter, visibility: e.target.value });
-                      }
-                    }}
-                  >
-                    <option value="Basic">Basic</option>
-                    <option value="Advanced">Advanced</option>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">Choose visibility level</p>
-                </div>
               </div>
               
               {/* Right Column - Type-specific settings and description */}
@@ -346,190 +292,6 @@ function Parameters() {
                   <p className="text-xs text-muted-foreground">A detailed description helps users understand the purpose and impact of this parameter</p>
                 </div>
                 
-                {/* Type-specific Configuration */}
-                {(editingParameter?.type === 'range' || (!editingParameter && newParameter.type === 'range')) && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Slider Configuration</label>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label htmlFor="sliderMin" className="text-xs font-medium">Min</label>
-                          <Input
-                            id="sliderMin"
-                            type="number"
-                            value={editingParameter ? editingParameter.parameter_config?.min || 0 : newParameter.parameter_config.min}
-                            onChange={(e) => {
-                              if (editingParameter) {
-                                setEditingParameter({
-                                  ...editingParameter,
-                                  config: {
-                                    ...(editingParameter.parameter_config || {}),
-                                    min: parseInt(e.target.value, 10)
-                                  }
-                                });
-                              } else {
-                                setNewParameter({
-                                  ...newParameter,
-                                  config: {
-                                    ...newParameter.parameter_config,
-                                    min: parseInt(e.target.value, 10)
-                                  }
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="sliderMax" className="text-xs font-medium">Max</label>
-                          <Input
-                            id="sliderMax"
-                            type="number"
-                            value={editingParameter ? editingParameter.parameter_config?.max || 100 : newParameter.parameter_config.max}
-                            onChange={(e) => {
-                              if (editingParameter) {
-                                setEditingParameter({
-                                  ...editingParameter,
-                                  config: {
-                                    ...(editingParameter.parameter_config || {}),
-                                    max: parseInt(e.target.value, 10)
-                                  }
-                                });
-                              } else {
-                                setNewParameter({
-                                  ...newParameter,
-                                  config: {
-                                    ...newParameter.parameter_config,
-                                    max: parseInt(e.target.value, 10)
-                                  }
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="sliderStep" className="text-xs font-medium">Step</label>
-                          <Input
-                            id="sliderStep"
-                            type="number"
-                            value={editingParameter ? editingParameter.parameter_config?.step || 1 : newParameter.parameter_config.step}
-                            onChange={(e) => {
-                              if (editingParameter) {
-                                setEditingParameter({
-                                  ...editingParameter,
-                                  config: {
-                                    ...(editingParameter.parameter_config || {}),
-                                    step: parseInt(e.target.value, 10)
-                                  }
-                                });
-                              } else {
-                                setNewParameter({
-                                  ...newParameter,
-                                  config: {
-                                    ...newParameter.parameter_config,
-                                    step: parseInt(e.target.value, 10)
-                                  }
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Slider Labels</label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="sliderMinLabel" className="text-xs font-medium">Min Label</label>
-                          <Input
-                            id="sliderMinLabel"
-                            placeholder="Label for minimum value"
-                            value={
-                              editingParameter
-                                ? (Array.isArray(editingParameter.parameter_values) && editingParameter.parameter_values[0]?.label) || ''
-                                : (Array.isArray(newParameter.parameter_values) && newParameter.parameter_values[0]?.label) || ''
-                            }
-                            onChange={(e) => {
-                              if (editingParameter) {
-                                const updatedValues = Array.isArray(editingParameter.parameter_values) 
-                                  ? [...editingParameter.parameter_values] 
-                                  : [{}, {}];
-                                
-                                if (!updatedValues[0]) updatedValues[0] = {};
-                                if (!updatedValues[1]) updatedValues[1] = {};
-                                
-                                updatedValues[0].label = e.target.value;
-                                
-                                setEditingParameter({
-                                  ...editingParameter,
-                                  values: updatedValues
-                                });
-                              } else {
-                                const updatedValues = Array.isArray(newParameter.parameter_values)
-                                  ? [...newParameter.parameter_values]
-                                  : [{}, {}];
-                                
-                                if (!updatedValues[0]) updatedValues[0] = {};
-                                if (!updatedValues[1]) updatedValues[1] = {};
-                                
-                                updatedValues[0].label = e.target.value;
-                                
-                                setNewParameter({
-                                  ...newParameter,
-                                  values: updatedValues
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="sliderMaxLabel" className="text-xs font-medium">Max Label</label>
-                          <Input
-                            id="sliderMaxLabel"
-                            placeholder="Label for maximum value"
-                            value={
-                              editingParameter
-                                ? (Array.isArray(editingParameter.parameter_values) && editingParameter.parameter_values[1]?.label) || ''
-                                : (Array.isArray(newParameter.parameter_values) && newParameter.parameter_values[1]?.label) || ''
-                            }
-                            onChange={(e) => {
-                              if (editingParameter) {
-                                const updatedValues = Array.isArray(editingParameter.parameter_values)
-                                  ? [...editingParameter.parameter_values]
-                                  : [{}, {}];
-                                
-                                if (!updatedValues[0]) updatedValues[0] = {};
-                                if (!updatedValues[1]) updatedValues[1] = {};
-                                
-                                updatedValues[1].label = e.target.value;
-                                
-                                setEditingParameter({
-                                  ...editingParameter,
-                                  values: updatedValues
-                                });
-                              } else {
-                                const updatedValues = Array.isArray(newParameter.parameter_values)
-                                  ? [...newParameter.parameter_values]
-                                  : [{}, {}];
-                                
-                                if (!updatedValues[0]) updatedValues[0] = {};
-                                if (!updatedValues[1]) updatedValues[1] = {};
-                                
-                                updatedValues[1].label = e.target.value;
-                                
-                                setNewParameter({
-                                  ...newParameter,
-                                  values: updatedValues
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Labels to display at the min and max positions of the slider</p>
-                    </div>
-                  </div>
-                )}
                 
                 {((editingParameter && ['select'].includes(editingParameter.type)) || 
                   (!editingParameter && ['select'].includes(newParameter.type))) && (
@@ -550,7 +312,7 @@ function Parameters() {
                             if (editingParameter) {
                               setEditingParameter({
                                 ...editingParameter,
-                                values: [
+                                parameter_values: [
                                   ...(Array.isArray(editingParameter.parameter_values) ? editingParameter.parameter_values : []), 
                                   { label: newValue.trim() }
                                 ]
@@ -558,7 +320,7 @@ function Parameters() {
                             } else {
                               setNewParameter({
                                 ...newParameter,
-                                values: [...newParameter.parameter_values, { label: newValue.trim() }]
+                                parameter_values: [...newParameter.parameter_values, { label: newValue.trim() }]
                               });
                             }
                             setNewValue('');
@@ -583,12 +345,12 @@ function Parameters() {
                                 if (editingParameter) {
                                   setEditingParameter({
                                     ...editingParameter,
-                                    values: editingParameter.parameter_values.filter((_, i) => i !== index)
+                                    parameter_values: editingParameter.parameter_values.filter((_, i) => i !== index)
                                   });
                                 } else {
                                   setNewParameter({
                                     ...newParameter,
-                                    values: newParameter.parameter_values.filter((_, i) => i !== index)
+                                    parameter_values: newParameter.parameter_values.filter((_, i) => i !== index)
                                   });
                                 }
                               }}
@@ -620,7 +382,7 @@ function Parameters() {
                             if (editingParameter) {
                               setEditingParameter({
                                 ...editingParameter,
-                                values: {
+                                parameter_values: {
                                   ...(typeof editingParameter.parameter_values === 'object' && 
                                     !Array.isArray(editingParameter.parameter_values) ? 
                                     editingParameter.parameter_values : {}),
@@ -630,7 +392,7 @@ function Parameters() {
                             } else {
                               setNewParameter({
                                 ...newParameter,
-                                values: {
+                                parameter_values: {
                                   ...(newParameter.parameter_values || {}),
                                   on: e.target.value
                                 }
@@ -652,7 +414,7 @@ function Parameters() {
                             if (editingParameter) {
                               setEditingParameter({
                                 ...editingParameter,
-                                values: {
+                                parameter_values: {
                                   ...(typeof editingParameter.parameter_values === 'object' && 
                                     !Array.isArray(editingParameter.parameter_values) ? 
                                     editingParameter.parameter_values : {}),
@@ -662,7 +424,7 @@ function Parameters() {
                             } else {
                               setNewParameter({
                                 ...newParameter,
-                                values: {
+                                parameter_values: {
                                   ...(newParameter.parameter_values || {}),
                                   off: e.target.value
                                 }

@@ -337,7 +337,7 @@ router.delete('/categories/:id', async (req: TypedRequestParams<IdParamSchema>, 
       }
     });
   } catch (error: any) {
-    next(boom.internal('Failed to delete category', error));
+    next(error);
   }
 });
 

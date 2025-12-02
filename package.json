@@ -12,7 +12,8 @@
     "#server/*": "./src/server/*"
   },
   "scripts": {
-    "dev": "npm run build && cd src/server && NODE_ENV=development npx tsx --watch server.ts",
+    "dev": "npm run build && npm run dev:server",
+    "dev:client": "BROWSER=none react-scripts start",
     "dev:server": "cd src/server && NODE_ENV=development npx tsx --watch server.ts",
     "start": "npm run build && cd src/server && NODE_ENV=production npx tsx server.ts",
     "build": "react-scripts build",

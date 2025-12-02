@@ -220,13 +220,18 @@ class DataService {
   // Categories
   async getCategories(): Promise<Category[]> {
     const categories = await this.query(
-      `SELECT * FROM categories ORDER BY name ASC`
+      `SELECT c.*, COUNT(p.id) as parameter_count
+       FROM categories c 
+       LEFT JOIN parameters p ON c.id = p.category_id 
+       GROUP BY c.id, c.name, c.description, c.created_at
+       ORDER BY c.name ASC`
     );
     return categories.map(category => ({
       id: category.id,
       name: category.name,
       description: category.description,
-      created_at: new Date(category.created_at)
+      created_at: new Date(category.created_at),
+      parameter_count: category.parameter_count || 0
     }));
   }
 
@@ -269,8 +274,23 @@ class DataService {
   }
 
   async deleteCategory(id: string): Promise<{ success: boolean; message: string }> {
+    // First check if category exists
+    const existing = await this.get('SELECT * FROM categories WHERE id = ?', [id]);
+    if (!existing) throw boom.notFound(`Category with id ${id} not found`);
+    
+    // Check for dependent parameters (helpful for debugging)
+    const dependentParams = await this.query('SELECT id, name FROM parameters WHERE category_id = ?', [id]);
+    if (dependentParams.length > 0) {
+      console.log(`Deleting category ${id} with ${dependentParams.length} dependent parameters:`, dependentParams.map(p => p.name));
+    }
+    
+    // Ensure foreign keys are enabled for this connection
+    await this.run('PRAGMA foreign_keys = ON');
+    
+    // Delete the category (CASCADE should handle parameters)
     const result = await this.run('DELETE FROM categories WHERE id = ?', [id]);
     if (result.changes === 0) throw boom.notFound(`Category with id ${id} not found`);
+    
     return { success: true, message: 'Category deleted successfully' };
   }
 

@@ -70,10 +70,6 @@ const ToastContainer = ({ toasts, onDismiss }) => {
           isToast={true}
           toastId={toast.id}
           onDismiss={() => onDismiss(toast.id)}
-          style={{
-            transform: `translateY(${index * 4}px)`,
-            zIndex: 100 - index
-          }}
         >
           {toast.message}
         </Alert>

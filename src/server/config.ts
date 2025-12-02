@@ -166,7 +166,6 @@ if (env === 'production') {
 
 if (env === 'test') {
   config.logging.level = 'error';
-  config.ai.openai.apiKey = 'test-key';
   config.features.enableRateLimit = false;
 }
 

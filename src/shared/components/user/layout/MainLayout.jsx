@@ -1,6 +1,6 @@
 // src/components/layout/MainLayout.jsx
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import { useLocation } from 'react-router-dom';

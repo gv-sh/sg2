@@ -1,7 +1,7 @@
 // src/components/layout/ResponsiveLayout.jsx
 import React from 'react';
-import { useScreenSize } from '../../utils/responsiveUtils';
-import { cn } from '../../lib/utils';
+import { useScreenSize } from '../../../../user/utils/responsiveUtils';
+import { cn } from '../../../lib/utils';
 
 const ResponsiveLayout = ({ children, className = '' }) => {
   const { isMobile, isTablet } = useScreenSize();

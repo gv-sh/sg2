@@ -38,10 +38,11 @@ export interface ApiResponse<T = any> {
 export interface ContentApiData {
   id: string;
   title: string;
-  fiction_content: string;
+  content: string;
   image_original_url?: string;
   image_thumbnail_url?: string;
-  prompt_data: Record<string, any>;
+  parameters: Record<string, any>;
+  year: number | null;
   metadata?: Record<string, any>;
   created_at?: string;
 }

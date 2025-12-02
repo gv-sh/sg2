@@ -82,7 +82,7 @@ export function expectErrorResponse(response, expectedStatus, errorMessage = nul
 }
 
 export function expectValidationError(response) {
-  expectErrorResponse(response, 400, 'Validation failed');
+  expectErrorResponse(response, 400, 'Validation failed'); // Match exact validation error message
   // Details property is optional - some validation errors may not include it
 }
 

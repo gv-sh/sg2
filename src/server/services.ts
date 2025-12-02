@@ -704,20 +704,67 @@ class AIService {
   private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null): string {
     let prompt = 'Create a compelling speculative fiction story with the following elements:\n\n';
     
-    if (year) prompt += `Setting: Year ${year}\n`;
+    if (year) prompt += `Setting: Year ${year}\n\n`;
     
-    Object.entries(parameters).forEach(([, categoryParams]) => {
-      if (typeof categoryParams === 'object') {
-        Object.entries(categoryParams).forEach(([param, value]) => {
-          if (value !== null && value !== undefined) {
-            prompt += `${param.replace(/-/g, ' ')}: ${value}\n`;
-          }
-        });
+    // Handle category-grouped parameters
+    Object.entries(parameters).forEach(([categoryName, categoryParams]) => {
+      if (typeof categoryParams === 'object' && categoryParams !== null) {
+        const paramEntries = Object.entries(categoryParams);
+        if (paramEntries.length > 0) {
+          prompt += `${categoryName}:\n`;
+          
+          paramEntries.forEach(([paramId, value]) => {
+            if (value !== null && value !== undefined) {
+              const paramName = this.formatParameterName(paramId);
+              const displayValue = this.formatParameterValue(paramId, value);
+              prompt += `- ${paramName}: ${displayValue}\n`;
+            }
+          });
+          
+          prompt += '\n';
+        }
       }
     });
     
-    prompt += '\nWrite a story that incorporates these elements naturally. Include a compelling title.';
+    prompt += 'Write a story that incorporates these elements naturally. Include a compelling title.';
     return prompt;
+  }
+
+  private formatParameterName(paramId: string): string {
+    return paramId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  private formatParameterValue(paramId: string, value: any): string {
+    // Handle range parameters with descriptive labels
+    if (paramId === 'technology-level') {
+      if (value <= 0.2) return `Primitive (${value})`;
+      if (value <= 0.4) return `Basic (${value})`;
+      if (value <= 0.6) return `Moderate (${value})`;
+      if (value <= 0.8) return `Advanced (${value})`;
+      return `Highly Advanced (${value})`;
+    }
+    
+    if (paramId === 'conflict-intensity') {
+      if (value <= 0.2) return `Peaceful (${value})`;
+      if (value <= 0.4) return `Low (${value})`;
+      if (value <= 0.6) return `Moderate (${value})`;
+      if (value <= 0.8) return `High (${value})`;
+      return `Extreme (${value})`;
+    }
+    
+    // Handle boolean parameters
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+    
+    // Handle select parameters - try to capitalize first letter
+    if (typeof value === 'string') {
+      // Convert kebab-case to title case
+      return value.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+    
+    // Return as-is for numbers and other types
+    return String(value);
   }
 
   private buildImagePrompt(year: number | null, generatedText: string | null): string {

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../../ui/card.tsx';
 import { Calendar, BookOpen } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 import LazyImage from '../ui/LazyImage';
 import config from '../../config';
 

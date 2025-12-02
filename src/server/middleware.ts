@@ -58,11 +58,81 @@ export const parameterSchema = z.object({
 
 export const parameterUpdateSchema = parameterSchema.partial().omit({ category_id: true });
 
-// Content generation schemas
+// Content generation schemas - category-grouped parameters
 export const generationRequestSchema = z.object({
-  parameters: z.record(z.any()).default({}),
+  parameters: z.record(z.record(z.any())).default({}), // { "Category Name": { "param": value } }
   year: z.number().int().min(config.get('validation.yearRange.min')).max(config.get('validation.yearRange.max')).nullable().optional()
 });
+
+// Parameter validation function - validates against database parameters
+export async function validateGenerationParameters(parameters: Record<string, any>): Promise<{ isValid: boolean; errors: string[] }> {
+  const { dataService } = await import('./services.js');
+  const errors: string[] = [];
+  
+  try {
+    // Get all parameters from database
+    const dbParameters = await dataService.getParameters();
+    const parameterMap = new Map(dbParameters.map(p => [p.id, p]));
+    
+    // Validate each submitted parameter
+    for (const [paramId, value] of Object.entries(parameters)) {
+      const dbParam = parameterMap.get(paramId);
+      
+      if (!dbParam) {
+        errors.push(`Parameter '${paramId}' is not valid`);
+        continue;
+      }
+      
+      // Type-specific validation
+      switch (dbParam.type) {
+        case 'select':
+          if (dbParam.parameter_values && Array.isArray(dbParam.parameter_values)) {
+            const validValues = dbParam.parameter_values.map((v: any) => v.id || v.label);
+            if (!validValues.includes(value)) {
+              errors.push(`Parameter '${paramId}' must be one of: ${validValues.join(', ')}`);
+            }
+          }
+          break;
+        case 'text':
+          if (typeof value !== 'string') {
+            errors.push(`Parameter '${paramId}' must be a string`);
+          } else if (value.length === 0) {
+            errors.push(`Parameter '${paramId}' cannot be empty`);
+          } else if (value.length > 200) {
+            errors.push(`Parameter '${paramId}' cannot exceed 200 characters`);
+          }
+          break;
+        case 'number':
+          if (typeof value !== 'number' || isNaN(value)) {
+            errors.push(`Parameter '${paramId}' must be a valid number`);
+          }
+          break;
+        case 'boolean':
+          if (typeof value !== 'boolean') {
+            errors.push(`Parameter '${paramId}' must be a boolean (true/false)`);
+          }
+          break;
+        case 'range':
+          if (typeof value !== 'number' || isNaN(value)) {
+            errors.push(`Parameter '${paramId}' must be a valid number`);
+          } else if (dbParam.parameter_config) {
+            const config = dbParam.parameter_config;
+            if (config.min !== undefined && value < config.min) {
+              errors.push(`Parameter '${paramId}' must be at least ${config.min}`);
+            }
+            if (config.max !== undefined && value > config.max) {
+              errors.push(`Parameter '${paramId}' must be at most ${config.max}`);
+            }
+          }
+          break;
+      }
+    }
+    
+    return { isValid: errors.length === 0, errors };
+  } catch (error) {
+    return { isValid: false, errors: ['Failed to validate parameters against database'] };
+  }
+}
 
 export const contentUpdateSchema = z.object({
   title: z.string().min(1).max(config.get('validation.maxTitleLength')).optional()

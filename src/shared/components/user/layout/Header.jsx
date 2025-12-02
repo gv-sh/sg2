@@ -5,7 +5,7 @@ import { Menu, X, Sliders, Home, Info, Library } from 'lucide-react';
 import { ThemeToggle } from '../theme/theme-toggle';
 import { Tooltip } from '../ui/tooltip';
 import { Link, useLocation } from 'react-router-dom';
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 const Header = ({ onShowTour }) => {
   const location = useLocation();

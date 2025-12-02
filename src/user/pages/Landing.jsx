@@ -20,8 +20,7 @@ const Landing = ({ onClearSession }) => {
   }, [removeAllParameters, onClearSession]);
   
   return (
-    <div className="flex items-center justify-center h-full">
-      <div className="fixed w-full h-screen overflow-hidden">
+    <div className="flex items-center justify-center h-full relative">
       {/* Background particle system */}
       <GalaxyParticles />
       <Shaders />
@@ -90,7 +89,6 @@ const Landing = ({ onClearSession }) => {
       
       </div>
       
-    </div>
     </div>
   );
 };

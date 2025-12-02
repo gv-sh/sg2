@@ -21,8 +21,8 @@ const MainLayout = ({ children, onShowTour, className }) => {
       
       <main className={cn("flex-1 pt-14 container", libraryPadding)}>
         <div className={useDynamicHeight 
-          ? "min-h-[calc(100vh-theme(spacing.20)-theme(spacing.16))]" 
-          : "h-[calc(100vh-theme(spacing.14)-theme(spacing.13))] bg-background"}>
+          ? "min-h-[calc(100vh-5rem-4rem)]" 
+          : "h-[calc(100vh-3.5rem-3.25rem)] bg-background"}>
           {children}
         </div>
       </main>

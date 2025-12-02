@@ -12,8 +12,8 @@ export default function GalaxyParticles() {
     const canvas = canvasRef.current;
     if (!canvas || typeof window === 'undefined') return;
 
-    let width = canvas.offsetWidth;
-    let height = canvas.offsetHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
     const colors = [
       new THREE.Color(0xE16740),
@@ -190,18 +190,16 @@ export default function GalaxyParticles() {
     }
 
     function onResize() {
-      width = canvas.offsetWidth;
-      height = canvas.offsetHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
-
     }
 
     function onMouseMove(e) {
-      const rect = canvas.getBoundingClientRect();
-      mouse.current.x = ((e.clientX - rect.left) / width) * 2 - 1;
-      mouse.current.y = -((e.clientY - rect.top) / height) * 2 + 1;
+      mouse.current.x = (e.clientX / width) * 2 - 1;
+      mouse.current.y = -(e.clientY / height) * 2 + 1;
     }
 
     window.addEventListener("mousemove", onMouseMove);
@@ -218,5 +216,5 @@ export default function GalaxyParticles() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="w-full h-full" />;
+  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" />;
 }

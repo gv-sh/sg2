@@ -13,6 +13,7 @@
   },
   "scripts": {
     "dev": "npm run build && cd src/server && NODE_ENV=development npx tsx --watch server.ts",
+    "dev:server": "cd src/server && NODE_ENV=development npx tsx --watch server.ts",
     "start": "npm run build && cd src/server && NODE_ENV=production npx tsx server.ts",
     "build": "react-scripts build",
     "build:server": "tsc --project tsconfig.server.json",
@@ -20,9 +21,10 @@
     "type-check:server": "tsc --noEmit --project tsconfig.server.json",
     "test": "npm run test:unit && npm run test:client",
     "test:unit": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config tests/jest.config.mjs --colors=true",
-    "test:server": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand tests/server.test.js --config tests/jest.config.mjs --colors=true",
-    "test:admin": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand tests/admin.test.js --config tests/jest.config.mjs --colors=true",
-    "test:user": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand tests/user.test.js --config tests/jest.config.mjs --colors=true",
+    "test:server": "npm run test:admin && npm run test:content && npm run test:system",
+    "test:server-admin": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --runInBand tests/server-admin.test.js --config tests/jest.config.mjs --colors=true",
+    "test:server-content": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --runInBand tests/server-content.test.js --config tests/jest.config.mjs --colors=true",
+    "test:server-system": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --runInBand tests/server-system.test.js --config tests/jest.config.mjs --colors=true",
     "test:client": "react-scripts test --watchAll=false",
     "lint": "eslint src/",
     "clean": "rm -rf node_modules build src/server/data/*.db dist"

@@ -160,8 +160,7 @@ class DataService {
         await this.createCategory({
           id: category.id,
           name: category.name,
-          description: category.description || '',
-          sort_order: category.sort_order || 0
+          description: category.description || ''
         });
       }
 
@@ -231,10 +230,12 @@ class DataService {
   // Categories
   async getCategories(): Promise<Category[]> {
     const categories = await this.query(
-      `SELECT * FROM categories ORDER BY sort_order ASC, name ASC`
+      `SELECT * FROM categories ORDER BY name ASC`
     );
     return categories.map(category => ({
-      ...category,
+      id: category.id,
+      name: category.name,
+      description: category.description,
       created_at: new Date(category.created_at)
     }));
   }
@@ -243,7 +244,9 @@ class DataService {
     const category = await this.get('SELECT * FROM categories WHERE id = ?', [id]);
     if (!category) throw boom.notFound(`Category with id ${id} not found`);
     return {
-      ...category,
+      id: category.id,
+      name: category.name,
+      description: category.description,
       created_at: new Date(category.created_at)
     };
   }
@@ -251,13 +254,12 @@ class DataService {
   async createCategory(categoryData: CategoryData): Promise<Category> {
     const id = categoryData.id || this.generateId(categoryData.name);
     await this.run(
-      `INSERT INTO categories (id, name, description, sort_order)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT INTO categories (id, name, description)
+       VALUES (?, ?, ?)`,
       [
         id,
         categoryData.name,
-        categoryData.description || '',
-        categoryData.sort_order || 0
+        categoryData.description || ''
       ]
     );
     return await this.getCategoryById(id);
@@ -266,11 +268,10 @@ class DataService {
   async updateCategory(id: string, updates: Partial<CategoryData>): Promise<Category> {
     const existing = await this.getCategoryById(id);
     await this.run(
-      `UPDATE categories SET name = ?, description = ?, sort_order = ? WHERE id = ?`,
+      `UPDATE categories SET name = ?, description = ? WHERE id = ?`,
       [
         updates.name || existing.name,
         updates.description !== undefined ? updates.description : existing.description,
-        updates.sort_order !== undefined ? updates.sort_order : existing.sort_order,
         id
       ]
     );

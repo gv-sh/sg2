@@ -7,16 +7,17 @@ import boom from '@hapi/boom';
 import pino from 'pino';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { Request, Response, NextFunction } from 'express';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import config from './config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // ==================== LOGGER ====================
 
 export const logger = pino({
-  level: config.get('logging.level'),
-  transport: config.isDevelopment() ? {
-    target: 'pino-pretty',
-    options: { colorize: true }
-  } : undefined
+  level: config.get('logging.level')
 });
 
 // ==================== VALIDATION SCHEMAS ====================
@@ -110,7 +111,12 @@ const swaggerOptions = {
       { name: 'System', description: 'System operations and monitoring' }
     ]
   },
-  apis: ['./routes.js', './server.js']
+  apis: [
+    './routes/admin.ts',
+    './routes/content.ts', 
+    './routes/system.ts',
+    './routes/index.ts'
+  ]
 };
 
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);

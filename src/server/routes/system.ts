@@ -96,24 +96,6 @@ router.get('/health', async (req: Request, res: Response<ApiResponse<HealthStatu
   }
 });
 
-/**
- * @swagger
- * /api/health/ping:
- *   get:
- *     summary: Simple ping endpoint for basic health check
- *     tags: [System]
- *     responses:
- *       200:
- *         description: Service is alive
- */
-router.get('/ping', async (req: Request, res: Response) => {
-  res.json({ 
-    message: 'pong',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
 // ==================== DATABASE MANAGEMENT ====================
 
 /**
@@ -121,7 +103,7 @@ router.get('/ping', async (req: Request, res: Response) => {
  * /api/system/database/init:
  *   post:
  *     summary: Initialize database with default data
- *     tags: [System - Database]
+ *     tags: [System]
  *     responses:
  *       200:
  *         description: Database initialized successfully
@@ -148,7 +130,7 @@ router.post('/database/init', async (req: Request, res: Response<ApiResponse>, n
  * /api/system/database/status:
  *   get:
  *     summary: Get database statistics and status
- *     tags: [System - Database]
+ *     tags: [System]
  *     responses:
  *       200:
  *         description: Database status information
@@ -192,7 +174,7 @@ router.get('/database/status', async (req: Request, res: Response<ApiResponse<Da
  * /api/system/docs.json:
  *   get:
  *     summary: Get OpenAPI specification as JSON
- *     tags: [Documentation]
+ *     tags: [System]
  *     responses:
  *       200:
  *         description: OpenAPI specification
@@ -210,12 +192,15 @@ router.get('/docs.json', async (req: Request, res: Response) => {
   }
 });
 
+// Serve Swagger UI assets first
+router.use('/docs', swaggerUi.serve);
+
 /**
  * @swagger
  * /api/system/docs:
  *   get:
  *     summary: Interactive API documentation (Swagger UI)
- *     tags: [Documentation]
+ *     tags: [System]
  *     responses:
  *       200:
  *         description: Swagger UI interface
@@ -224,36 +209,23 @@ router.get('/docs.json', async (req: Request, res: Response) => {
  *             schema:
  *               type: string
  */
-router.get('/docs', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Setup Swagger UI with custom configuration
-    const swaggerUiOptions = {
-      customCss: `
-        .swagger-ui .topbar { display: none; }
-        .swagger-ui .info .title { color: #2c5aa0; }
-        .swagger-ui .scheme-container { background: #f8f9fa; padding: 10px; border-radius: 5px; }
-      `,
-      customSiteTitle: 'SpecGen API Documentation',
-      swaggerOptions: {
-        url: '/api/system/docs.json',
-        docExpansion: 'list',
-        defaultModelsExpandDepth: 2,
-        defaultModelRendering: 'model',
-        displayRequestDuration: true,
-        filter: true,
-        showRequestHeaders: true,
-        tryItOutEnabled: true
-      }
-    };
-    
-    const swaggerUIMiddleware = swaggerUi.setup(swaggerSpec, swaggerUiOptions);
-    swaggerUIMiddleware(req, res, next);
-  } catch (error: any) {
-    next(boom.internal('Failed to load API documentation', error));
+router.get('/docs', swaggerUi.setup(swaggerSpec, {
+  customCss: `
+    .swagger-ui .topbar { display: none; }
+    .swagger-ui .info .title { color: #2c5aa0; }
+    .swagger-ui .scheme-container { background: #f8f9fa; padding: 10px; border-radius: 5px; }
+  `,
+  customSiteTitle: 'SpecGen API Documentation',
+  swaggerOptions: {
+    url: '/api/system/docs.json',
+    docExpansion: 'list',
+    defaultModelsExpandDepth: 2,
+    defaultModelRendering: 'model',
+    displayRequestDuration: true,
+    filter: true,
+    showRequestHeaders: true,
+    tryItOutEnabled: true
   }
-});
-
-// Serve Swagger UI assets
-router.use('/docs', swaggerUi.serve);
+}));
 
 export default router;

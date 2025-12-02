@@ -16,10 +16,10 @@ const router: express.Router = express.Router();
 
 /**
  * @swagger
- * /:
+ * /api:
  *   get:
  *     summary: API information and available endpoints
- *     tags: [General]
+ *     tags: [System]
  *     responses:
  *       200:
  *         description: API information
@@ -48,7 +48,6 @@ router.get('/api', (req: Request, res: Response) => {
         },
         system: {
           health: '/api/system/health',
-          ping: '/api/health/ping',
           docs: '/api/system/docs',
           database: '/api/system/database/status'
         }
@@ -88,12 +87,5 @@ router.use('/api/images', (req, res, next) => {
 
 // System routes - health, database, documentation  
 router.use('/api/system', systemRoutes);
-
-// Health ping endpoint (separate from system routes to avoid conflicts)
-router.get('/api/health/ping', (req, res, next) => {
-  // Route to system routes ping handler
-  req.url = '/ping';
-  systemRoutes(req, res, next);
-});
 
 export default router;

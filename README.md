@@ -188,6 +188,25 @@ sg2/
 
 ## ⚙️ Configuration
 
+### Environment Setup
+
+1. **Create environment file:**
+```bash
+# Copy example environment file
+cp .env.example .env
+```
+
+2. **Add your OpenAI API key:**
+```bash
+# Edit .env file and add your API key
+OPENAI_API_KEY=your_actual_openai_api_key_here
+```
+
+3. **Get OpenAI API Key:**
+   - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create new API key
+   - Copy and paste into `.env` file
+
 ### Environment Variables
 
 ```env
@@ -196,11 +215,11 @@ PORT=3000                           # Development port (prod: 8000)
 NODE_ENV=development                # Environment: development/production/test
 HOST=localhost                      # Server host
 
-# Database
-DB_PATH=./src/server/data/specgen.db  # SQLite database path
+# AI Configuration (REQUIRED)
+OPENAI_API_KEY=your_key_here        # OpenAI API key for GPT and DALL-E
 
-# AI Services
-OPENAI_API_KEY=your_api_key_here    # Required for content generation
+# Database
+DB_PATH=./data/specgen.db           # SQLite database path
 
 # CORS & Security (Production)
 ALLOWED_ORIGINS=https://yourdomain.com  # Comma-separated origins

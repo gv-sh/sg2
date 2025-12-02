@@ -465,7 +465,7 @@ router.delete('/:id', async (req: TypedRequestParams<IdParamSchema>, res: Respon
  * /api/images/{id}/original:
  *   get:
  *     summary: Get original image for content
- *     tags: [Images]
+ *     tags: [Content]
  *     parameters:
  *       - name: id
  *         in: path
@@ -505,7 +505,7 @@ router.get('/images/:id/original', async (req: TypedRequestParams<IdParamSchema>
  * /api/images/{id}/thumbnail:
  *   get:
  *     summary: Get thumbnail image for content
- *     tags: [Images]
+ *     tags: [Content]
  *     parameters:
  *       - name: id
  *         in: path

@@ -67,36 +67,36 @@ function AdminApp() {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 space-y-0">
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Categories</CardTitle>
                         <CardDescription>Manage fiction categories like Science Fiction, Fantasy, etc.</CardDescription>
                       </CardHeader>
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/categories" className="w-full">
                           <Button variant="default" className="w-full">Manage Categories</Button>
                         </Link>
                       </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Parameters</CardTitle>
                         <CardDescription>Configure generation parameters for each category.</CardDescription>
                       </CardHeader>
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/parameters" className="w-full">
                           <Button variant="default" className="w-full">Manage Parameters</Button>
                         </Link>
                       </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Content</CardTitle>
                         <CardDescription>View and manage generated fiction and images.</CardDescription>
                       </CardHeader>
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/content" className="w-full">
                           <Button variant="default" className="w-full">Manage Content</Button>
                         </Link>

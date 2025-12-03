@@ -24,6 +24,29 @@ import { randomizeParameterValue } from '../utils/parameterUtils';
 
 // Individual selected parameter card
 const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
+  // Initialize null values with appropriate defaults
+  const initializeValue = () => {
+    if (parameter.value !== null && parameter.value !== undefined) {
+      return parameter.value;
+    }
+    
+    // Set default based on type
+    switch (parameter.type) {
+      case 'boolean':
+        return false;
+      case 'range':
+        return 50;
+      case 'select':
+        return parameter.parameter_values?.[0]?.id || '';
+      case 'text':
+        return '';
+      default:
+        return null;
+    }
+  };
+
+  const currentValue = initializeValue();
+
   const handleValueChange = (newValue) => {
     onUpdate(parameter.id, newValue);
   };
@@ -37,7 +60,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
     switch (parameter.type) {
       case 'select':
         return (
-          <Select value={parameter.value || ''} onValueChange={handleValueChange}>
+          <Select value={currentValue || ''} onValueChange={handleValueChange}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
@@ -56,11 +79,11 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id={`selected-${parameter.id}`}
-              checked={parameter.value || false}
+              checked={currentValue || false}
               onCheckedChange={handleValueChange}
             />
             <label htmlFor={`selected-${parameter.id}`} className="text-sm">
-              {parameter.value ? 'Enabled' : 'Disabled'}
+              {currentValue ? 'Enabled' : 'Disabled'}
             </label>
           </div>
         );
@@ -70,13 +93,13 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm">Value</label>
-              <Badge variant="outline">{parameter.value || 50}</Badge>
+              <Badge variant="outline">{currentValue || 50}</Badge>
             </div>
             <Slider
               min={0}
               max={100}
               step={1}
-              value={[parameter.value || 50]}
+              value={[currentValue || 50]}
               onValueChange={([newValue]) => handleValueChange(newValue)}
               className="w-full"
             />
@@ -87,7 +110,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
         return (
           <Input
             type="text"
-            value={parameter.value || ''}
+            value={currentValue || ''}
             onChange={(e) => handleValueChange(e.target.value)}
             placeholder="Enter text..."
             className="w-full"
@@ -105,14 +128,14 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
 
   const getValueDisplay = () => {
     if (parameter.type === 'select') {
-      const option = parameter.parameter_values?.find(opt => opt.id === parameter.value);
+      const option = parameter.parameter_values?.find(opt => opt.id === currentValue);
       return option?.label || 'Not selected';
     } else if (parameter.type === 'boolean') {
-      return parameter.value ? 'Yes' : 'No';
+      return currentValue ? 'Yes' : 'No';
     } else if (parameter.type === 'range') {
-      return parameter.value || '50';
+      return currentValue || '50';
     } else if (parameter.type === 'text') {
-      return parameter.value || 'Empty';
+      return currentValue || 'Empty';
     }
     return 'Unknown';
   };

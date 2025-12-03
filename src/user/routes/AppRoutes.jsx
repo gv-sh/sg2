@@ -124,6 +124,7 @@ const AppRoutes = ({
                   selectedCategory={selectedCategory}
                   selectedParameters={selectedParameters}
                   onParameterSelect={handleParameterSelect}
+                  onParameterRemove={handleParameterRemove}
                 />
               </Suspense>
             </Column>

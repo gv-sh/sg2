@@ -154,6 +154,7 @@ export const useGeneration = (
       const response = await generateContent(
         parameterValues,
         Object.keys(parameterValues),
+        'combined',
         yearToUse,
         null
       );
@@ -249,6 +250,7 @@ export const useGeneration = (
       const response = await generateContent(
         parameterValues,
         Object.keys(parameterValues),
+        'combined',
         yearToUse,
         storyToRegenerate.title
       );

@@ -72,9 +72,12 @@ export const fetchParameters = async (categoryId) => {
  * Generate content based on selected parameters
  * @param {Object} parameterValues - Object with category IDs and their parameter values
  * @param {Array} categoryIds - Array of selected category IDs
+ * @param {string} contentType - Type of content to generate (default: 'combined')
+ * @param {number} year - Optional year setting for the story
+ * @param {string} title - Optional title for the story
  * @returns {Promise<Object>} Generated content response
  */
-export const generateContent = async (parameterValues, categoryIds, year = null, title = null) => {
+export const generateContent = async (parameterValues, categoryIds, contentType = 'combined', year = null, title = null) => {
   try {
     // Create a unique ID for the generation request
     const requestId = `request-${Date.now()}`;

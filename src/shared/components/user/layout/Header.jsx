@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '../../ui/button.tsx';
 import { Menu, X, Sliders, Home, Info, Library } from 'lucide-react';
-import { ThemeToggle } from '../theme/theme-toggle';
+import { ThemeToggle } from '../theme/theme-toggle.jsx';
 import { Tooltip } from '../../ui';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
@@ -40,17 +40,17 @@ const Header = ({ onShowTour }) => {
             </Link>
           </Tooltip>
           
-          <div className="ml-auto flex items-center">
-            <ThemeToggle className="mr-4" />
+          <div className="ml-auto flex items-center space-x-2">
+            <ThemeToggle />
             
             {/* Hamburger Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={toggleMenu}
+              className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-label="Toggle menu"
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            </button>
           </div>
         </div>
       </div>

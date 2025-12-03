@@ -423,6 +423,124 @@ router.get('/years', async (req: Request, res: Response<ApiResponse<number[]>>, 
   }
 });
 
+// ==================== USER-FACING DATA ENDPOINTS ====================
+// NOTE: These must come BEFORE the /:id route to avoid conflicts
+
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Get categories for user interface
+ *     tags: [User Interface]
+ *     responses:
+ *       200:
+ *         description: Categories retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       parameter_count:
+ *                         type: integer
+ */
+router.get('/categories', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const categories = await dataService.getCategories();
+    res.json({
+      success: true,
+      message: 'Categories retrieved successfully',
+      data: categories,
+      meta: {
+        total: categories.length,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Failed to retrieve categories', error));
+  }
+});
+
+/**
+ * @swagger
+ * /api/parameters:
+ *   get:
+ *     summary: Get parameters for user interface
+ *     tags: [User Interface]
+ *     parameters:
+ *       - name: categoryId
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter parameters by category
+ *     responses:
+ *       200:
+ *         description: Parameters retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                       category_id:
+ *                         type: string
+ *                       parameter_values:
+ *                         type: array
+ *                       parameter_config:
+ *                         type: object
+ */
+router.get('/parameters', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { categoryId } = req.query;
+    
+    let parameters;
+    if (categoryId) {
+      parameters = await dataService.getParametersByCategory(categoryId as string);
+    } else {
+      parameters = await dataService.getParameters();
+    }
+    
+    res.json({
+      success: true,
+      message: 'Parameters retrieved successfully',
+      data: parameters,
+      meta: {
+        total: parameters.length,
+        filters: categoryId ? { categoryId } : {},
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Failed to retrieve parameters', error));
+  }
+});
+
 /**
  * @swagger
  * /api/content/{id}:

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from './navigation-menu.js';
 import { Badge } from './badge.tsx';
+import { ThemeToggle } from '../user/theme/theme-toggle.jsx';
 
 const routes = [
   { path: '/admin/categories', label: 'Categories' },
@@ -36,21 +37,24 @@ function Navbar({ serverStatus }) {
           </div>
         </div>
 
-        <NavigationMenu>
-          <NavigationMenuList>
-            {routes.map(({ path, label }) => (
-              <NavigationMenuItem key={path}>
-                <NavigationMenuLink 
-                  as={Link} 
-                  to={path} 
-                  active={location.pathname === path}
-                >
-                  {label}
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
+          <NavigationMenu>
+            <NavigationMenuList>
+              {routes.map(({ path, label }) => (
+                <NavigationMenuItem key={path}>
+                  <NavigationMenuLink 
+                    as={Link} 
+                    to={path} 
+                    active={location.pathname === path}
+                  >
+                    {label}
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
       </div>
     </header>
   );

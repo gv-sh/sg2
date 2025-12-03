@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { isMobileDevice } from './utils/deviceUtils.js';
 
-// Theme and Layout Components
-import { ThemeProvider } from '../shared/components/user/theme/theme-provider.jsx';
+// Layout Components
 import MainLayout from '../shared/components/user/layout/MainLayout.jsx';
 import AppRoutes from './routes/AppRoutes.jsx';
 import { ParameterProvider } from './contexts/ParameterContext.jsx';
@@ -11,11 +10,9 @@ import { ParameterProvider } from './contexts/ParameterContext.jsx';
 // User App Component
 function UserApp() {
   return (
-    <ThemeProvider defaultTheme="dark">
-      <ParameterProvider>
-        <AppContent />
-      </ParameterProvider>
-    </ThemeProvider>
+    <ParameterProvider>
+      <AppContent />
+    </ParameterProvider>
   );
 }
 

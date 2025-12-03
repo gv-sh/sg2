@@ -85,6 +85,19 @@ router.use('/api/images', (req, res, next) => {
   contentRoutes(req, res, next);
 });
 
+// User-facing data endpoints
+router.get('/api/categories', (req, res, next) => {
+  // Route categories request to content routes
+  req.url = '/categories';
+  contentRoutes(req, res, next);
+});
+
+router.get('/api/parameters', (req, res, next) => {
+  // Route parameters request to content routes
+  req.url = '/parameters';
+  contentRoutes(req, res, next);
+});
+
 // System routes - health, database, documentation  
 router.use('/api/system', systemRoutes);
 

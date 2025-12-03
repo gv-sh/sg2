@@ -1,5 +1,5 @@
 // src/routes/AppRoutes.jsx
-import React, { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import ResponsiveLayout, { Column } from '../../shared/components/user/layout/ResponsiveLayout';
 import GuidedTour from '../../shared/components/user/GuidedTour';
@@ -35,12 +35,12 @@ const AppRoutes = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Auto-start tour when visiting /parameters page
-  useEffect(() => {
-    if (location.pathname === '/parameters') {
-      setShowTour(true);
-    }
-  }, [location.pathname, setShowTour]);
+  // Auto-start tour when visiting /parameters page - DISABLED
+  // useEffect(() => {
+  //   if (location.pathname === '/parameters') {
+  //     setShowTour(true);
+  //   }
+  // }, [location.pathname, setShowTour]);
 
   // Clear parameters when navigating to landing page
   const handleClearSession = () => {
@@ -51,19 +51,24 @@ const AppRoutes = ({
   };
 
   const handleParameterSelect = (parameter) => {
-    // Prevent duplicates
-    if (!selectedParameters.some(p => p.id === parameter.id)) {
-      // Initialize the parameter with a random value
-      const initializedParameter = {
-        ...parameter,
-        value: randomizeParameterValue(parameter)
-      };
-      setSelectedParameters(prev => [initializedParameter, ...prev]);
+    // Find existing parameter or add new one
+    const existingIndex = selectedParameters.findIndex(p => p.id === parameter.id);
+    
+    if (existingIndex >= 0) {
+      // Update existing parameter
+      setSelectedParameters(prev =>
+        prev.map((p, index) =>
+          index === existingIndex ? parameter : p
+        )
+      );
+    } else {
+      // Add new parameter
+      setSelectedParameters(prev => [...prev, parameter]);
     }
   };
 
-  const handleParameterRemove = (parameter) => {
-    setSelectedParameters(prev => prev.filter(p => p.id !== parameter.id));
+  const handleParameterRemove = (parameterId) => {
+    setSelectedParameters(prev => prev.filter(p => p.id !== parameterId));
   };
 
   const handleParameterValueUpdate = (parameterId, newValue) => {
@@ -106,8 +111,8 @@ const AppRoutes = ({
             <Column span={4} mobileOrder={1} tabletSpan={2} position="left">
               <Suspense fallback={<LoadingSpinner />}>
                 <Categories
-                  onCategorySelect={setSelectedCategory}
                   selectedCategory={selectedCategory}
+                  onCategorySelect={setSelectedCategory}
                 />
               </Suspense>
             </Column>
@@ -119,7 +124,6 @@ const AppRoutes = ({
                   selectedCategory={selectedCategory}
                   selectedParameters={selectedParameters}
                   onParameterSelect={handleParameterSelect}
-                  onParameterRemove={handleParameterRemove}
                 />
               </Suspense>
             </Column>
@@ -132,7 +136,6 @@ const AppRoutes = ({
                   onRemoveParameter={handleParameterRemove}
                   onUpdateParameterValue={handleParameterValueUpdate}
                   onNavigateToGenerate={handleNavigateToGenerate}
-                  onShowTour={() => setShowTour(true)}
                 />
               </Suspense>
             </Column>

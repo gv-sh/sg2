@@ -19,7 +19,7 @@ function UserApp() {
 // App Content Component with shared state
 function AppContent() {
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedParameters, setSelectedParameters] = useState([]);
   const [showTour, setShowTour] = useState(false);
   const [generatedContent, setGeneratedContent] = useState(null);

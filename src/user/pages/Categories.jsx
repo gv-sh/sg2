@@ -20,11 +20,10 @@ const Categories = ({ onCategorySelect }) => {
         setLoading(true);
         const response = await fetchCategories();
         
-        // Filter categories that should be shown
-        const visibleCategories = (response.data || [])
-          .filter(category => category.visibility === 'Show');
+        // Use all categories (no visibility filtering needed for user interface)
+        const allCategories = response.data || [];
           
-        setCategories(visibleCategories);
+        setCategories(allCategories);
         setError(null);
       } catch (err) {
         console.error('Error loading categories:', err);

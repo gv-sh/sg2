@@ -14,7 +14,7 @@ const About = () => {
       </h1>
       
       <div className="relative prose prose-sm prose-zinc dark:prose-invert columns-1 gap-10 pb-6">
-        <p className="relative text-muted-foreground leading-relaxed mt-10 mb-4 ">
+        <p className="relative text-muted-foreground text-body mt-10 mb-4 ">
           <strong className="text-accent text-2xl">Futures of Hope</strong> speaks of the many possibilities that lie ahead,
           <em> guided by hope</em>—imagining <em>countless paths</em> the future might take,
           each carrying the promise of something <strong>beautiful</strong> yet to come.
@@ -27,18 +27,18 @@ const About = () => {
           What is Futures of Hope?
         </h1>
       <div className="relative prose prose-sm prose-zinc dark:prose-invert columns-2 gap-10 pb-6">      
-        <p className="relative text-muted-foreground leading-relaxed mb-4">
+        <p className="relative text-muted-foreground text-body mb-4">
           <em>Futures of Hope</em> is a speculative fiction generator that helps to explore 
           infinte preferrable futures through AI-generated stories.
           Speculative fiction gives us a way to imagine what might unfold if 
           we changed the way we think, live, and shape our world differently.
         </p>
 
-        <p className="relative text-muted-foreground leading-relaxed mb-4">
+        <p className="relative text-muted-foreground text-body mb-4">
         <em> Futures of Hope</em> invites you to engage playfully with critical questions such as:
         </p>
 
-        <ul className="list-disc text-muted-foreground leading-relaxed mb-4">
+        <ul className="list-disc text-muted-foreground text-body mb-4">
           <li>Who holds the power to define progress, and whose voices are left out?</li>
           <br></br>
           <li>What would truly inclusive and equitable communities look like—and how might we get there?</li>
@@ -46,7 +46,7 @@ const About = () => {
           <li>What are the long-term consequences of continuing along our current technological, political, and social paths?</li>
         </ul>
         
-        <p className="break-before-column relative text-muted-foreground leading-relaxed">
+        <p className="break-before-column relative text-muted-foreground text-body">
           You begin by selecting values across domains such as politics, technology, 
           social structures, legal systems, economies, and environmental change—parameters 
           that are essential to imagining a future world.
@@ -70,7 +70,7 @@ const About = () => {
         Why we built Futures of Hope?
       </h1>
       <div className="relative prose prose-sm prose-zinc dark:prose-invert columns-2 gap-10 mb-20 border-b pb-10">
-        <p className="relative text-muted-foreground leading-relaxed mb-4">
+        <p className="relative text-muted-foreground text-body mb-4">
           <em>Futures of Hope</em> was created to help people imagine different futures 
           and reflect more deeply on the world around them. In a time of rapid change—across 
           politics, technology, climate, and society—it invites us to pause and ask:
@@ -79,7 +79,7 @@ const About = () => {
           to question the paths we’re on.
         </p>
 
-        <p className="break-before-column relative text-muted-foreground leading-relaxed mb-4">
+        <p className="break-before-column relative text-muted-foreground text-body mb-4">
           It also supports <strong>regeneration culture</strong>—a way of thinking where 
           we don’t just try to fix problems, but try to grow healthier, fairer, and more caring 
           systems for people and the planet. By imagining better futures through these stories, 
@@ -107,7 +107,7 @@ const About = () => {
           alt="Quest Learning Observatory Logo"
           className="w-1/4 object-contain max-h-64 mb-4 hidden dark:block"
         />
-        <p className="relative text-muted-foreground leading-relaxed mb-4">
+        <p className="relative text-muted-foreground text-body mb-4">
           The {' '}
           <a
             href="https://questlearningobservatory.org"

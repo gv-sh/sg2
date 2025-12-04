@@ -27,7 +27,7 @@ const Landing = ({ onClearSession }) => {
       {/* Foreground content */}
       <div className="content__inner absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white">
       <div className="max-w-4xl mx-auto px-8">
-          <h1 className="flex flex-wrap justify-center gap-4 text-[84px] text-primary font-bold leading-[64px] mb-8 tracking-tight text-center">
+          <h1 className="flex flex-wrap justify-center gap-4 text-display text-primary mb-8 text-center">
             {["What", "kind", "of", "futures", "do", "you", "envision?"].map((word, i) => (
               <span key={i}>
                 {word === "futures" ? (
@@ -49,8 +49,8 @@ const Landing = ({ onClearSession }) => {
                     <span
                       className="
                         absolute left-0 w-3/4 top-[65%]
-                        text-[20px] font-normal not-italic opacity-0 tracking-normal
-                        transition-opacity duration-200 ease-out bg-none leading-[40px] whitespace-nowrap
+                        text-body font-normal not-italic opacity-0 tracking-normal
+                        transition-opacity duration-200 ease-out bg-none whitespace-nowrap
                         group-hover:opacity-100
                       "
                     >
@@ -65,7 +65,7 @@ const Landing = ({ onClearSession }) => {
           </h1>
 
   
-          <p className="text-[28px] text-darkText/80 mb-8 font-regular leading-[40px] hover:bg-background/70 transition-colors">
+          <p className="text-body-large text-foreground/80 mb-8 font-normal hover:bg-background/70 transition-colors">
             Explore speculative futures, challenge assumptions, and shape worlds that 
             reflect the values you believe in.
           </p>

@@ -329,7 +329,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
         )}
 
         {pageChunks[pageIndex].map((paragraph, idx) => (
-          <p key={idx} className="w-3/4 mb-5 mx-auto text-[13px] text-gray-900 font-worksans leading-relaxed">
+          <p key={idx} className="w-3/4 mb-5 mx-auto text-body-small text-foreground">
             {paragraph}
           </p>
         ))}

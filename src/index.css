@@ -231,6 +231,19 @@
     background-blend-mode: soft-light;
     animation: shimmer 2.5s infinite;
   }
+
+  /* Sci-Fi Bevel Corner Classes */
+  .corner-bevel {
+    clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+  }
+
+  .corner-bevel-sm {
+    clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
+  }
+
+  .corner-bevel-lg {
+    clip-path: polygon(10px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%, 0% 10px);
+  }
 }
 
 /* Keyframe animations */

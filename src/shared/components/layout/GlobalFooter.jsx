@@ -5,7 +5,7 @@ import { ThemeToggle } from '../user/theme/theme-toggle.jsx';
 const GlobalFooter = () => {
   return (
     <footer className="fixed bottom-0 left-0 right-0 border-t py-4 text-center text-sm text-muted-foreground bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
-      <div className="container flex items-center justify-between max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <p className="text-left">
           Conceptualized by <a 
             href="https://www.1377.co.in/" 

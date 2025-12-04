@@ -28,11 +28,11 @@ function AdminApp() {
               <Route path="settings" element={<Settings />} />
               <Route path="database" element={<Database />} />
               <Route path="/" element={
-                <div className="h-[calc(100vh-8rem)] flex flex-col justify-center items-center py-10">
+                <div className="flex flex-col justify-center items-center h-[calc(100vh-16rem)]">
                   <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold tracking-tight mb-4">FOH Behind the Scenes</h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                      Administration dashboard for fiction and image generation management.
+                      Configure story genres, adjust generation settings, and curate your fiction library.
                     </p>
                   </div>
                   
@@ -40,7 +40,7 @@ function AdminApp() {
                     <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Categories</CardTitle>
-                        <CardDescription>Manage fiction categories like Science Fiction, Fantasy, etc.</CardDescription>
+                        <CardDescription>Define and organize the fictional worlds your stories inhabit.</CardDescription>
                       </CardHeader>
                       <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/categories" className="w-full">
@@ -52,7 +52,7 @@ function AdminApp() {
                     <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Parameters</CardTitle>
-                        <CardDescription>Configure generation parameters for each category.</CardDescription>
+                        <CardDescription>Fine-tune how stories are generated for each genre.</CardDescription>
                       </CardHeader>
                       <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/parameters" className="w-full">
@@ -64,7 +64,7 @@ function AdminApp() {
                     <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Content</CardTitle>
-                        <CardDescription>View and manage generated fiction and images.</CardDescription>
+                        <CardDescription>Browse, review, and organize your generated stories and images.</CardDescription>
                       </CardHeader>
                       <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/content" className="w-full">

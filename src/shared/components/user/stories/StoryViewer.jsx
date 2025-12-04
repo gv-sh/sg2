@@ -298,7 +298,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
     container.style.top = '0';
     container.style.width = '794px';
     container.style.padding = '10mm';
-    container.style.backgroundColor = '#fff';
+    container.style.backgroundColor = 'hsl(var(--background))';
     container.style.columnCount = '1';
     container.style.columnGap = '40px';
     container.style.fontSize = '10px';
@@ -357,7 +357,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
       scale: 2,
       useCORS: true,
       scrollY: -window.scrollY,
-      backgroundColor: '#fff',
+      backgroundColor: 'hsl(var(--background))',
       windowWidth: container.scrollWidth
     });
 

@@ -192,7 +192,7 @@ function Settings() {
                     id="fictionModel"
                     value={settings.ai.models.fiction}
                     onChange={(e) => handleSettingsChange('ai', 'models', 'fiction', e.target.value)}
-                    className={settings.ai.models.fiction !== DEFAULT_SETTINGS.ai.models.fiction ? 'border border-yellow-500' : ''}
+                    className={settings.ai.models.fiction !== DEFAULT_SETTINGS.ai.models.fiction ? 'border border-destructive' : ''}
                   />
                   <p className="text-xs text-muted-foreground">
                     The AI model used for fiction generation (e.g., "gpt-4o-mini")
@@ -204,7 +204,7 @@ function Settings() {
                     id="imageModel"
                     value={settings.ai.models.image}
                     onChange={(e) => handleSettingsChange('ai', 'models', 'image', e.target.value)}
-                    className={settings.ai.models.image !== DEFAULT_SETTINGS.ai.models.image ? 'border border-yellow-500' : ''}
+                    className={settings.ai.models.image !== DEFAULT_SETTINGS.ai.models.image ? 'border border-destructive' : ''}
                   />
                   <p className="text-xs text-muted-foreground">
                     The AI model used for image generation (e.g., "dall-e-3")
@@ -234,7 +234,7 @@ function Settings() {
                       ...settings.ai.parameters.fiction,
                       temperature: parseFloat(e.target.value)
                     })}
-                    className={settings.ai.parameters.fiction.temperature !== DEFAULT_SETTINGS.ai.parameters.fiction.temperature ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.fiction.temperature !== DEFAULT_SETTINGS.ai.parameters.fiction.temperature ? 'border border-destructive' : ''}
                   />
                   <p className="text-xs text-muted-foreground">
                     Controls randomness (0.0 to 2.0)
@@ -252,7 +252,7 @@ function Settings() {
                       ...settings.ai.parameters.fiction,
                       max_tokens: parseInt(e.target.value, 10)
                     })}
-                    className={settings.ai.parameters.fiction.max_tokens !== DEFAULT_SETTINGS.ai.parameters.fiction.max_tokens ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.fiction.max_tokens !== DEFAULT_SETTINGS.ai.parameters.fiction.max_tokens ? 'border border-destructive' : ''}
                   />
                   <p className="text-xs text-muted-foreground">
                     Maximum tokens to generate
@@ -270,7 +270,7 @@ function Settings() {
                       ...settings.ai.parameters.fiction,
                       default_story_length: parseInt(e.target.value, 10)
                     })}
-                    className={settings.ai.parameters.fiction.default_story_length !== DEFAULT_SETTINGS.ai.parameters.fiction.default_story_length ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.fiction.default_story_length !== DEFAULT_SETTINGS.ai.parameters.fiction.default_story_length ? 'border border-destructive' : ''}
                   />
                   <p className="text-xs text-muted-foreground">
                     Default story length in words
@@ -297,7 +297,7 @@ function Settings() {
                       ...settings.ai.parameters.fiction,
                       system_prompt: e.target.value
                     })}
-                    className={settings.ai.parameters.fiction.system_prompt !== DEFAULT_SETTINGS.ai.parameters.fiction.system_prompt ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.fiction.system_prompt !== DEFAULT_SETTINGS.ai.parameters.fiction.system_prompt ? 'border border-destructive' : ''}
                     placeholder="Enter the system prompt that guides the AI's fiction generation behavior..."
                   />
                   <p className="text-xs text-muted-foreground">
@@ -314,7 +314,7 @@ function Settings() {
                       ...settings.ai.parameters.image,
                       prompt_suffix: e.target.value
                     })}
-                    className={settings.ai.parameters.image.prompt_suffix !== DEFAULT_SETTINGS.ai.parameters.image.prompt_suffix ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.image.prompt_suffix !== DEFAULT_SETTINGS.ai.parameters.image.prompt_suffix ? 'border border-destructive' : ''}
                     placeholder="Enter the suffix added to all image generation prompts..."
                   />
                   <p className="text-xs text-muted-foreground">
@@ -341,7 +341,7 @@ function Settings() {
                       ...settings.ai.parameters.image,
                       size: e.target.value
                     })}
-                    className={settings.ai.parameters.image.size !== DEFAULT_SETTINGS.ai.parameters.image.size ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.image.size !== DEFAULT_SETTINGS.ai.parameters.image.size ? 'border border-destructive' : ''}
                   >
                     <option value="256x256">256x256</option>
                     <option value="512x512">512x512</option>
@@ -362,7 +362,7 @@ function Settings() {
                       ...settings.ai.parameters.image,
                       quality: e.target.value
                     })}
-                    className={settings.ai.parameters.image.quality !== DEFAULT_SETTINGS.ai.parameters.image.quality ? 'border border-yellow-500' : ''}
+                    className={settings.ai.parameters.image.quality !== DEFAULT_SETTINGS.ai.parameters.image.quality ? 'border border-destructive' : ''}
                   >
                     <option value="standard">Standard</option>
                     <option value="hd">HD</option>

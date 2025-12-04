@@ -135,8 +135,8 @@ function Categories() {
                           <div className="flex items-center justify-center gap-1">
                             <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                               category.parameter_count > 0 
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                                : 'bg-gray-50 text-gray-500 border border-gray-200'
+                                ? 'bg-primary/10 text-primary border border-primary/20' 
+                                : 'bg-muted text-muted-foreground border border-border'
                             }`}>
                               {category.parameter_count || 0}
                             </span>

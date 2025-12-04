@@ -1,18 +1,58 @@
 // src/components/ui/select.jsx
 import * as React from "react"
 import { cn } from "../../lib/utils"
+import { ChevronDown } from "lucide-react"
 
-const Select = React.forwardRef(({ className, ...props }, ref) => (
-  <select
-    className={cn(
-      "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none pr-9",
-      className
-    )}
-    ref={ref}
-    {...props}
-  />
-))
-Select.displayName = "Select"
+// Context for Select state management
+const SelectContext = React.createContext()
+
+// Main Select component
+const Select = ({ value, onValueChange, children, ...props }) => {
+  const [open, setOpen] = React.useState(false)
+  const [selectedValue, setSelectedValue] = React.useState(value || '')
+  const selectRef = React.useRef(null)
+
+  // Update internal value when prop changes
+  React.useEffect(() => {
+    setSelectedValue(value || '')
+  }, [value])
+
+  // Handle value selection
+  const handleValueChange = (newValue) => {
+    setSelectedValue(newValue)
+    onValueChange?.(newValue)
+    setOpen(false)
+  }
+
+  // Handle click outside to close
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectRef.current && !selectRef.current.contains(event.target)) {
+        setOpen(false)
+      }
+    }
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [open])
+
+  const contextValue = {
+    open,
+    setOpen,
+    selectedValue,
+    handleValueChange
+  }
+
+  return (
+    <SelectContext.Provider value={contextValue}>
+      <div ref={selectRef} className="relative" {...props}>
+        {children}
+      </div>
+    </SelectContext.Provider>
+  )
+}
 
 const SelectGroup = React.forwardRef(({ className, ...props }, ref) => (
   <div
@@ -41,56 +81,90 @@ const SelectOption = React.forwardRef(({ className, ...props }, ref) => (
 ))
 SelectOption.displayName = "SelectOption"
 
-// Custom Select components to match Shadcn/ui style
-const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-))
+// Functional Select components
+const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) => {
+  const context = React.useContext(SelectContext)
+  
+  const handleClick = () => {
+    context?.setOpen(!context.open)
+  }
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={cn(
+        "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+      <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform", context?.open && "rotate-180")} />
+    </button>
+  )
+})
 SelectTrigger.displayName = "SelectTrigger"
 
-const SelectValue = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm", className)}
-    {...props}
-  />
-))
+const SelectValue = ({ placeholder, className, ...props }) => {
+  const context = React.useContext(SelectContext)
+  
+  return (
+    <div
+      className={cn("text-sm", className)}
+      {...props}
+    >
+      {context?.selectedValue || placeholder}
+    </div>
+  )
+}
 SelectValue.displayName = "SelectValue"
 
-const SelectContent = React.forwardRef(({ className, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border border-input bg-popover text-popover-foreground shadow-md",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-))
+const SelectContent = React.forwardRef(({ className, children, ...props }, ref) => {
+  const context = React.useContext(SelectContext)
+  
+  if (!context?.open) return null
+  
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-input bg-popover text-popover-foreground shadow-lg",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+})
 SelectContent.displayName = "SelectContent"
 
-const SelectItem = React.forwardRef(({ className, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "relative flex w-full cursor-default border border-input select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none hover:bg-accent focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-))
+const SelectItem = React.forwardRef(({ className, children, value, ...props }, ref) => {
+  const context = React.useContext(SelectContext)
+  
+  const handleClick = () => {
+    context?.handleValueChange(value)
+  }
+
+  const isSelected = context?.selectedValue === value
+  
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none hover:bg-accent focus:bg-accent",
+        isSelected && "bg-accent",
+        className
+      )}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+})
 SelectItem.displayName = "SelectItem"
 
 export { 

@@ -79,11 +79,8 @@ router.post('/api/generate', (req, res, next) => {
   contentRoutes(req, res, next);
 });
 
-router.use('/api/images', (req, res, next) => {
-  // Route image requests to content routes
-  req.url = req.url.replace('/api/images', '/images');
-  contentRoutes(req, res, next);
-});
+// Mount image routes directly from content routes
+router.use('/api', contentRoutes);
 
 // User-facing data endpoints
 router.get('/api/categories', (req, res, next) => {

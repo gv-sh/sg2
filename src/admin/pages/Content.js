@@ -30,9 +30,7 @@ function Content() {
   
   // Modal and content state
   const [selectedContent, setSelectedContent] = useState(null);
-  const [editContent, setEditContent] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   
@@ -212,46 +210,12 @@ function Content() {
     }
   };
 
-  const handleEditClick = async (content) => {
-    const fullContent = await fetchFullContent(content.id);
-    if (fullContent) {
-      setEditContent({ ...fullContent });
-      setShowEditModal(true);
-    }
-  };
 
   const handleDeleteClick = (content) => {
     setSelectedContent(content);
     setShowDeleteModal(true);
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      setIsLoading(true);
-      const { id, title, content: fiction_content, image_original_url, year, metadata } = editContent;
-      const payload = { title };
-
-      // Add validated year to payload
-      if (year && year.toString().length === 4) {
-        payload.year = parseInt(year, 10);
-      }
-
-      // All content has fiction content  
-      payload.fiction_content = fiction_content;
-
-      // Always include metadata in payload (even if it's an empty object)
-      payload.metadata = metadata || {};
-
-      await axios.put(`${config.API_URL}/api/content/${id}`, payload);
-      setShowEditModal(false);
-      fetchContent();
-      toast.success('Content updated successfully!');
-    } catch (error) {
-      toast.error('Failed to update content. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDeleteContent = async () => {
     try {
@@ -524,15 +488,6 @@ function Content() {
                           View
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="xs"
-                          onClick={() => handleEditClick(item)}
-                          aria-label={`Edit ${item.title}`}
-                          disabled={isLoadingFullContent}
-                        >
-                          Edit
-                        </Button>
-                        <Button
                           variant="destructive-ghost"
                           size="xs"
                           onClick={() => handleDeleteClick(item)}
@@ -761,23 +716,16 @@ function Content() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-muted-foreground">Generation Parameters</h4>
-                  <div className="rounded-lg border border-border/50 p-3 h-[200px] overflow-y-auto bg-transparent">
-                    <pre className="text-xs text-foreground/80">{JSON.stringify(selectedContent.prompt_data, null, 2)}</pre>
-                  </div>
-                </div>
-
-                {selectedContent.metadata && (
+              {selectedContent.metadata && (
+                <div className="mt-8">
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium text-muted-foreground">Metadata</h4>
                     <div className="rounded-lg border border-border/50 p-3 h-[200px] overflow-y-auto bg-transparent">
                       <pre className="text-xs text-foreground/80">{JSON.stringify(selectedContent.metadata, null, 2)}</pre>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter>
@@ -794,130 +742,6 @@ function Content() {
         </Dialog>
       )}
 
-      {/* Edit Content Modal */}
-      {showEditModal && editContent && (
-        <Dialog isOpen={showEditModal} onDismiss={() => setShowEditModal(false)}>
-          <DialogContent className="sm:max-w-[700px]">
-            <DialogHeader>
-              <DialogTitle className="text-xl">Edit {editContent.type === 'fiction' ? 'Fiction' : 'Image'}</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-6 py-6">
-              <div className="space-y-2">
-                <label htmlFor="contentTitle" className="text-sm font-medium">Title</label>
-                <Input
-                  id="contentTitle"
-                  value={editContent.title}
-                  onChange={(e) => setEditContent({ ...editContent, title: e.target.value })}
-                  className="bg-background/50"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="contentYear" className="text-sm font-medium">Year of Generation</label>
-                <Input
-                  id="contentYear"
-                  type="number"
-                  value={editContent.year || new Date().getFullYear()}
-                  onChange={(e) => {
-                    const yearValue = e.target.value;
-                    // Only update if empty or valid number
-                    if (!yearValue || (yearValue.length <= 4 && /^\d+$/.test(yearValue))) {
-                      setEditContent({ ...editContent, year: yearValue });
-                    }
-                  }}
-                  placeholder={new Date().getFullYear().toString()}
-                  className="bg-background/50"
-                  min="1000"
-                  max="9999"
-                />
-                {editContent.year && (editContent.year.toString().length !== 4 || editContent.year < 1000 || editContent.year > 9999) && (
-                  <p className="text-xs text-destructive">Please enter a valid four-digit year</p>
-                )}
-              </div>
-
-              {(editContent.type === 'fiction' || editContent.type === 'combined') && (
-                <div className="space-y-2">
-                  <label htmlFor="contentText" className="text-sm font-medium">Story Content</label>
-                  <textarea
-                    className="flex w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 min-h-[250px]"
-                    id="contentText"
-                    value={editContent.content || ''}
-                    onChange={(e) => setEditContent({ ...editContent, content: e.target.value })}
-                  />
-                </div>
-              )}
-
-              {editContent.type === 'image' && (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">Image Preview</p>
-                  {editContent.image_original_url ? (
-                    <div className="rounded-lg border border-border/50 bg-transparent p-4 flex justify-center">
-                      <img
-                        src={editContent.image_original_url}
-                        alt={editContent.title}
-                        className="rounded-md max-w-full mx-auto shadow-md"
-                        style={{ maxHeight: '300px' }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-center py-10 rounded-lg border border-border/50 bg-transparent">
-                      <p className="text-sm text-muted-foreground">No image data available</p>
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    The image data is stored as a base64 encoded string and cannot be directly edited.
-                  </p>
-                </div>
-              )}
-
-              {/* Add Metadata Editing Section */}
-              <div className="space-y-2">
-                <label htmlFor="contentMetadata" className="text-sm font-medium">Metadata</label>
-                <textarea
-                  className="flex w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm font-mono focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 min-h-[150px]"
-                  id="contentMetadata"
-                  value={JSON.stringify(editContent.metadata || {}, null, 2)}
-                  onChange={(e) => {
-                    try {
-                      const parsed = JSON.parse(e.target.value);
-                      setEditContent({ ...editContent, metadata: parsed });
-                    } catch (error) {
-                      // Allow invalid JSON during editing, but will validate before saving
-                      // We're keeping the potentially invalid text in the textarea
-                      // This approach allows users to continue typing even when syntax is temporarily invalid
-                    }
-                  }}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Edit metadata in JSON format. Changes will be validated before saving.
-                </p>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-md text-xs"
-                onClick={() => setShowEditModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                className="rounded-md text-xs"
-                onClick={handleSaveEdit}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedContent && (

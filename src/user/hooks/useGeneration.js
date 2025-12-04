@@ -160,6 +160,8 @@ export const useGeneration = (
       );
 
       if (response.success) {
+        console.log('Generation response:', response); // DEBUG
+        
         if (response.content) {
           setGeneratedContent(response.content);
 
@@ -175,20 +177,24 @@ export const useGeneration = (
           setStoryTitle(response.title || extractedTitle);
         }
 
-        // Create story object
-        const newStory = response.generatedStory || {
-          id: `story-${Date.now()}`,
-          title: response.title || storyTitle || "Untitled Story",
-          createdAt: new Date().toISOString(),
-          content: response.content,
-          imageData: response.imageData?.startsWith('data:image')
-            ? response.imageData
-            : response.imageData ? `data:image/png;base64,${response.imageData}` : null,
-          parameterValues,
-          metadata: response.metadata,
-          year: response.year || yearToUse
-        };
+        // Use the story object returned by the backend (with proper UUID)
+        const newStory = response.generatedStory;
+        
+        console.log('New story from response:', newStory); // DEBUG
+        
+        if (!newStory) {
+          console.error('Backend did not return story data in generatedStory field'); // DEBUG
+          console.error('Full response:', response); // DEBUG
+          throw new Error('Backend did not return story data - check console for details');
+        }
+        
+        if (!newStory.id || newStory.id.startsWith('request-') || newStory.id.startsWith('gen-')) {
+          console.error('Invalid story ID detected:', newStory.id); // DEBUG
+          console.error('Full story object:', newStory); // DEBUG
+          throw new Error('Backend returned invalid story ID format');
+        }
 
+        console.log('Setting story with ID:', newStory.id); // DEBUG
         newStoryId = newStory.id;
         setLastGeneratedStoryId(newStoryId);
         setActiveStory(newStory);

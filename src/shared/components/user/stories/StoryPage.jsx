@@ -29,7 +29,19 @@ const StoryPage = () => {
       setError(null);
       
       try {
-        // Try to get from localStorage first (for now, until API endpoint is available)
+        // First try to fetch from API
+        const response = await fetch(`/api/content/${storyId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setActiveStory(data.data);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // Fallback to localStorage cache
         const cachedStoriesJSON = localStorage.getItem('specgen-cached-stories');
         if (cachedStoriesJSON) {
           const cachedStories = JSON.parse(cachedStoriesJSON);
@@ -42,8 +54,6 @@ const StoryPage = () => {
           }
         }
         
-        // If not in cache, we could fetch from API
-        // For now, show error
         setError('Story not found');
       } catch (err) {
         console.error('Error loading story:', err);
@@ -84,13 +94,12 @@ const StoryPage = () => {
       );
       
       if (response.success) {
-        // Update story with new content
+        // Update story with new content - preserve API structure
         const updatedStory = {
           ...activeStory,
           content: response.content,
-          imageData: response.imageData?.startsWith('data:image')
-            ? response.imageData
-            : response.imageData ? `data:image/png;base64,${response.imageData}` : null,
+          image_original_url: response.image_original_url,
+          image_thumbnail_url: response.image_thumbnail_url,
           updatedAt: new Date().toISOString()
         };
         

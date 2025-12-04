@@ -6,6 +6,7 @@ import StoryViewer from '../../shared/components/user/stories/StoryViewer';
 import StoryGenerator from '../../shared/components/user/stories/StoryGenerator';
 import GenerationControls from '../../shared/components/user/generation/GenerationControls';
 import { useGeneration } from '../hooks/useGeneration';
+import { fetchStoryById } from '../services/api';
 import { Alert, AlertDescription } from '../../shared/components/ui/alert.tsx';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
@@ -120,6 +121,16 @@ const Generation = ({
           const story = stories.find(s => s.id === storyId);
           if (story) {
             setActiveStory(story);
+          } else {
+            // If story not found in array, try to fetch it directly by ID
+            console.log('Story not found in array, attempting direct fetch for ID:', storyId);
+            try {
+              const fetchedStory = await fetchStoryById(storyId);
+              setActiveStory(fetchedStory);
+              console.log('Successfully fetched story by ID:', fetchedStory);
+            } catch (error) {
+              console.error('Failed to fetch story by ID:', error);
+            }
           }
         }
       } else if (location.pathname === '/library') {

@@ -79,8 +79,6 @@ export const fetchParameters = async (categoryId) => {
  */
 export const generateContent = async (parameterValues, categoryIds, contentType = 'combined', year = null, title = null) => {
   try {
-    // Create a unique ID for the generation request
-    const requestId = `request-${Date.now()}`;
 
     // Validate inputs
     if (!parameterValues || Object.keys(parameterValues).length === 0) {
@@ -91,43 +89,49 @@ export const generateContent = async (parameterValues, categoryIds, contentType 
     }
 
     const payload = {
-      parameterValues,
-      contentType
+      parameters: parameterValues,
+      year: year ? parseInt(year, 10) : null
     };
-
-    // Add year to payload if provided
-    if (year) {
-      payload.year = parseInt(year, 10);
-    }
-
-    // Add title to payload if provided
-    if (title) {
-      payload.title = title;
-    }
 
     // Make the API call
     const response = await api.post('/generate', payload);
     
-    // Create story object
-    const newStory = {
-      id: requestId,
-      title: response.data.title || title || "Untitled Story",
-      createdAt: new Date().toISOString(),
-      content: response.data.content,
-      imageData: response.data.imageData ? `data:image/png;base64,${response.data.imageData}` : null,
-      parameterValues,
-      metadata: response.data.metadata,
-      year: response.data.year || year || null
-    };
+    if (response && response.data && response.data.success) {
+      // Use the story object returned by the backend (with proper UUID)
+      const backendStory = response.data.data;
+      
+      console.log('Backend story data:', backendStory); // DEBUG
+      
+      // Transform to frontend expected format - preserve API structure
+      const story = {
+        id: backendStory.id, // This is the UUID from database
+        title: backendStory.title,
+        content: backendStory.content,
+        image_original_url: backendStory.image_original_url, // Keep API structure
+        image_thumbnail_url: backendStory.image_thumbnail_url,
+        createdAt: backendStory.created_at,
+        year: backendStory.year,
+        parameterValues: backendStory.parameters || parameterValues,
+        metadata: backendStory.metadata || null
+      };
 
-    // Save to local storage if needed
-    saveToGenerationHistory(newStory);
-        
-    return {
-      ...response.data,
-      success: true,
-      generatedStory: newStory
-    };
+      console.log('Transformed story for frontend:', story); // DEBUG
+
+      return {
+        success: true,
+        content: story.content,
+        title: story.title,
+        image_original_url: story.image_original_url,
+        year: story.year,
+        metadata: story.metadata,
+        generatedStory: story // This now has the proper UUID
+      };
+    } else {
+      return {
+        success: false,
+        error: response.data?.message || 'Generation failed'
+      };
+    }
   } catch (error) {
     console.error('Content generation error:', error);
     
@@ -151,65 +155,6 @@ export const generateContent = async (parameterValues, categoryIds, contentType 
   }
 };
 
-/**
- * Save generation to local storage history
- * @param {Object} generation - Generation data to save
- */
-const saveToGenerationHistory = (generation) => {
-  try {
-    // Get existing history
-    const historyJSON = localStorage.getItem('specgen-history');
-    let history = historyJSON ? JSON.parse(historyJSON) : [];
-
-    // Add new generation at the beginning
-    history = [generation, ...history];
-
-    // Limit to 50 stories to prevent excessive clearing
-    if (history.length > 50) {
-      history = history.slice(0, 50);
-    }
-
-    // Remove imageData to save space
-    history = history.map(story => ({
-      ...story,
-      // Only store a reference to image, not the full base64 data
-      imageData: story.imageData ? 'stored-externally' : null
-    }));
-
-    // Try to save, but catch quota errors
-    try {
-      localStorage.setItem('specgen-history', JSON.stringify(history));
-    } catch (storageError) {
-      if (storageError.name === 'QuotaExceededError') {
-        // Clear older items and try again with fewer items
-        localStorage.removeItem('specgen-cached-stories');
-        const originalLength = history.length;
-        history = history.slice(0, 25); // Keep 25 instead of 5
-        
-        try {
-          localStorage.setItem('specgen-history', JSON.stringify(history));
-          console.warn(`Storage quota exceeded. Reduced story library from ${originalLength} to ${history.length} stories.`);
-          
-          // Emit a custom event to notify UI components
-          window.dispatchEvent(new CustomEvent('storageQuotaExceeded', {
-            detail: { 
-              removedCount: originalLength - history.length,
-              remainingCount: history.length 
-            }
-          }));
-        } catch (retryError) {
-          console.error('Failed to save stories even after reducing size:', retryError);
-          // Emit error event for UI to handle
-          window.dispatchEvent(new CustomEvent('storageSaveFailed', {
-            detail: { error: retryError.message }
-          }));
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error saving to generation history:', error);
-  }
-};
 
 /**
  * Fetch content summary without images for fast loading
@@ -233,6 +178,39 @@ export const fetchContentSummary = async (params = {}) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching content summary:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch a specific story by ID
+ * @param {string} storyId - Story ID
+ * @returns {Promise<Object>} Promise resolving to story data
+ */
+export const fetchStoryById = async (storyId) => {
+  try {
+    const response = await api.get(`/content/${storyId}`);
+    
+    if (response && response.data && response.data.success) {
+      const story = response.data.data;
+      
+      // Transform API response format to frontend expected format - preserve API structure
+      return {
+        id: story.id,
+        title: story.title,
+        content: story.content,
+        image_original_url: story.image_original_url, // Keep API structure
+        image_thumbnail_url: story.image_thumbnail_url,
+        createdAt: story.created_at,
+        year: story.year,
+        parameterValues: story.parameters || {},
+        metadata: story.metadata || {}
+      };
+    }
+    
+    throw new Error('Story not found');
+  } catch (error) {
+    console.error(`Error fetching story ${storyId}:`, error);
     throw error;
   }
 };
@@ -283,11 +261,24 @@ export const fetchPreviousGenerations = async (filters = {}) => {
       params.type = filters.type;
     }
 
-    // Use the new summary endpoint for better performance
-    const response = await fetchContentSummary(params);
+    // Use the content endpoint to get actual story data
+    const response = await api.get('/content', { params });
 
-    if (response && response.success) {
-      let stories = response.data || [];
+    if (response && response.data && response.data.success) {
+      let stories = Array.isArray(response.data.data) ? response.data.data : [];
+
+      // Transform API response format to frontend expected format - preserve API structure
+      stories = stories.map(story => ({
+        id: story.id,
+        title: story.title,
+        content: story.content, // API returns this as 'content' already
+        image_original_url: story.image_original_url, // Keep API structure
+        image_thumbnail_url: story.image_thumbnail_url,
+        createdAt: story.created_at, // API returns created_at, frontend expects createdAt
+        year: story.year,
+        parameterValues: story.parameters || {}, // API returns 'parameters', frontend expects 'parameterValues'
+        metadata: story.metadata || {}
+      }));
 
       // Apply client-side search filter if provided (server doesn't support search yet)
       if (filters.search) {
@@ -307,7 +298,7 @@ export const fetchPreviousGenerations = async (filters = {}) => {
       return {
         success: true,
         data: stories,
-        pagination: response.pagination
+        pagination: response.data.meta
       };
     }
 
@@ -325,9 +316,12 @@ const fallbackToLocalStorage = (filters = {}) => {
   try {
     const historyJSON = localStorage.getItem('specgen-history');
     const history = historyJSON ? JSON.parse(historyJSON) : [];
+    
+    // Ensure history is an array
+    const historyArray = Array.isArray(history) ? history : [];
 
     // Process the data to ensure all fields are present
-    const processedHistory = history.map(item => ({
+    const processedHistory = historyArray.map(item => ({
       id: item.id || `gen-${Date.now() + Math.random()}`,
       title: item.title || generateTitle(item.content),
       content: item.content || '',
@@ -338,8 +332,8 @@ const fallbackToLocalStorage = (filters = {}) => {
       metadata: item.metadata || {}
     }));
 
-    // Apply filters
-    let filteredHistory = [...processedHistory];
+    // Apply filters - ensure we have an array
+    let filteredHistory = Array.isArray(processedHistory) ? [...processedHistory] : [];
 
     // Apply the same filters as in the main function
     if (filters.year) {
@@ -385,11 +379,16 @@ const normalizeImageData = (imageData) => {
   if (!imageData) return null;
 
   if (typeof imageData === 'string') {
+    // If it's already a data URL, return as-is
     if (imageData.startsWith('data:image')) {
       return imageData;
-    } else {
-      return `data:image/png;base64,${imageData}`;
     }
+    // If it's an API URL, return as-is (don't add base64 prefix)
+    if (imageData.startsWith('/api/') || imageData.startsWith('http')) {
+      return imageData;
+    }
+    // Only add base64 prefix if it's raw base64 data
+    return `data:image/png;base64,${imageData}`;
   }
 
   return null;

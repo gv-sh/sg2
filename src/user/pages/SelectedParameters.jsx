@@ -1,7 +1,6 @@
 // src/pages/SelectedParameters.jsx
 import React, { useState } from 'react';
 import { Button } from '../../shared/components/ui/button.tsx';
-import { Badge } from '../../shared/components/ui/badge.tsx';
 import { Input } from '../../shared/components/ui/input.tsx';
 import { Checkbox } from '../../shared/components/ui/checkbox.tsx';
 import { Slider } from '../../shared/components/ui/slider.jsx';
@@ -12,48 +11,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../shared/components/ui/select.jsx';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../../shared/components/ui/card.tsx';
-import { Trash2, Sparkles, Play, Dices } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { randomizeParameterValue } from '../utils/parameterUtils';
+import { Trash2, Sparkles, Play } from 'lucide-react';
 
-// Individual selected parameter card
+// Individual selected parameter card - simplified
 const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
-  // Initialize null values with appropriate defaults
-  const initializeValue = () => {
-    if (parameter.value !== null && parameter.value !== undefined) {
-      return parameter.value;
-    }
-    
-    // Set default based on type
-    switch (parameter.type) {
-      case 'boolean':
-        return false;
-      case 'range':
-        return 50;
-      case 'select':
-        return parameter.parameter_values?.[0]?.id || '';
-      case 'text':
-        return '';
-      default:
-        return null;
-    }
-  };
-
-  const currentValue = initializeValue();
+  // Initialize value if not set
+  const currentValue = parameter.value !== null && parameter.value !== undefined 
+    ? parameter.value 
+    : (() => {
+        // Set default and update parameter
+        let defaultValue;
+        switch (parameter.type) {
+          case 'boolean': 
+            defaultValue = false; 
+            break;
+          case 'range': 
+            const rangeConfig = parameter.parameter_config || {};
+            defaultValue = rangeConfig.default ?? rangeConfig.min ?? 0;
+            break;
+          case 'select': 
+            const firstOption = parameter.parameter_values?.[0];
+            defaultValue = firstOption?.id || firstOption?.label || firstOption || '';
+            break;
+          case 'text': 
+            defaultValue = ''; 
+            break;
+          case 'number':
+            defaultValue = 0;
+            break;
+          default: 
+            defaultValue = '';
+        }
+        onUpdate(parameter.id, defaultValue);
+        return defaultValue;
+      })();
 
   const handleValueChange = (newValue) => {
     onUpdate(parameter.id, newValue);
-  };
-
-  const handleRandomize = () => {
-    const randomValue = randomizeParameterValue(parameter);
-    handleValueChange(randomValue);
   };
 
   const renderValueInput = () => {
@@ -65,11 +59,16 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent>
-              {parameter.parameter_values?.map(option => (
-                <SelectItem key={option.id} value={option.id}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              {parameter.parameter_values?.map(option => {
+                // Handle both {id, label} and {label} formats
+                const optionId = option.id || option.label || option;
+                const optionLabel = option.label || option;
+                return (
+                  <SelectItem key={optionId} value={optionId}>
+                    {optionLabel}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         );
@@ -83,27 +82,28 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
               onCheckedChange={handleValueChange}
             />
             <label htmlFor={`selected-${parameter.id}`} className="text-sm">
-              {currentValue ? 'Enabled' : 'Disabled'}
+              {currentValue ? 
+                (parameter.parameter_values?.on || 'Enabled') : 
+                (parameter.parameter_values?.off || 'Disabled')
+              }
             </label>
           </div>
         );
 
       case 'range':
+        const rangeConfig = parameter.parameter_config || {};
+        const min = rangeConfig.min ?? 0;
+        const max = rangeConfig.max ?? 100;
+        const step = rangeConfig.step ?? 1;
         return (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm">Value</label>
-              <Badge variant="outline">{currentValue || 50}</Badge>
-            </div>
-            <Slider
-              min={0}
-              max={100}
-              step={1}
-              value={[currentValue || 50]}
-              onValueChange={([newValue]) => handleValueChange(newValue)}
-              className="w-full"
-            />
-          </div>
+          <Slider
+            min={min}
+            max={max}
+            step={step}
+            value={[currentValue || min]}
+            onValueChange={([newValue]) => handleValueChange(newValue)}
+            className="w-full"
+          />
         );
 
       case 'text':
@@ -112,80 +112,56 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
             type="text"
             value={currentValue || ''}
             onChange={(e) => handleValueChange(e.target.value)}
-            placeholder="Enter text..."
+            placeholder={parameter.description || "Enter text..."}
+            className="w-full"
+          />
+        );
+
+      case 'number':
+        return (
+          <Input
+            type="number"
+            value={currentValue || ''}
+            onChange={(e) => handleValueChange(Number(e.target.value) || 0)}
+            placeholder={parameter.description || "Enter number..."}
             className="w-full"
           />
         );
 
       default:
         return (
-          <div className="text-xs text-muted-foreground">
-            Unknown parameter type: {parameter.type}
+          <div className="p-3 border rounded-md bg-muted/50">
+            <div className="text-xs text-muted-foreground mb-1">
+              Unsupported parameter type: "{parameter.type}"
+            </div>
+            <Input
+              type="text"
+              value={currentValue || ''}
+              onChange={(e) => handleValueChange(e.target.value)}
+              placeholder="Enter value..."
+              className="w-full"
+            />
           </div>
         );
     }
   };
 
-  const getValueDisplay = () => {
-    if (parameter.type === 'select') {
-      const option = parameter.parameter_values?.find(opt => opt.id === currentValue);
-      return option?.label || 'Not selected';
-    } else if (parameter.type === 'boolean') {
-      return currentValue ? 'Yes' : 'No';
-    } else if (parameter.type === 'range') {
-      return currentValue || '50';
-    } else if (parameter.type === 'text') {
-      return currentValue || 'Empty';
-    }
-    return 'Unknown';
-  };
-
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-sm font-medium truncate">
-              {parameter.name}
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              {parameter.description}
-            </p>
-          </div>
-          <div className="flex items-center gap-1 ml-2">
-            <Button
-              onClick={handleRandomize}
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0"
-              title="Randomize value"
-            >
-              <Dices className="h-3 w-3" />
-            </Button>
-            <Button
-              onClick={() => onRemove(parameter.id)}
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-              title="Remove parameter"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-muted-foreground">Current Value</label>
-            <Badge variant="secondary" className="text-xs">
-              {getValueDisplay()}
-            </Badge>
-          </div>
-          {renderValueInput()}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="p-4 border rounded-md space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium">{parameter.name}</h4>
+        <Button
+          onClick={() => onRemove(parameter.id)}
+          size="sm"
+          variant="ghost"
+          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+          title="Remove parameter"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
+      {renderValueInput()}
+    </div>
   );
 };
 
@@ -200,10 +176,6 @@ const SelectedParameters = ({
     return Math.floor(Math.random() * (2126 - 2026 + 1)) + 2026;
   });
 
-  const handleRandomizeYear = () => {
-    const randomYear = Math.floor(Math.random() * (2126 - 2026 + 1)) + 2026;
-    setStoryYear(randomYear);
-  };
 
   const handleGenerate = () => {
     if (onNavigateToGenerate) {
@@ -211,10 +183,6 @@ const SelectedParameters = ({
     }
   };
 
-  // Check if all parameters have values
-  const hasIncompleteParameters = parameters.some(p => 
-    p.value === null || p.value === undefined || p.value === ''
-  );
 
   if (parameters.length === 0) {
     return (
@@ -238,7 +206,7 @@ const SelectedParameters = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full space-y-4">
       <div className="flex flex-col items-left">
         <h3 className="text-sm font-medium mb-1 pt-3">Selected Parameters</h3>
         <p className="text-muted-foreground text-xs border-b pb-3">
@@ -247,41 +215,21 @@ const SelectedParameters = ({
       </div>
 
       {/* Story Year Setting */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium">Story Year</CardTitle>
-            <Button
-              onClick={handleRandomizeYear}
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0"
-              title="Randomize year"
-            >
-              <Dices className="h-3 w-3" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs text-muted-foreground">Year Setting</label>
-              <Badge variant="secondary" className="text-xs">{storyYear}</Badge>
-            </div>
-            <Input
-              type="number"
-              value={storyYear}
-              onChange={(e) => setStoryYear(parseInt(e.target.value) || storyYear)}
-              min={2000}
-              max={3000}
-              className="w-full"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="p-4 border rounded-md space-y-3">
+        <h4 className="text-sm font-medium">Story Year</h4>
+        <Input
+          type="number"
+          value={storyYear}
+          onChange={(e) => setStoryYear(parseInt(e.target.value) || storyYear)}
+          min={2000}
+          max={3000}
+          placeholder="Enter year (e.g., 2050)"
+          className="w-full"
+        />
+      </div>
 
       {/* Selected Parameters */}
-      <div className="space-y-3 max-h-80 overflow-y-auto">
+      <div className="space-y-3 flex-1 overflow-y-auto">
         {parameters.map(parameter => (
           <SelectedParameterCard
             key={parameter.id}
@@ -296,23 +244,12 @@ const SelectedParameters = ({
       <div className="pt-4 border-t">
         <Button
           onClick={handleGenerate}
-          className={cn(
-            "w-full",
-            hasIncompleteParameters && "opacity-75"
-          )}
+          className="w-full"
           disabled={parameters.length === 0}
         >
           <Play className="h-4 w-4 mr-2" />
-          {hasIncompleteParameters 
-            ? `Generate with ${parameters.filter(p => p.value !== null && p.value !== undefined && p.value !== '').length}/${parameters.length} parameters`
-            : `Generate Story (${parameters.length} parameters)`
-          }
+          Generate Story
         </Button>
-        {hasIncompleteParameters && (
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Some parameters don't have values set. They'll use default values.
-          </p>
-        )}
       </div>
     </div>
   );

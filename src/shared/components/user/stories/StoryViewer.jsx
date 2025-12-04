@@ -88,11 +88,16 @@ const StoryViewer = ({
     }
   };
   
-  // Enhanced image handling function
+  // Enhanced image handling function - matches admin pattern
   const getStoryImage = (story) => {
     if (!story) return null;
     
-    // Handle base64 image data
+    // Use API image URL directly (like admin side does)
+    if (story.image_original_url) {
+      return story.image_original_url;
+    }
+    
+    // Legacy support for base64 image data
     if (story.imageData) {
       if (typeof story.imageData === 'string') {
         // If it already starts with data:image, it's already properly formatted
@@ -104,7 +109,7 @@ const StoryViewer = ({
       }
     }
     
-    // Handle image URL if that's what the API returns
+    // Handle legacy imageUrl field
     if (story.imageUrl) {
       return story.imageUrl;
     }

@@ -15,7 +15,19 @@ const StoryCard = ({ story, isHighlighted, onClick }) => {
   const getImageUrl = (story) => {
     // Only exclude if hasImage is explicitly false; allow undefined for backward compatibility
     if (!story || story.hasImage === false || imageError) return null;
-    return `${config.API_URL}/api/content/${story.id}/image`;
+    
+    // Use thumbnail URL first (new API format)
+    if (story.image_thumbnail_url) {
+      return story.image_thumbnail_url;
+    }
+    
+    // Fall back to original image URL (new API format)
+    if (story.image_original_url) {
+      return story.image_original_url;
+    }
+    
+    // Use the imageData URL that was already processed by API service (legacy format)
+    return story.imageData || null;
   };
 
   // Handle title extraction from story

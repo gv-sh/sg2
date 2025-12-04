@@ -17,7 +17,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       destructive: "bg-red-100 text-red-900 border-red-300 dark:bg-red-900 dark:border-red-700 dark:text-red-100",
       info: "bg-blue-100 border-blue-300 text-blue-900 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-100",
       success: "bg-green-100 border-green-300 text-green-900 dark:bg-green-900 dark:border-green-700 dark:text-green-100",
-      warning: "bg-yellow-100 border-yellow-300 text-yellow-900 dark:bg-yellow-900 dark:border-yellow-700 dark:text-yellow-100"
+      warning: "bg-yellow-100 border-yellow-300 text-yellow-900 dark:bg-yellow-900 dark:border-yellow-700 dark:text-yellow-900"
     }
 
     const toastStyles = isToast ? "w-96 max-w-[calc(100vw-2rem)] shadow-lg animate-in slide-in-from-right-full duration-300" : "relative w-full"

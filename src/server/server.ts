@@ -11,6 +11,7 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Server } from 'http';
+import fs from 'fs';
 
 import config from './config.js';
 import routes from './routes/index.js';

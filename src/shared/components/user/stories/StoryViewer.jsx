@@ -301,7 +301,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
     container.style.backgroundColor = 'hsl(var(--background))';
     container.style.columnCount = '1';
     container.style.columnGap = '40px';
-    container.style.fontSize = '10px';
+    container.style.fontSize = '0.75rem'; // 12px for print readability
     container.style.lineHeight = '1.8';
     document.body.appendChild(container);
 
@@ -329,13 +329,13 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
         )}
 
         {pageChunks[pageIndex].map((paragraph, idx) => (
-          <p key={idx} className="w-3/4 mb-5 mx-auto text-body-small text-foreground">
+          <p key={idx} className="w-3/4 mb-5 mx-auto text-story text-foreground">
             {paragraph}
           </p>
         ))}
 
        
-        <div className="w-3/4 mx-auto flex items-center text-[10px] text-gray-700 space-x-2 text-sm border-t mt-10 mb-2">
+        <div className="w-3/4 mx-auto flex items-center text-caption text-muted-foreground space-x-2 border-t mt-10 mb-2">
           <span>Created on</span>
           <span>{formatDate(story.createdAt)}</span>
           <span>|</span>

@@ -79,7 +79,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
             <Checkbox
               id={`selected-${parameter.id}`}
               checked={currentValue || false}
-              onCheckedChange={handleValueChange}
+              onChange={(e) => handleValueChange(e.target.checked)}
             />
             <label htmlFor={`selected-${parameter.id}`} className="text-sm">
               {currentValue ? 
@@ -100,8 +100,8 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
             min={min}
             max={max}
             step={step}
-            value={[currentValue || min]}
-            onValueChange={([newValue]) => handleValueChange(newValue)}
+            value={currentValue || min}
+            onValueChange={(newValue) => handleValueChange(newValue)}
             className="w-full"
           />
         );

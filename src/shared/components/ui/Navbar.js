@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from './navigation-menu.js';
-import { Badge } from './badge.tsx';
-import { ThemeToggle } from '../user/theme/theme-toggle.jsx';
 
 const routes = [
   { path: '/admin/categories', label: 'Categories' },
@@ -12,7 +10,7 @@ const routes = [
   { path: '/admin/database', label: 'Database' }
 ];
 
-function Navbar({ serverStatus }) {
+function Navbar() {
   const location = useLocation();
 
   return (
@@ -20,25 +18,11 @@ function Navbar({ serverStatus }) {
       <div className="container flex h-16 items-center justify-between py-4 max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           <Link to="/admin" className="text-xl font-bold">
-            Admin Dashboard
+            FOH Behind the Scenes
           </Link>
-          <div className="ml-4">
-            <Badge
-              variant={serverStatus === 'online'
-                ? 'default'
-                : serverStatus === 'error'
-                ? 'secondary'
-                : 'destructive'
-              }
-            >
-              Server: {serverStatus}
-              {serverStatus !== 'online' && <span className="ml-1 text-xs">(Configure in Settings)</span>}
-            </Badge>
-          </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <ThemeToggle />
+        <div className="flex items-center">
           <NavigationMenu>
             <NavigationMenuList>
               {routes.map(({ path, label }) => (

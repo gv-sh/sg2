@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '../../../lib/utils';
 import Header from './Header.jsx';
-import Footer from './Footer.jsx';
+import GlobalFooter from '../../layout/GlobalFooter.jsx';
 import { useLocation } from 'react-router-dom';
 
 const MainLayout = ({ children, onShowTour, className }) => {
@@ -27,7 +27,7 @@ const MainLayout = ({ children, onShowTour, className }) => {
         </div>
       </main>
       
-      <Footer />
+      <GlobalFooter />
     </div>
   );
 };

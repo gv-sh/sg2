@@ -16,7 +16,7 @@ function Layout({ children }) {
       animate="enter"
       exit="exit"
       variants={pageVariants}
-      className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6"
+      className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-24"
     >
       {children}
     </motion.div>

@@ -10,7 +10,7 @@ const StoryCardSkeleton = () => {
   return (
     <Card className="overflow-hidden">
       {/* Image skeleton */}
-      <Skeleton className="w-full h-48 rounded-none" />
+      <Skeleton className="w-full aspect-[6/4] rounded-none" />
 
       <CardContent className="p-4 space-y-3">
         {/* Title skeleton */}

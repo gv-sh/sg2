@@ -8,7 +8,7 @@ import { useToast } from '../../shared/contexts/ToastContext.jsx';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../shared/components/ui/table.js';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../shared/components/ui/dialog.js';
 import { PaginationControls } from '../../shared/components/ui/pagination.js';
-import { Clipboard, Download, Search, Trash2, CheckSquare, Square } from 'lucide-react';
+import { Clipboard, Download, Search, Trash2 } from 'lucide-react';
 
 function Content() {
   // Content and pagination state
@@ -408,17 +408,13 @@ function Content() {
                 <TableHeader>
                   <TableRow className="bg-muted/50">
                     <TableHead className="w-12">
-                      <button
-                        onClick={handleSelectAll}
-                        className="flex items-center justify-center w-5 h-5"
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4"
                         aria-label={selectAll ? "Deselect all" : "Select all"}
-                      >
-                        {selectAll ? (
-                          <CheckSquare className="h-4 w-4" />
-                        ) : (
-                          <Square className="h-4 w-4" />
-                        )}
-                      </button>
+                      />
                     </TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Story Preview</TableHead>
@@ -432,17 +428,13 @@ function Content() {
                   {filteredContent.map((item) => (
                     <TableRow key={item.id} className="hover:bg-muted/30">
                       <TableCell>
-                        <button
-                          onClick={() => handleSelectItem(item.id)}
-                          className="flex items-center justify-center w-5 h-5"
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.has(item.id)}
+                          onChange={() => handleSelectItem(item.id)}
+                          className="w-4 h-4"
                           aria-label={`Select ${item.title}`}
-                        >
-                          {selectedItems.has(item.id) ? (
-                            <CheckSquare className="h-4 w-4" />
-                          ) : (
-                            <Square className="h-4 w-4" />
-                          )}
-                        </button>
+                        />
                       </TableCell>
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell className="max-w-xs">
@@ -453,24 +445,24 @@ function Content() {
                           }
                         </div>
                       </TableCell>
-                      <TableCell className="w-20">
+                      <TableCell className="w-24">
                         <div className="flex justify-center">
                           {item.image_thumbnail_url ? (
                             <img 
                               src={item.image_thumbnail_url} 
                               alt={`${item.title} thumbnail`}
-                              className="w-12 h-12 object-cover rounded border"
+                              className="w-18 h-12 object-cover rounded border"
                               onError={(e) => {
                                 e.target.style.display = 'none';
                                 e.target.nextSibling.style.display = 'block';
                               }}
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
+                            <div className="w-18 h-12 bg-muted rounded border flex items-center justify-center">
                               <span className="text-xs text-muted-foreground">No image</span>
                             </div>
                           )}
-                          <div style={{display: 'none'}} className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
+                          <div style={{display: 'none'}} className="w-18 h-12 bg-muted rounded border flex items-center justify-center">
                             <span className="text-xs text-muted-foreground">Error</span>
                           </div>
                         </div>
@@ -522,7 +514,7 @@ function Content() {
       {/* View Content Modal - unchanged */}
       {showViewModal && selectedContent && (
         <Dialog isOpen={showViewModal} onDismiss={() => setShowViewModal(false)}>
-          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[95vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">{selectedContent.title}</DialogTitle>
               <p className="text-sm text-muted-foreground mt-1">
@@ -552,7 +544,7 @@ function Content() {
                       <Download className="h-3.5 w-3.5 opacity-70" /> Download
                     </Button>
                   </div>
-                  <div className="prose prose-sm max-w-none rounded-lg border border-border/50 p-4 bg-transparent">
+                  <div className="prose prose-sm max-w-none rounded-lg border border-border/50 p-4 bg-transparent max-h-[400px] overflow-y-auto">
                     <p className="text-sm whitespace-pre-line text-foreground/90">{selectedContent.content}</p>
                   </div>
                 </div>
@@ -585,12 +577,12 @@ function Content() {
                           <Download className="h-3.5 w-3.5 opacity-70" /> Download
                         </Button>
                       </div>
-                      <div className="flex justify-center p-4 rounded-lg border border-border/50 bg-transparent">
+                      <div className="flex justify-center p-4 rounded-lg border border-border/50 bg-transparent max-h-[500px] overflow-auto">
                         <img
                           src={selectedContent.image_original_url}
                           alt={selectedContent.title}
-                          className="rounded-md max-w-full mx-auto shadow-md"
-                          style={{ maxHeight: '500px' }}
+                          className="rounded-lg max-w-full mx-auto shadow-md object-contain"
+                          style={{ maxHeight: '450px' }}
                           onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'block';
@@ -631,7 +623,7 @@ function Content() {
                         <Download className="h-3.5 w-3.5 opacity-70" /> Download Text
                       </Button>
                     </div>
-                    <div className="prose prose-sm max-w-none rounded-lg border border-border/50 p-4 bg-transparent">
+                    <div className="prose prose-sm max-w-none rounded-lg border border-border/50 p-4 bg-transparent max-h-[400px] overflow-y-auto">
                       <p className="text-sm whitespace-pre-line text-foreground/90">{selectedContent.content}</p>
                     </div>
                   </div>
@@ -666,12 +658,12 @@ function Content() {
                             <Download className="h-3.5 w-3.5 opacity-70" /> Download Image
                           </Button>
                         </div>
-                        <div className="flex justify-center p-4 rounded-lg border border-border/50 bg-transparent">
+                        <div className="flex justify-center p-4 rounded-lg border border-border/50 bg-transparent max-h-[400px] overflow-auto">
                           <img
                             src={selectedContent.image_original_url}
                             alt={selectedContent.title}
-                            className="rounded-md max-w-full mx-auto shadow-md"
-                            style={{ maxHeight: '500px' }}
+                            className="rounded-lg max-w-full mx-auto shadow-md object-contain"
+                            style={{ maxHeight: '350px' }}
                             onError={(e) => {
                               e.target.style.display = 'none';
                               e.target.nextSibling.style.display = 'block';
@@ -720,8 +712,8 @@ function Content() {
                 <div className="mt-8">
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium text-muted-foreground">Metadata</h4>
-                    <div className="rounded-lg border border-border/50 p-3 h-[200px] overflow-y-auto bg-transparent">
-                      <pre className="text-xs text-foreground/80">{JSON.stringify(selectedContent.metadata, null, 2)}</pre>
+                    <div className="rounded-lg border border-border/50 p-3 h-[300px] overflow-auto bg-transparent">
+                      <pre className="text-xs text-foreground/80 whitespace-pre-wrap break-words">{JSON.stringify(selectedContent.metadata, null, 2)}</pre>
                     </div>
                   </div>
                 </div>

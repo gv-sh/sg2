@@ -93,6 +93,7 @@ function Database() {
     const file = event.target.files[0];
     if (file) {
       setSelectedFile(file);
+      setShowImportModal(true);
     }
   };
 
@@ -154,19 +155,17 @@ function Database() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Database Management</h1>
-          <p className="text-muted-foreground mt-1">Backup, restore, or reset your application database.</p>
+          <p className="text-muted-foreground mt-1">Manage backups, content, and database operations.</p>
         </div>
         
-        {/* Full Database Operations */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Database Operations</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Simplified Operations */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Export Database</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-40 justify-between">
-                <p className="text-sm text-muted-foreground">Download a complete backup of the entire database including categories, parameters, settings, and generated content.</p>
+              <CardContent className="flex flex-col h-32 justify-between">
+                <p className="text-sm text-muted-foreground">Download complete database backup with all settings and content.</p>
                 <Button 
                   onClick={handleExportDatabase}
                   disabled={isLoading}
@@ -181,26 +180,24 @@ function Database() {
               <CardHeader>
                 <CardTitle>Import Database</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-40 justify-between">
-                <p className="text-sm text-muted-foreground">Restore the entire database from a backup file. This will replace all current data.</p>
-                <div className="space-y-2 mt-auto">
-                  <Input
-                    type="file"
-                    ref={fileInputRef}
-                    accept=".json"
-                    onChange={handleFileSelect}
-                    disabled={isLoading}
-                    className="text-xs"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowImportModal(true)}
-                    disabled={!selectedFile || isLoading}
-                    className="w-full"
-                  >
-                    {isLoading ? 'Importing...' : 'Import Database'}
-                  </Button>
-                </div>
+              <CardContent className="flex flex-col h-32 justify-between">
+                <p className="text-sm text-muted-foreground">Restore database from backup file. Replaces all current data.</p>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".json"
+                  onChange={handleFileSelect}
+                  disabled={isLoading}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading}
+                  className="w-full mt-4"
+                >
+                  {isLoading ? 'Importing...' : 'Import Database'}
+                </Button>
               </CardContent>
             </Card>
 
@@ -208,8 +205,8 @@ function Database() {
               <CardHeader>
                 <CardTitle>Reset Database</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-40 justify-between">
-                <p className="text-sm text-muted-foreground">Reset the database to its initial state with default data. This action cannot be undone.</p>
+              <CardContent className="flex flex-col h-32 justify-between">
+                <p className="text-sm text-muted-foreground">Reset database to default state. This action cannot be undone.</p>
                 <Button
                   variant="destructive"
                   onClick={() => setShowResetModal(true)}
@@ -220,13 +217,6 @@ function Database() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </div>
-        
-        {/* Content Management */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Content Management</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Export Content</CardTitle>
@@ -259,7 +249,6 @@ function Database() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
         </div>
       </div>
 

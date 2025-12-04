@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS = {
         system_prompt: "You are a speculative fiction generator trained to create vivid, original, and thought-provoking stories from the Global South—particularly Africa, Asia, and Latin America, with special focus on India. Your goal is to craft speculative fiction rooted deeply in the region's cultural, ecological, historical, and socio-political realities, while imagining bold, layered futures.\n\nEach story must:\n- Be grounded in the specific cultural and traditional context of the selected region.\n- Establish a logical continuity between the present year (e.g., 2025) and a user-defined future, showing how current realities evolve into future scenarios.\n- Be driven by the world-building parameters provided by the user. These parameters define societal structures, technologies, environments, and ideologies—use them as the foundation for constructing the speculative world.\n- Reflect the narrative parameters to shape voice, tone, style, and structure.\n\nGeneration Guidelines:\n- Begin from a recognizable present or near-present context, then extrapolate plausibly into the future.\n- Translate the user-defined world-building parameters into concrete details—institutions, environments, economies, belief systems, and everyday life.\n- Infuse speculative elements with grounding in local histories, belief systems, and lived realities.\n- Let the narrative parameters guide how the story is told—not just what happens.\n- Avoid Western-centric tropes. Think from within the chosen region's worldview—its languages, philosophies, conflicts, mythologies, and ways of knowing."
       },
       image: { 
-        size: '1024x1024', 
+        size: '900x600', 
         quality: 'standard',
         prompt_suffix: "Create a photorealistic, visually rich and emotionally resonant scene inspired by the story. Include key narrative elements in the composition. Place characters from the story in the foreground with expressive, human-like features, posture, and emotion that reflect their role or experience in the narrative. Design the background to subtly or symbolically represent the setting, mood, or major events of the story. Do not include any text or lettering in the image. Let the image convey the story purely through visual form, composition, and atmosphere."
       }
@@ -343,11 +343,9 @@ function Settings() {
                     })}
                     className={settings.ai.parameters.image.size !== DEFAULT_SETTINGS.ai.parameters.image.size ? 'border border-destructive' : ''}
                   >
-                    <option value="256x256">256x256</option>
-                    <option value="512x512">512x512</option>
-                    <option value="1024x1024">1024x1024</option>
-                    <option value="1792x1024">1792x1024</option>
-                    <option value="1024x1792">1024x1792</option>
+                    <option value="600x400">Small (600×400)</option>
+                    <option value="900x600">Medium (900×600)</option>
+                    <option value="1200x800">Large (1200×800)</option>
                   </Select>
                   <p className="text-xs text-muted-foreground">
                     Size of generated images

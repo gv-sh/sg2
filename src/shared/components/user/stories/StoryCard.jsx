@@ -68,13 +68,13 @@ const StoryCard = ({ story, isHighlighted, onClick }) => {
         <LazyImage
           src={imageUrl}
           alt={storyTitle}
-          className="w-full h-48 object-cover"
-          skeletonClassName="w-full h-48"
+          className="w-full aspect-[6/4] object-cover"
+          skeletonClassName="w-full aspect-[6/4]"
           onError={() => setImageError(true)}
         />
       ) : (
         // Fallback for stories without images
-        <div className="w-full h-48 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+        <div className="w-full aspect-[6/4] bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
           <BookOpen className="h-12 w-12 text-white opacity-80" />
         </div>
       )}

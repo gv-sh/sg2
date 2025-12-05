@@ -82,20 +82,13 @@ const StoryCard = ({ story, isHighlighted, onClick }) => {
       <CardContent className="p-5">
         <h3 className="text-xl font-semibold line-clamp-2 mb-2">{storyTitle}</h3>
         
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center text-sm text-muted-foreground">
           {story.year && (
             <div className="flex items-center">
               <Calendar className="h-3.5 w-3.5 mr-1.5" />
               Year {story.year}
             </div>
           )}
-          
-          {/* Story type badge */}
-          <div className="flex items-center">
-            <span className="px-2 py-1 bg-muted rounded-md text-xs font-medium capitalize">
-              {story.type}
-            </span>
-          </div>
         </div>
 
         {/* Creation date */}

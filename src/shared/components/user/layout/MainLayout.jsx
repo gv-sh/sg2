@@ -13,13 +13,13 @@ const MainLayout = ({ children, onShowTour, className }) => {
     (location.pathname.includes('/library/') && location.pathname.length > '/library/'.length);
   
   // Add padding when on library-related pages
-  const libraryPadding = useDynamicHeight ? 'px-6' : '';
+  const libraryPadding = useDynamicHeight ? '' : '';
   
   return (
     <div className={cn("min-h-screen bg-background text-foreground flex flex-col", className)}>
       <Header onShowTour={onShowTour} />
       
-      <main className={cn("flex-1 pt-14 w-full px-6", libraryPadding)}>
+      <main className={cn("flex-1 pt-14 w-full", useDynamicHeight ? "" : "px-6", libraryPadding)}>
         <div className={useDynamicHeight 
           ? "min-h-[calc(100vh-5rem-4rem)]" 
           : "h-[calc(100vh-3.5rem-3.25rem)] bg-background"}>

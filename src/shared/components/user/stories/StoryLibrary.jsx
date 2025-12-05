@@ -123,7 +123,7 @@ const StoryLibrary = ({
   }, [stories, yearFilter, searchQuery, sortOrder]);
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto p-6 bg-card text-card-foreground border rounded-md">
+    <div className="w-full px-6 pb-20">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Your Stories</h1>
@@ -209,7 +209,7 @@ const StoryLibrary = ({
         <NoSearchResults onClearFilters={clearFilters} />
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
             {filteredStories.map((story) => (
               <StoryCard 
                 key={story.id}

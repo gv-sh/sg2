@@ -162,7 +162,7 @@ const StoryViewer = ({
   };
   
   return (
-    <div className="container max-w-6xl mx-auto h-full flex flex-col" id={'jsx-template'}>
+    <div className="w-full max-w-screen-2xl mx-auto h-full flex flex-col" id={'jsx-template'}>
       {/* Header */}
       <header className="py-6 border-b">
         <div className="flex items-center justify-between">

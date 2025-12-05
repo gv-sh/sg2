@@ -221,7 +221,7 @@ const SelectedParameters = ({
       </div>
 
       {/* Story Year Setting - anchored to bottom */}
-      <div className="p-2 border rounded-md space-y-2 mt-auto mb-2 bg-background">
+      <div className="p-2 border rounded-md space-y-2 mt-auto mb-6 bg-background">
         <h4 className="text-sm font-medium">Story Year</h4>
         <div className="flex items-center gap-2">
           <Input

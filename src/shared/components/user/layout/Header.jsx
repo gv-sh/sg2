@@ -17,20 +17,19 @@ const Header = ({ onShowTour }) => {
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <div className="flex items-center w-full">
-          {/* Logo with Tooltip */}
-          <Tooltip 
-            content="Stories from futures untold" 
-            position="right"
-          >
-            <Link to="/" className="font-medium text-lg text-primary">
-              Futures of Hope
-            </Link>
-          </Tooltip>
-          
-          {/* Navigation Items */}
-          <nav className="ml-auto flex items-center space-x-1">
+      <div className="flex h-14 items-center justify-between px-6 w-full">
+        {/* Logo with Tooltip */}
+        <Tooltip 
+          content="Stories from futures untold" 
+          position="right"
+        >
+          <Link to="/" className="font-medium text-lg text-primary">
+            Futures of Hope
+          </Link>
+        </Tooltip>
+        
+        {/* Navigation Items */}
+        <nav className="flex items-center space-x-4">
             {menuItems.map((item) => (
               <Tooltip key={item.path} content={item.name} position="bottom">
                 <Link
@@ -51,8 +50,7 @@ const Header = ({ onShowTour }) => {
                 </Link>
               </Tooltip>
             ))}
-          </nav>
-        </div>
+        </nav>
       </div>
     </header>
   );

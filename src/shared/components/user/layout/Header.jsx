@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '../../ui/button.tsx';
 import { Menu, X, Sliders, Home, Info, Library } from 'lucide-react';
-import { ThemeToggle } from '../theme/theme-toggle.jsx';
 import { Tooltip } from '../../ui';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
@@ -41,8 +40,6 @@ const Header = ({ onShowTour }) => {
           </Tooltip>
           
           <div className="ml-auto flex items-center space-x-2">
-            <ThemeToggle />
-            
             {/* Hamburger Menu Button */}
             <button
               onClick={toggleMenu}

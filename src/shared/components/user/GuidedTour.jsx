@@ -137,7 +137,7 @@ const GuidedTour = ({ onClose }) => {
       <div
         className={`absolute pointer-events-auto ${getPositionClasses()}`}
       >
-        <div className="bg-card rounded-lg shadow-lg border border-primary/20 w-72 p-5 animate-in fade-in duration-300">
+        <div className="bg-card rounded-lg border border-primary/20 w-72 p-5 animate-in fade-in duration-300">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-3">
               {steps[currentStep].icon}

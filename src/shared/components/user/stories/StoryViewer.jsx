@@ -203,7 +203,7 @@ const StoryViewer = ({
               <img 
                 src={imageSource} 
                 alt={story.title} 
-                className="w-full h-auto rounded-lg shadow-md"
+                className="w-full h-auto rounded-lg"
                 onError={(e) => {
                   console.error("Story image failed to load:", imageSource);
                   e.target.onerror = null;
@@ -348,7 +348,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
           <>
 
             {imageSource && (
-              <div className="not-prose w-3/4 mx-auto h-[450px] mb-5 rounded-sm shadow-md relative overflow-hidden">
+              <div className="not-prose w-3/4 mx-auto h-[450px] mb-5 rounded-sm relative overflow-hidden">
                 <img
                   src={imageSource}
                   alt={story.title}

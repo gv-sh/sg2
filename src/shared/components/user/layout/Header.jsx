@@ -64,7 +64,7 @@ const Header = ({ onShowTour }) => {
           <div 
             className={cn(
               "absolute top-0 right-0 w-64 h-auto max-h-[calc(100vh-4rem)] overflow-auto",
-              "bg-card border rounded-b-lg shadow-lg p-2",
+              "bg-card border rounded-b-lg p-2",
               "transform transition-transform duration-300 ease-in-out",
               "origin-top-right"
             )}

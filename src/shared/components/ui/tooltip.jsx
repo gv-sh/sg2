@@ -63,7 +63,7 @@ export const Tooltip = ({
       {isVisible && content && (
         <div 
           className={cn(
-            `absolute z-50 px-3 py-2 text-xs rounded-md shadow-lg 
+            `absolute z-50 px-3 py-2 text-xs rounded-md 
             bg-foreground text-background 
             max-w-xs w-max whitespace-normal 
             pointer-events-none transition-all duration-200 

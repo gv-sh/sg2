@@ -48,7 +48,7 @@ export const Column = ({
   return (
     <div 
       className={cn(
-        "bg-card text-card-foreground shadow-sm h-full overflow-hidden",
+        "bg-card text-card-foreground h-full overflow-hidden",
         roundedClasses,
         borderClasses,
         isMobile && mobileOrder !== undefined ? `order-${mobileOrder}` : "",

@@ -20,7 +20,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       warning: "bg-yellow-100 border-yellow-300 text-yellow-900 dark:bg-yellow-900 dark:border-yellow-700 dark:text-yellow-900"
     }
 
-    const toastStyles = isToast ? "w-96 max-w-[calc(100vw-2rem)] shadow-lg animate-in slide-in-from-right-full duration-300" : "relative w-full"
+    const toastStyles = isToast ? "w-96 max-w-[calc(100vw-2rem)] animate-in slide-in-from-right-full duration-300" : "relative w-full"
     
     return (
       <div

@@ -75,7 +75,7 @@ const InstagramHandleDialog = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4 shadow-xl border">
+      <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4 border">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">

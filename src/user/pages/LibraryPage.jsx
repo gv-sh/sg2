@@ -153,7 +153,7 @@ const LibraryPage = () => {
   // Show skeleton during initial load
   if (isInitialLoad && loading) {
     return (
-      <div className="bg-card rounded-md border shadow-sm h-full overflow-auto">
+      <div className="bg-card rounded-md border h-full overflow-auto">
         <GenerationControls
           onBackToLibrary={() => {}}
           storyTitle="Story Library"
@@ -164,7 +164,7 @@ const LibraryPage = () => {
   }
 
   return (
-    <div className="bg-card rounded-md border shadow-sm h-full overflow-auto">
+    <div className="bg-card rounded-md border h-full overflow-auto">
       <GenerationControls
         onBackToLibrary={() => {}}
         storyTitle="Story Library"

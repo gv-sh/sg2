@@ -1,28 +1,18 @@
 // src/components/layout/Header.jsx
-import React, { useState } from 'react';
-import { Button } from '../../ui/button.tsx';
-import { Menu, X, Sliders, Home, Info, Library } from 'lucide-react';
+import React from 'react';
+import { Sliders, Home, Info, Library } from 'lucide-react';
 import { Tooltip } from '../../ui';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 
 const Header = ({ onShowTour }) => {
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
 
   const menuItems = [
-    { name: 'Home', path: '/', icon: <Home className="h-4 w-4 mr-2" /> },
-    { name: 'Story Library', path: '/library', icon: <Library className="h-4 w-4 mr-2" /> },
-    { name: 'Create Story', path: '/parameters', icon: <Sliders className="h-4 w-4 mr-2" /> },
-    { name: 'About', path: '/about', icon: <Info className="h-4 w-4 mr-2" /> },
+    { name: 'Home', path: '/', icon: <Home className="h-4 w-4" /> },
+    { name: 'Story Library', path: '/library', icon: <Library className="h-4 w-4" /> },
+    { name: 'Create Story', path: '/parameters', icon: <Sliders className="h-4 w-4" /> },
+    { name: 'About', path: '/about', icon: <Info className="h-4 w-4" /> },
   ];
   
   return (
@@ -34,60 +24,36 @@ const Header = ({ onShowTour }) => {
             content="Stories from futures untold" 
             position="right"
           >
-            <Link to="/" className="font-medium text-lg text-primary ">
+            <Link to="/" className="font-medium text-lg text-primary">
               Futures of Hope
             </Link>
           </Tooltip>
           
-          <div className="ml-auto flex items-center space-x-2">
-            {/* Hamburger Menu Button */}
-            <button
-              onClick={toggleMenu}
-              className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Slide-out Menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 top-14 z-40 bg-transparent"
-          onClick={closeMenu}
-        >
-          <div 
-            className={cn(
-              "absolute top-0 right-0 w-64 h-auto max-h-[calc(100vh-4rem)] overflow-auto",
-              "bg-card border rounded-b-lg p-2",
-              "transform transition-transform duration-300 ease-in-out",
-              "origin-top-right"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="space-y-1">
-              {menuItems.map((item) => (
+          {/* Navigation Items */}
+          <nav className="ml-auto flex items-center space-x-1">
+            {menuItems.map((item) => (
+              <Tooltip key={item.path} content={item.name} position="bottom">
                 <Link
-                  key={item.path}
                   to={item.path}
-                  onClick={closeMenu}
                   className={cn(
-                    "flex items-center w-full p-2 rounded-md text-sm",
+                    "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "hover:bg-accent hover:text-accent-foreground",
+                    "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
                     location.pathname === item.path 
                       ? "bg-accent text-accent-foreground" 
-                      : "text-muted-foreground hover:bg-accent/50"
+                      : "text-muted-foreground"
                   )}
                 >
-                  {item.icon}
-                  {item.name}
+                  <span className="flex items-center">
+                    {item.icon}
+                    <span className="ml-2 hidden sm:inline">{item.name}</span>
+                  </span>
                 </Link>
-              ))}
-            </div>
-          </div>
+              </Tooltip>
+            ))}
+          </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 };

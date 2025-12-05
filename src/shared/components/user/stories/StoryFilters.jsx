@@ -2,6 +2,7 @@
 import React from 'react';
 import { Input } from '../../ui/input.tsx';
 import { Button } from '../../ui/button.tsx';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../ui/select.jsx';
 import { Search, X, Calendar, SortAsc, SortDesc } from 'lucide-react';
 
 const StoryFilters = ({ 
@@ -42,19 +43,18 @@ const StoryFilters = ({
       
       <div className="flex items-center gap-2">
         {/* Year filter */}
-        <div className="relative">
-          <select
-            value={yearFilter}
-            onChange={(e) => onYearFilterChange(e.target.value)}
-            className="h-9 w-32 rounded-md border border-input bg-background px-3 pr-9 text-sm"
-          >
-            <option value="">All Years</option>
+        <Select value={yearFilter} onValueChange={onYearFilterChange}>
+          <SelectTrigger className="w-32">
+            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="All Years" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Years</SelectItem>
             {allYears.map(year => (
-              <option key={year} value={year}>{year}</option>
+              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
             ))}
-          </select>
-          <Calendar className="absolute right-3 top-2.5 h-4 w-4 pointer-events-none text-muted-foreground" />
-        </div>
+          </SelectContent>
+        </Select>
         
         {/* Sort order toggle */}
         <Button

@@ -2,7 +2,7 @@
  * Instagram Service - Handle Instagram Graph API integration for carousel posting
  */
 
-import type { Config } from '../config.js';
+import type { Config } from '../../types/config.js';
 
 interface InstagramMediaContainer {
   id: string;
@@ -27,12 +27,10 @@ interface CommentRequest {
 }
 
 export class InstagramService {
-  private config: Config;
   private accessToken: string;
   private appId: string;
 
-  constructor(config: Config) {
-    this.config = config;
+  constructor() {
     this.accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
     this.appId = process.env.INSTAGRAM_APP_ID || '';
 

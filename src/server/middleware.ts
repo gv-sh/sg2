@@ -198,7 +198,8 @@ export async function validateGenerationParameters(parameters: Record<string, an
 }
 
 export const contentUpdateSchema = z.object({
-  title: z.string().min(1).max(config.get('validation.maxTitleLength')).optional()
+  title: z.string().min(1).max(config.get('validation.maxTitleLength')).optional(),
+  metadata: z.record(z.any()).optional()
 }).refine(
   (data) => Object.keys(data).length > 0,
   'At least one field is required for update'

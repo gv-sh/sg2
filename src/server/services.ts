@@ -566,16 +566,35 @@ class DataService {
     });
   }
 
-  async updateGeneratedContent(id: string, updates: { title?: string }): Promise<GeneratedContent> {
+  async updateGeneratedContent(id: string, updates: { title?: string; metadata?: Record<string, any> }): Promise<GeneratedContent> {
     const existing = await this.getGeneratedContentById(id);
 
+    // Build dynamic update query based on provided fields
+    const updateFields = [];
+    const updateValues = [];
+
+    if (updates.title !== undefined) {
+      updateFields.push('title = ?');
+      updateValues.push(updates.title);
+    }
+
+    if (updates.metadata !== undefined) {
+      updateFields.push('metadata = ?');
+      updateValues.push(JSON.stringify(updates.metadata));
+    }
+
+    if (updateFields.length === 0) {
+      // No updates provided, return existing
+      return existing;
+    }
+
+    updateValues.push(id); // Add id for WHERE clause
+
     await this.run(
-      'UPDATE generated_content SET title = ? WHERE id = ?',
-      [
-        updates.title || existing.title,
-        id
-      ]
+      `UPDATE generated_content SET ${updateFields.join(', ')} WHERE id = ?`,
+      updateValues
     );
+    
     return await this.getGeneratedContentById(id);
   }
 

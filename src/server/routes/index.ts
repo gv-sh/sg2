@@ -8,6 +8,7 @@ import config from '../config.js';
 // Import route modules
 import adminRoutes from './admin.js';
 import contentRoutes from './content.js';
+import instagramRoutes from './instagram.js';
 import systemRoutes from './system.js';
 
 const router: express.Router = express.Router();
@@ -46,6 +47,12 @@ router.get('/api', (req: Request, res: Response) => {
           summary: '/api/content/summary',
           years: '/api/content/years'
         },
+        instagram: {
+          share: '/api/instagram/share',
+          comment: '/api/instagram/comment',
+          status: '/api/instagram/status/{storyId}',
+          images: '/api/instagram/images/{storyId}/{imageIndex}'
+        },
         system: {
           health: '/api/system/health',
           docs: '/api/system/docs',
@@ -71,6 +78,9 @@ router.use('/api/admin', adminRoutes);
 
 // Content routes - generation, management, and image serving
 router.use('/api/content', contentRoutes);
+
+// Instagram routes - carousel posting and image generation
+router.use('/api/instagram', instagramRoutes);
 
 // Mount specific content endpoints at different paths
 router.post('/api/generate', (req, res, next) => {

@@ -34,6 +34,10 @@ export class InstagramService {
     this.accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
     this.appId = process.env.INSTAGRAM_APP_ID || '';
 
+    // Debug logging
+    console.log('[Instagram Service] App ID:', this.appId || 'NOT SET');
+    console.log('[Instagram Service] Access Token:', this.accessToken ? `${this.accessToken.slice(0, 20)}...` : 'NOT SET');
+
     if (!this.accessToken || !this.appId) {
       throw new Error('Instagram credentials are not properly configured');
     }
@@ -44,6 +48,12 @@ export class InstagramService {
    */
   async createCarouselPost(request: CarouselPostRequest): Promise<InstagramCarouselPost> {
     try {
+      // First validate that we have the right type of credentials
+      const isValid = await this.validateCredentials();
+      if (!isValid) {
+        throw new Error('Invalid Instagram credentials. Please ensure you have a valid Instagram Graph API token for content publishing.');
+      }
+
       // Step 1: Create individual media containers for each image
       const mediaContainers: InstagramMediaContainer[] = [];
       
@@ -64,6 +74,12 @@ export class InstagramService {
       return publishedPost;
     } catch (error) {
       console.error('Failed to create Instagram carousel post:', error);
+      
+      // Provide more helpful error message for common issues
+      if (error instanceof Error && error.message.includes('access token')) {
+        throw new Error(`Instagram API error: ${error.message}. You may need an Instagram Graph API token (not Basic Display API) for content publishing.`);
+      }
+      
       throw new Error(`Instagram carousel post failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -105,11 +121,21 @@ export class InstagramService {
    */
   async validateCredentials(): Promise<boolean> {
     try {
+      // Use Instagram Graph API endpoint instead of Facebook Graph API
       const response = await fetch(
-        `https://graph.facebook.com/v18.0/me?access_token=${this.accessToken}`
+        `https://graph.instagram.com/me?fields=id,username&access_token=${this.accessToken}`
       );
 
-      return response.ok;
+      const result = await response.json();
+      console.log('[Instagram Service] Validation response:', result);
+      
+      if (response.ok && result.id) {
+        console.log('[Instagram Service] Credentials valid for user:', result.username);
+        return true;
+      }
+      
+      console.error('[Instagram Service] Invalid credentials:', result);
+      return false;
     } catch (error) {
       console.error('Instagram credentials validation failed:', error);
       return false;
@@ -120,6 +146,8 @@ export class InstagramService {
    * Create a media container for a single image
    */
   private async createMediaContainer(imageUrl: string): Promise<InstagramMediaContainer> {
+    console.log('[Instagram Service] Creating media container for URL:', imageUrl);
+    
     const response = await fetch(
       `https://graph.facebook.com/v18.0/${this.appId}/media`,
       {
@@ -135,12 +163,16 @@ export class InstagramService {
       }
     );
 
+    console.log('[Instagram Service] Media container response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json();
+      console.error('[Instagram Service] Media container error:', error);
       throw new Error(`Failed to create media container: ${error.error?.message || response.statusText}`);
     }
 
     const result = await response.json();
+    console.log('[Instagram Service] Media container created:', result.id);
     return { id: result.id };
   }
 

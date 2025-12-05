@@ -69,6 +69,10 @@ export function getInstagramConfig(): InstagramConfig {
   const isProduction = process.env.NODE_ENV === 'production';
   const isDevelopment = process.env.NODE_ENV === 'development';
 
+  // Debug logging for Instagram configuration
+  console.log('[Instagram Config] Access Token:', process.env.INSTAGRAM_ACCESS_TOKEN ? `${process.env.INSTAGRAM_ACCESS_TOKEN.slice(0, 20)}...` : 'NOT SET');
+  console.log('[Instagram Config] App ID:', process.env.INSTAGRAM_APP_ID || 'NOT SET');
+  
   return {
     api: {
       accessToken: process.env.INSTAGRAM_ACCESS_TOKEN || '',

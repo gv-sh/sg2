@@ -147,7 +147,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
   };
 
   return (
-    <div className="p-4 border rounded-md space-y-3">
+    <div className="p-2 border rounded-md space-y-2">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium">{parameter.name}</h4>
         <Button
@@ -179,7 +179,7 @@ const SelectedParameters = ({
 
   const handleGenerate = () => {
     if (onNavigateToGenerate) {
-      onNavigateToGenerate({ year: storyYear });
+      onNavigateToGenerate();
     }
   };
 
@@ -188,10 +188,7 @@ const SelectedParameters = ({
     return (
       <div className="space-y-4">
         <div className="flex flex-col items-left">
-          <h3 className="text-sm font-medium mb-1 pt-3">Selected Parameters</h3>
-          <p className="text-muted-foreground text-xs border-b pb-3">
-            Parameters you select will appear here.
-          </p>
+          <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Selected Parameters</h3>
         </div>
         
         <div className="flex flex-col items-center justify-center h-48 text-center">
@@ -206,30 +203,13 @@ const SelectedParameters = ({
   }
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="flex flex-col h-full">
       <div className="flex flex-col items-left">
-        <h3 className="text-sm font-medium mb-1 pt-3">Selected Parameters</h3>
-        <p className="text-muted-foreground text-xs border-b pb-3">
-          Configure your story parameters and generate content.
-        </p>
+        <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Selected Parameters</h3>
       </div>
 
-      {/* Story Year Setting */}
-      <div className="p-4 border rounded-md space-y-3">
-        <h4 className="text-sm font-medium">Story Year</h4>
-        <Input
-          type="number"
-          value={storyYear}
-          onChange={(e) => setStoryYear(parseInt(e.target.value) || storyYear)}
-          min={2000}
-          max={3000}
-          placeholder="Enter year (e.g., 2050)"
-          className="w-full"
-        />
-      </div>
-
-      {/* Selected Parameters */}
-      <div className="space-y-3 flex-1 overflow-y-auto">
+      {/* Selected Parameters - scrollable area */}
+      <div className="space-y-1 flex-1 overflow-y-auto mb-4">
         {parameters.map(parameter => (
           <SelectedParameterCard
             key={parameter.id}
@@ -240,17 +220,31 @@ const SelectedParameters = ({
         ))}
       </div>
 
-      {/* Generate Button */}
-      <div className="pt-4 border-t">
-        <Button
-          onClick={handleGenerate}
-          className="w-full"
-          disabled={parameters.length === 0}
-        >
-          <Play className="h-4 w-4 mr-2" />
-          Generate Story
-        </Button>
+      {/* Story Year Setting - anchored to bottom */}
+      <div className="p-2 border rounded-md space-y-2 mt-auto mb-2 bg-background">
+        <h4 className="text-sm font-medium">Story Year</h4>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            value={storyYear}
+            onChange={(e) => setStoryYear(parseInt(e.target.value) || storyYear)}
+            min={2000}
+            max={3000}
+            placeholder="Enter year (e.g., 2050)"
+            className="flex-1"
+          />
+          <Button
+            onClick={handleGenerate}
+            size="sm"
+            disabled={parameters.length === 0}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground flex-shrink-0"
+          >
+            <Play className="h-3 w-3 mr-1" />
+            Generate
+          </Button>
+        </div>
       </div>
+
     </div>
   );
 };

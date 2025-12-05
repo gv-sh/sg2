@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchCategories } from '../services/api';
 import { Alert, AlertDescription } from '../../shared/components/ui/alert.tsx';
-import { Folder, FolderOpen } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const Categories = ({ selectedCategory, onCategorySelect }) => {
@@ -67,13 +66,10 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-left">
-        <h3 className="text-sm font-medium mb-1 pt-3">Categories</h3>
-        <p className="text-muted-foreground text-xs border-b pb-3">
-          Choose a category to explore parameters.
-        </p>
+        <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Categories</h3>
       </div>
       
-      <div className="space-y-2">
+      <div className="space-y-1">
         {categories.map(category => {
           const isSelected = selectedCategory?.id === category.id;
           
@@ -81,22 +77,17 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
             <button
               key={category.id}
               className={cn(
-                "w-full p-3 text-left rounded-md border transition-colors",
+                "w-full p-2 text-left rounded-md transition-colors",
                 "flex items-center justify-between",
                 isSelected
-                  ? "bg-primary text-accent-foreground border-primary" 
-                  : "hover:bg-primary/10 hover:border-primary/50"
+                  ? "bg-primary text-accent-foreground border border-primary" 
+                  : "border"
               )}
               onClick={() => handleCategorySelect(category)}
               title={category.description || 'No description available'}
             >
-              <div className="flex items-center gap-2">
-                {isSelected ? (
-                  <FolderOpen className="h-4 w-4" />
-                ) : (
-                  <Folder className="h-4 w-4" />
-                )}
-                <span className="font-medium">{category.name}</span>
+              <div className="flex items-center">
+                <span className="text-sm">{category.name}</span>
               </div>
               
               {/* Show parameter count badge */}

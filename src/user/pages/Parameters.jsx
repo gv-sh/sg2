@@ -16,14 +16,14 @@ const ParameterItem = ({ parameter, onSelect, onRemove, isSelected }) => {
 
   return (
     <div 
-      className={`p-4 border rounded-md transition-colors cursor-pointer ${
+      className={`p-2 border rounded-md transition-colors cursor-pointer ${
         isSelected 
           ? 'bg-primary/10 border-primary text-primary' 
-          : 'hover:bg-accent hover:border-accent-foreground/20'
+          : 'border'
       }`}
       onClick={handleToggle}
     >
-      <h4 className="text-sm font-medium">{parameter.name}</h4>
+      <h4 className="text-sm">{parameter.name}</h4>
     </div>
   );
 };
@@ -104,13 +104,10 @@ const Parameters = ({ selectedCategory, selectedParameters, onParameterSelect, o
   return (
     <div className="flex flex-col h-full space-y-4">
       <div className="flex flex-col items-left">
-        <h3 className="text-sm font-medium mb-1 pt-3">Add Parameters</h3>
-        <p className="text-muted-foreground text-xs border-b pb-3">
-          Click "Add" to select parameters from <strong>{selectedCategory.name}</strong>. Configure values in the next column.
-        </p>
+        <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Add Parameters</h3>
       </div>
       
-      <div className="space-y-3 flex-1 overflow-y-auto">
+      <div className="space-y-1 flex-1 overflow-y-auto">
         {parameters.map(parameter => (
           <ParameterItem
             key={parameter.id}

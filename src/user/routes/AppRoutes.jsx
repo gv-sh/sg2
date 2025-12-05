@@ -144,53 +144,47 @@ const AppRoutes = ({
         } />
 
         <Route path="/generating" element={
-          <div className="bg-card rounded-md border-l border-r shadow-sm h-full">
-            <Suspense fallback={<LoadingSpinner />}>
-              <Generation
-                setGeneratedContent={setGeneratedContent}
-                generatedContent={generatedContent}
-                selectedParameters={selectedParameters}
-                setSelectedParameters={setSelectedParameters}
-                generationInProgress={true}
-                setGenerationInProgress={setGenerationInProgress}
-                viewMode="generating"
-              />
-            </Suspense>
-          </div>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Generation
+              setGeneratedContent={setGeneratedContent}
+              generatedContent={generatedContent}
+              selectedParameters={selectedParameters}
+              setSelectedParameters={setSelectedParameters}
+              generationInProgress={true}
+              setGenerationInProgress={setGenerationInProgress}
+              viewMode="generating"
+            />
+          </Suspense>
         } />
 
         {/* Individual Story Page */}
         <Route path="/story" element={
-          <div className="bg-card rounded-md border-l border-r shadow-sm h-full">
-            <Suspense fallback={<LoadingSpinner />}>
-              <Generation
-                setGeneratedContent={setGeneratedContent}
-                generatedContent={generatedContent}
-                selectedParameters={selectedParameters}
-                setSelectedParameters={setSelectedParameters}
-                generationInProgress={false}
-                setGenerationInProgress={setGenerationInProgress}
-                viewMode="story"
-              />
-            </Suspense>
-          </div>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Generation
+              setGeneratedContent={setGeneratedContent}
+              generatedContent={generatedContent}
+              selectedParameters={selectedParameters}
+              setSelectedParameters={setSelectedParameters}
+              generationInProgress={false}
+              setGenerationInProgress={setGenerationInProgress}
+              viewMode="story"
+            />
+          </Suspense>
         } />
 
         {/* Library Page */}
         <Route path="/library" element={
-          <div className="bg-card rounded-md border-l border-r shadow-sm h-full">
-            <Suspense fallback={<LoadingSpinner />}>
-              <Generation
-                setGeneratedContent={setGeneratedContent}
-                generatedContent={generatedContent}
-                selectedParameters={selectedParameters}
-                setSelectedParameters={setSelectedParameters}
-                generationInProgress={false}
-                setGenerationInProgress={setGenerationInProgress}
-                viewMode="library"
-              />
-            </Suspense>
-          </div>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Generation
+              setGeneratedContent={setGeneratedContent}
+              generatedContent={generatedContent}
+              selectedParameters={selectedParameters}
+              setSelectedParameters={setSelectedParameters}
+              generationInProgress={false}
+              setGenerationInProgress={setGenerationInProgress}
+              viewMode="library"
+            />
+          </Suspense>
         } />
         
         {/* Redirect /generate to /library for backward compatibility */}

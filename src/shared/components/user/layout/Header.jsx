@@ -1,6 +1,6 @@
 // src/components/layout/Header.jsx
 import React from 'react';
-import { Sliders, Home, Info, Library } from 'lucide-react';
+import { Sliders, Home, Info, Library, HelpCircle } from 'lucide-react';
 import { Tooltip } from '../../ui';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
@@ -50,6 +50,24 @@ const Header = ({ onShowTour }) => {
               </Link>
             </Tooltip>
           ))}
+          
+          {/* Help/Tour Button */}
+          <Tooltip content="Take a guided tour" position="bottom">
+            <button
+              onClick={onShowTour}
+              className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium transition-colors",
+                "hover:bg-accent hover:text-accent-foreground",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                "text-muted-foreground"
+              )}
+            >
+              <span className="flex items-center">
+                <HelpCircle className="h-4 w-4" />
+                <span className="ml-2 hidden sm:inline">Help</span>
+              </span>
+            </button>
+          </Tooltip>
         </nav>
       </div>
     </header>

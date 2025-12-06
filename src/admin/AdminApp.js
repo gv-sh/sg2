@@ -5,6 +5,7 @@ import Parameters from './pages/Parameters.js';
 import Content from './pages/Content.js';
 import Settings from './pages/Settings.js';
 import Database from './pages/Database.js';
+import InstagramPreview from './pages/InstagramPreview.js';
 import { Layout } from '../shared/components/admin/layout/index.js';
 import GlobalFooter from '../shared/components/layout/GlobalFooter.jsx';
 import Navbar from '../shared/components/ui/Navbar.js';
@@ -27,6 +28,7 @@ function AdminApp() {
               <Route path="content" element={<Content />} />
               <Route path="settings" element={<Settings />} />
               <Route path="database" element={<Database />} />
+              <Route path="instagram-preview" element={<InstagramPreview />} />
               <Route path="/" element={
                 <div className="flex flex-col justify-center items-center h-[calc(100vh-16rem)]">
                   <div className="text-center mb-12">
@@ -36,7 +38,7 @@ function AdminApp() {
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
+                  <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl w-full">
                     <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
                       <CardHeader>
                         <CardTitle>Categories</CardTitle>
@@ -69,6 +71,18 @@ function AdminApp() {
                       <CardContent className="pt-4 flex-grow flex flex-col justify-end">
                         <Link to="/admin/content" className="w-full">
                           <Button variant="default" className="w-full">Manage Content</Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
+                      <CardHeader>
+                        <CardTitle>Instagram Preview</CardTitle>
+                        <CardDescription>Preview how stories appear as Instagram carousels and understand the image processing pipeline.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
+                        <Link to="/admin/instagram-preview" className="w-full">
+                          <Button variant="default" className="w-full">View Instagram Previews</Button>
                         </Link>
                       </CardContent>
                     </Card>

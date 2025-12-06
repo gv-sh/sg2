@@ -442,10 +442,10 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
         userMessage: 'Instagram posting limit reached. Please wait before posting again.'
       }));
     } else if (error.message?.startsWith('AUTH_ERROR:')) {
-      return next(boom.unauthorized(error.message.replace('AUTH_ERROR: ', ''), {
-        errorType: 'AUTH_ERROR',
-        userMessage: 'Instagram authentication issue. Please contact support.'
-      }));
+      const boomError = boom.unauthorized(error.message.replace('AUTH_ERROR: ', ''));
+      boomError.output.payload.errorType = 'AUTH_ERROR';
+      boomError.output.payload.userMessage = 'Instagram authentication issue. Please contact support.';
+      return next(boomError);
     } else if (error.message?.includes('Instagram')) {
       return next(boom.badGateway('Instagram API error', error));
     }

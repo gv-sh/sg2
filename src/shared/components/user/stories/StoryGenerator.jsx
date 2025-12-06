@@ -1,8 +1,9 @@
 // src/components/stories/StoryGenerator.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw, AlertTriangle, Instagram } from 'lucide-react';
 import { Alert, AlertDescription } from '../../ui/alert.tsx';
 import InstagramHandleDialog from './InstagramHandleDialog.jsx';
+import { fetchSettings } from '../../../../user/services/api.js';
 import axios from 'axios';
 
 const StoryGenerator = ({
@@ -25,17 +26,73 @@ const StoryGenerator = ({
   const [showHandleDialog, setShowHandleDialog] = useState(false);
   const [instagramError, setInstagramError] = useState(null);
   const [imageProgress, setImageProgress] = useState('');
+  const [waitingForHandle, setWaitingForHandle] = useState(false);
+  const waitingForHandleRef = useRef(false);
 
-  // Define steps for simple visual indicator
-  const steps = [
-    { id: 'story', label: 'Story Generation' },
-    { id: 'images', label: 'Creating Images' },
-    { id: 'posting', label: 'Posting to Instagram' },
-    { id: 'complete', label: 'Complete' }
-  ];
+  // Settings state
+  const [instagramEnabled, setInstagramEnabled] = useState(true);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  // Define steps for simple visual indicator (dynamic based on Instagram setting)
+  const getSteps = () => {
+    const baseSteps = [{ id: 'story', label: 'Story Generation' }];
+    
+    if (instagramEnabled) {
+      baseSteps.push(
+        { id: 'images', label: 'Creating Images' },
+        { id: 'posting', label: 'Posting to Instagram' }
+      );
+    }
+    
+    baseSteps.push({ id: 'complete', label: 'Complete' });
+    return baseSteps;
+  };
+
+  const steps = getSteps();
+
+  // Load settings on component mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetchSettings();
+        if (response.success && response.data) {
+          setInstagramEnabled(response.data['instagram.enabled'] ?? true);
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+        // Default to enabled if we can't load settings
+        setInstagramEnabled(true);
+      } finally {
+        setSettingsLoaded(true);
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   // Automatic Instagram posting when story is ready
   const startInstagramFlow = async (story) => {
+    // Check if Instagram is enabled before starting
+    if (!instagramEnabled) {
+      console.log('Instagram sharing is disabled, skipping Instagram flow');
+      setProgress(100);
+      setPhase('complete');
+      setCurrentStep(steps.length - 1);
+      setStatusMessage('Story generation complete');
+      
+      // Notify parent that Instagram is "completed" (skipped)
+      if (onInstagramShareComplete) {
+        onInstagramShareComplete({
+          instagramDisabled: true,
+          handleSubmitted: false
+        });
+      }
+      
+      // Complete the generation flow
+      if (onGenerationComplete) onGenerationComplete();
+      return;
+    }
+
     try {
       // Phase 1: Start image generation
       setInstagramState('generating');
@@ -85,8 +142,8 @@ const StoryGenerator = ({
       setStatusMessage('Posted to Instagram successfully!');
       setInstagramPostId(shareResponse.data.data.postId);
 
-      // Store Instagram sharing results in story metadata
-      if (story && onInstagramShareComplete) {
+      // Store Instagram sharing results in story metadata (but don't complete yet)
+      if (story) {
         const instagramResult = {
           shared: true,
           postId: shareResponse.data.data.postId,
@@ -101,15 +158,28 @@ const StoryGenerator = ({
           ...story.metadata,
           instagram: instagramResult
         };
-
-        // Notify parent about Instagram completion
-        onInstagramShareComplete(instagramResult);
+        
+        // Don't call onInstagramShareComplete yet - wait for handle dialog completion
       }
 
+      // Mark that we're waiting for handle input
+      setWaitingForHandle(true);
+      waitingForHandleRef.current = true;
+      
       // Show handle dialog after a brief delay
       setTimeout(() => {
         setShowHandleDialog(true);
       }, 1500);
+      
+      // Fallback: If dialog doesn't complete within 30 seconds, auto-complete without handle
+      setTimeout(() => {
+        if (waitingForHandleRef.current) {
+          console.warn('Instagram handle dialog timeout, auto-completing without handle');
+          waitingForHandleRef.current = false;
+          setWaitingForHandle(false);
+          handleHandleComplete({ skipped: true, handle: null, commentId: null });
+        }
+      }, 30000);
 
     } catch (error) {
       console.error('Instagram posting error:', error);
@@ -139,19 +209,20 @@ const StoryGenerator = ({
       setStatusMessage(isRateLimited ? 'Story ready - Instagram posting limited' : 'Instagram posting failed');
       setProgress(100);
       
-      // For rate limiting, complete the flow normally but with messaging
-      // For other errors, show error state
+      // For any Instagram error, complete the flow and show the story
+      // The user should still see their generated story even if Instagram fails
       setTimeout(() => {
-        if (isRateLimited && onInstagramShareComplete) {
-          // For rate limits, still call completion but mark as failed
+        if (onInstagramShareComplete) {
+          // Call completion with error information
           onInstagramShareComplete({
-            rateLimited: true,
-            error: userMessage,
+            rateLimited: isRateLimited,
+            instagramFailed: !isRateLimited,
+            error: userMessage || errorMessage,
             handleSubmitted: false
           });
         }
         if (onGenerationComplete) onGenerationComplete();
-      }, isRateLimited ? 1000 : 2000);
+      }, 1500);
     }
   };
 
@@ -171,26 +242,36 @@ const StoryGenerator = ({
       progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 1, 48));
       }, 800);
-    } else if (story && instagramState === 'idle') {
-      // Story completed, prepare for Instagram flow
+    } else if (story && instagramState === 'idle' && settingsLoaded) {
+      // Story completed, prepare for next phase
       setProgress(50);
-      setStatusMessage('Story generated! Starting Instagram posting...');
       
-      // Start Instagram flow after a brief delay
-      setTimeout(() => {
-        startInstagramFlow(story);
-      }, 1000);
+      if (instagramEnabled) {
+        setStatusMessage('Story generated! Starting Instagram posting...');
+        // Start Instagram flow after a brief delay
+        setTimeout(() => {
+          startInstagramFlow(story);
+        }, 1000);
+      } else {
+        setStatusMessage('Story generation complete');
+        // Skip Instagram and complete immediately
+        setTimeout(() => {
+          startInstagramFlow(story); // This will handle the disabled case
+        }, 1000);
+      }
     }
 
     return () => {
       if (progressInterval) clearInterval(progressInterval);
     };
-  }, [loading, story, instagramState, showRecoveryBanner]);
+  }, [loading, story, instagramState, showRecoveryBanner, settingsLoaded, instagramEnabled]);
 
   // Handle Instagram handle dialog completion
   const handleHandleComplete = (result) => {
     console.log('Instagram handle completed:', result);
     setShowHandleDialog(false);
+    setWaitingForHandle(false);
+    waitingForHandleRef.current = false;
     
     // Update story metadata with handle information
     if (story && story.metadata?.instagram) {
@@ -203,13 +284,18 @@ const StoryGenerator = ({
       };
     }
     
-    // Notify parent and navigate to story view
+    // Notify parent that Instagram flow is fully complete
     if (onInstagramShareComplete) {
       onInstagramShareComplete({
+        shared: true,
         postId: instagramPostId,
         handleSubmitted: !result.skipped,
         handle: result.handle || null,
         commentId: result.commentId || null,
+        carouselUrl: story?.metadata?.instagram?.carouselUrl || null,
+        slideCount: story?.metadata?.instagram?.slideCount || 1,
+        sharedAt: story?.metadata?.instagram?.sharedAt,
+        platform: 'instagram',
         instagramData: story?.metadata?.instagram
       });
     }

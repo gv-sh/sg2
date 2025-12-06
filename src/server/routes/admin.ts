@@ -7,6 +7,7 @@ import boom from '@hapi/boom';
 import { z } from 'zod';
 
 import { dataService } from '../services.js';
+import ImageProcessorService from '../services/imageProcessor.js';
 import config from '../config.js';
 import {
   categorySchema,
@@ -25,6 +26,9 @@ import type {
 } from '../../types/api.js';
 
 const router: express.Router = express.Router();
+
+// Initialize services
+const imageProcessor = new ImageProcessorService();
 
 // Type definitions
 type CategorySchema = z.infer<typeof categorySchema>;
@@ -919,5 +923,137 @@ router.get('/models', async (req: Request, res: Response<ApiResponse>, next: Nex
     next(boom.internal('Failed to retrieve available models', error));
   }
 });
+
+// ==================== INSTAGRAM PREVIEW ROUTES ====================
+
+/**
+ * @swagger
+ * /api/admin/instagram/preview:
+ *   post:
+ *     summary: Generate Instagram carousel preview for admin
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [storyId]
+ *             properties:
+ *               storyId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       200:
+ *         description: Instagram preview generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     slides:
+ *                       type: array
+ *                     caption:
+ *                       type: string
+ *                     slideCount:
+ *                       type: number
+ *                     theme:
+ *                       type: string
+ */
+router.post('/instagram/preview', async (req: TypedRequestBody<{ storyId: string }>, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const { storyId } = req.body;
+    
+    // Validate story ID
+    if (!storyId || typeof storyId !== 'string') {
+      return next(boom.badRequest('Valid story ID is required'));
+    }
+    
+    // Get the story from database
+    const story = await dataService.getGeneratedContentById(storyId);
+    if (!story) {
+      return next(boom.notFound(`Story with ID ${storyId} not found`));
+    }
+    
+    // Generate carousel slides preview
+    const carouselData = await imageProcessor.generateCarouselSlides({
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined',
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
+    
+    // Generate Instagram caption
+    const caption = await imageProcessor.generateInstagramCaption({
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined',
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
+    
+    // Detect theme for color information
+    const content = story.title + ' ' + story.fiction_content;
+    const theme = detectThemeFromContent(content);
+    
+    res.json({
+      success: true,
+      message: 'Instagram preview generated successfully',
+      data: {
+        slides: carouselData.slides,
+        caption,
+        slideCount: carouselData.slides.length,
+        theme,
+        storyId: story.id,
+        storyTitle: story.title
+      },
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    console.error('Failed to generate Instagram preview:', error);
+    next(boom.internal('Failed to generate Instagram preview', error));
+  }
+});
+
+// Helper function to detect theme from content
+function detectThemeFromContent(content: string): string {
+  const text = content.toLowerCase();
+  
+  if (text.includes('cyber') || text.includes('digital') || text.includes('ai') || text.includes('robot')) {
+    return 'cyberpunk';
+  }
+  if (text.includes('nature') || text.includes('forest') || text.includes('green') || text.includes('earth')) {
+    return 'nature';
+  }
+  if (text.includes('space') || text.includes('star') || text.includes('planet') || text.includes('galaxy')) {
+    return 'space';
+  }
+  if (text.includes('war') || text.includes('dark') || text.includes('destroy') || text.includes('apocalypse')) {
+    return 'dystopian';
+  }
+  if (text.includes('peace') || text.includes('harmony') || text.includes('perfect') || text.includes('paradise')) {
+    return 'utopian';
+  }
+  
+  return 'default';
+}
 
 export default router;

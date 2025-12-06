@@ -26,6 +26,7 @@ const DEFAULT_SETTINGS = {
     }
   },
   instagram: {
+    enabled: true,
     default_caption: '{title}\n\n{intro}\n\nSet in the year {year}\n\nThemes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\nWhat future do you envision? Share your thoughts below!\n\n#carousel #story #fiction'
   },
   defaults: { content_type: 'fiction' }
@@ -60,6 +61,7 @@ function Settings() {
         }
       },
       instagram: {
+        enabled: flatSettings['instagram.enabled'] ?? DEFAULT_SETTINGS.instagram.enabled,
         default_caption: flatSettings['instagram.default_caption'] || DEFAULT_SETTINGS.instagram.default_caption
       },
       defaults: {
@@ -147,6 +149,7 @@ function Settings() {
     flattened['ai.parameters.image.prompt_suffix'] = settingsObj.ai.parameters.image.prompt_suffix;
     
     // Instagram settings
+    flattened['instagram.enabled'] = settingsObj.instagram.enabled;
     flattened['instagram.default_caption'] = settingsObj.instagram.default_caption;
     
     // Defaults
@@ -432,6 +435,29 @@ function Settings() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-1">
+                      <label htmlFor="instagramEnabled" className="text-sm font-medium">Enable Instagram Sharing</label>
+                      <p className="text-xs text-muted-foreground">
+                        When enabled, stories will automatically be posted to Instagram after generation
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        id="instagramEnabled"
+                        type="checkbox"
+                        checked={settings.instagram.enabled}
+                        onChange={(e) => handleSettingsChange('instagram', null, 'enabled', e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {settings.instagram.enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="space-y-2">
                   <label htmlFor="instagramCaption" className="text-sm font-medium">Default Instagram Caption Template</label>
                   <Textarea

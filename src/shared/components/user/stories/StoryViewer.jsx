@@ -217,17 +217,21 @@ const StoryViewer = ({
       </div>
       
       {/* Instagram Status Section */}
-      {(instagramData?.shared || instagramData?.rateLimited) && (
+      {(instagramData?.shared || instagramData?.rateLimited || instagramData?.instagramFailed) && (
         <div className="max-w-3xl mx-auto mt-6 mb-4">
           <div className={`rounded-lg p-4 border ${
             instagramData?.shared 
               ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800'
+              : instagramData?.instagramFailed
+              ? 'bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 border-red-200 dark:border-red-800'
               : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800'
           }`}>
             <div className="flex items-start space-x-3">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                 instagramData?.shared 
                   ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                  : instagramData?.instagramFailed
+                  ? 'bg-gradient-to-r from-red-500 to-red-600'
                   : 'bg-gradient-to-r from-amber-500 to-orange-500'
               }`}>
                 <Instagram className="h-4 w-4 text-white" />
@@ -235,7 +239,7 @@ const StoryViewer = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {instagramData?.shared ? 'Posted to Instagram' : 'Instagram Posting Limited'}
+                    {instagramData?.shared ? 'Posted to Instagram' : instagramData?.instagramFailed ? 'Instagram Posting Failed' : 'Instagram Posting Limited'}
                   </h3>
                   {instagramData?.sharedAt && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -244,10 +248,17 @@ const StoryViewer = ({
                   )}
                 </div>
                 
-                {instagramData?.rateLimited ? (
+                {(instagramData?.rateLimited || instagramData?.instagramFailed) ? (
                   <div className="space-y-2">
-                    <div className="text-sm text-amber-700 dark:text-amber-300 mb-3">
-                      {instagramData.error || 'Instagram posting limit reached. Your story is ready but posting will need to wait.'}
+                    <div className={`text-sm mb-3 ${
+                      instagramData?.instagramFailed 
+                        ? 'text-red-700 dark:text-red-300'
+                        : 'text-amber-700 dark:text-amber-300'
+                    }`}>
+                      {instagramData.error || (instagramData?.instagramFailed 
+                        ? 'Instagram posting failed. Your story is ready and saved.' 
+                        : 'Instagram posting limit reached. Your story is ready but posting will need to wait.')
+                      }
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button 
@@ -268,8 +279,15 @@ const StoryViewer = ({
                         <Share className="h-3 w-3 mr-1" />
                         Share Manually
                       </Button>
-                      <span className="text-xs text-amber-600 dark:text-amber-400">
-                        Try again later for Instagram posting
+                      <span className={`text-xs ${
+                        instagramData?.instagramFailed 
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-amber-600 dark:text-amber-400'
+                      }`}>
+                        {instagramData?.instagramFailed 
+                          ? 'Instagram posting failed - share manually'
+                          : 'Try again later for Instagram posting'
+                        }
                       </span>
                     </div>
                   </div>
@@ -365,10 +383,14 @@ const StoryViewer = ({
               </div>
             )}
             
-            {instagramData?.rateLimited && (
-              <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
+            {(instagramData?.rateLimited || instagramData?.instagramFailed) && (
+              <div className={`flex items-center text-sm ${
+                instagramData?.instagramFailed 
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-amber-600 dark:text-amber-400'
+              }`}>
                 <Instagram className="h-4 w-4 mr-2" />
-                <span>Instagram posting limited</span>
+                <span>{instagramData?.instagramFailed ? 'Instagram posting failed' : 'Instagram posting limited'}</span>
               </div>
             )}
           </div>

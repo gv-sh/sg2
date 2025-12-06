@@ -6,6 +6,7 @@ const routes = [
   { path: '/admin/categories', label: 'Categories' },
   { path: '/admin/parameters', label: 'Parameters' },
   { path: '/admin/content', label: 'Content' },
+  { path: '/admin/instagram-preview', label: 'Instagram' },
   { path: '/admin/settings', label: 'Settings' },
   { path: '/admin/database', label: 'Database' }
 ];

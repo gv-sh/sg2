@@ -201,8 +201,8 @@ const Generation = ({
     console.log('Instagram share completed in generation view:', shareResult);
     setInstagramData(shareResult);
     
-    // Mark Instagram flow as completed (this includes handle submission/skip or rate limiting)
-    if (shareResult.handleSubmitted !== undefined || shareResult.instagramData || shareResult.rateLimited) {
+    // Mark Instagram flow as completed when handle dialog is done OR Instagram fails/disabled
+    if ((shareResult.handleSubmitted !== undefined && shareResult.shared) || shareResult.rateLimited || shareResult.instagramFailed || shareResult.instagramDisabled) {
       setInstagramCompleted(true);
       console.log('Instagram flow fully completed, ready for navigation');
     }

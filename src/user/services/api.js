@@ -419,6 +419,37 @@ const generateTitle = (content) => {
   return firstSentence.substring(0, 37) + '...';
 };
 
+/**
+ * Fetch application settings
+ * @returns {Promise<Object>} Promise resolving to settings data
+ */
+export const fetchSettings = async () => {
+  try {
+    const cacheKey = 'app-settings';
+    const cachedData = apiCache.get(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const response = await api.get('/admin/settings');
+
+    // Cache the response (valid for 5 minutes)
+    apiCache.set(cacheKey, response.data, 5 * 60 * 1000);
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    // Return default settings if API fails
+    return {
+      success: true,
+      data: {
+        'instagram.enabled': true // Default to enabled if can't fetch settings
+      }
+    };
+  }
+};
+
 // Alias for backward compatibility
 export const generateFiction = generateContent;
 

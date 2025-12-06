@@ -674,13 +674,6 @@ const CarouselPreview = ({
           </div>
         )}
 
-        {previewState === 'ready' && (
-          <div className="text-xs text-muted-foreground">
-            <div className="flex items-center space-x-1">
-              <span>Generate preview to see how your story will look on Instagram</span>
-            </div>
-          </div>
-        )}
 
         {previewState === 'error' && error && (
           <Alert variant="destructive" className="text-xs">

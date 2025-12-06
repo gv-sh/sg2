@@ -227,7 +227,7 @@ const StoryViewer = ({
       
       {/* Footer with actions */}
       <footer className="py-6 border-t mt-auto">
-        <div className="flex items-center justify-between max-w-3xl mx-auto">
+        <div className="flex items-center justify-start max-w-3xl mx-auto space-x-8">
           <div className="flex items-center space-x-4">
             <Button 
               variant="outline" 
@@ -279,12 +279,10 @@ const StoryViewer = ({
           </div>
           
           {/* Collection info with date moved here */}
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground ml-auto">
             <div className="flex items-center">
               <Calendar className="h-3.5 w-3.5 mr-1.5" />
               <span>{formatDate(story.createdAt)}</span>
-              <span className="mx-2">•</span>
-              <span className="text-primary">Speculative Fiction</span>
             </div>
           </div>
         </div>

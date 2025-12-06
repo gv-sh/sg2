@@ -169,15 +169,6 @@ export class ProductionImageGenerator {
       z-index: 1;
     }
     
-    .title-card .divider {
-      width: 200px;
-      height: 4px;
-      background: linear-gradient(90deg, transparent 0%, #6366f1 20%, #8b5cf6 50%, #6366f1 80%, transparent 100%);
-      margin: 40px auto;
-      border-radius: 2px;
-      position: relative;
-      z-index: 1;
-    }
 
     /* Enhanced content card */
     .content-card {
@@ -335,7 +326,6 @@ export class ProductionImageGenerator {
       const testHTML = `
         <div class="carousel-card title-card">
           <h1>Health Check</h1>
-          <div class="divider"></div>
           <div class="year">Test</div>
         </div>
       `;

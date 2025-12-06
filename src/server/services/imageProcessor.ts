@@ -149,13 +149,6 @@ export class ImageProcessorService {
         letter-spacing: 0.02em;
       }
       
-      .title-card .divider {
-        width: 150px;
-        height: 4px;
-        background: ${theme.primary};
-        margin: 30px auto;
-        border-radius: 2px;
-      }
       
       .content-card {
         background: ${theme.background};
@@ -281,7 +274,6 @@ export class ImageProcessorService {
       ${this.generateCardStyles(theme)}
       <div class="carousel-card title-card">
         <h1>${this.escapeHtml(title)}</h1>
-        <div class="divider"></div>
         ${year ? `<div class="year">Year ${year}</div>` : ''}
       </div>
     `;

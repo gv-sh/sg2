@@ -22,8 +22,15 @@ import type {
 
 const router: express.Router = express.Router();
 
-// Initialize services
-const instagramService = new InstagramService();
+// Initialize services (lazy initialization for Instagram service to avoid test failures)
+let instagramService: InstagramService | null = null;
+const getInstagramService = () => {
+  if (!instagramService) {
+    instagramService = new InstagramService();
+  }
+  return instagramService;
+};
+
 const imageProcessor = new ImageProcessorService();
 const imageGenerator = getImageGenerator();
 const browserManager = getBrowserManager();
@@ -49,6 +56,126 @@ const imageParamsSchema = z.object({
 type ShareRequestSchema = z.infer<typeof shareRequestSchema>;
 type CommentRequestSchema = z.infer<typeof commentRequestSchema>;
 type ImageParamsSchema = z.infer<typeof imageParamsSchema>;
+
+/**
+ * @swagger
+ * /api/instagram/preview:
+ *   post:
+ *     summary: Generate Instagram carousel preview without posting
+ *     tags: [Instagram]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               storyId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       200:
+ *         description: Carousel preview generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     slides:
+ *                       type: array
+ *                     caption:
+ *                       type: string
+ *                     slideCount:
+ *                       type: number
+ *                     previewUrls:
+ *                       type: array
+ */
+router.post('/preview', asyncErrorHandler(async (req: TypedRequestBody<ShareRequestSchema>, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const validatedData = shareRequestSchema.parse(req.body);
+    
+    // Get the story from database
+    const story = await dataService.getGeneratedContentById(validatedData.storyId);
+    if (!story) {
+      return next(boom.notFound(`Story with ID ${validatedData.storyId} not found`));
+    }
+
+    // Generate carousel slides
+    const carouselData = await imageProcessor.generateCarouselSlides({
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined',
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
+
+    // Generate preview URLs for the carousel images
+    const previewUrls: string[] = [];
+    
+    // Add original image if exists
+    if (story.image_blob) {
+      previewUrls.push(`/api/instagram/images/${story.id}/0`);
+    }
+
+    // Add generated slide URLs
+    carouselData.slides
+      .filter((slide: any) => slide.type !== 'original')
+      .forEach((_: any, index: number) => {
+        const slideIndex = story.image_blob ? index + 1 : index;
+        previewUrls.push(`/api/instagram/images/${story.id}/${slideIndex}`);
+      });
+
+    // Generate Instagram caption
+    const caption = imageProcessor.generateInstagramCaption({
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined',
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
+
+    // Cache the carousel data for later use
+    await cacheCarouselData(story.id, carouselData, caption);
+
+    res.json({
+      success: true,
+      message: 'Instagram carousel preview generated successfully',
+      data: {
+        slides: carouselData.slides,
+        caption,
+        slideCount: previewUrls.length,
+        previewUrls,
+        storyId: story.id
+      },
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    if (error.name === 'ZodError') {
+      return next(boom.badRequest('Validation failed', error.errors));
+    }
+    
+    next(boom.internal('Failed to generate Instagram preview', error));
+  }
+}));
 
 /**
  * @swagger
@@ -103,52 +230,79 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       return next(boom.badRequest('This story has already been shared to Instagram'));
     }
 
-    // Generate carousel slides
-    const carouselData = await imageProcessor.generateCarouselSlides({
-      id: story.id,
-      title: story.title,
-      content: story.fiction_content,
-      type: 'combined',
-      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-      parameters: story.prompt_data,
-      year: story.metadata?.year || null,
-      metadata: story.metadata || undefined,
-      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    // Try to use cached carousel data first (from preview step)
+    let carouselData;
+    let caption;
+    let mediaUrls: string[] = [];
 
-    // Generate media URLs for Instagram API
-    const mediaUrls: string[] = [];
+    // Check if we have cached data from preview step
+    const cachedData = await getCachedCarouselData(story.id);
     
-    // Add original image if exists
-    if (story.image_blob) {
-      mediaUrls.push(instagramService.getImageUploadUrl(story.id, 0));
-    }
+    if (cachedData) {
+      console.log(`Using cached carousel data for story ${story.id}`);
+      carouselData = cachedData.carouselData;
+      caption = cachedData.caption;
+      
+      // Generate media URLs from cached data
+      if (story.image_blob) {
+        mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, 0));
+      }
 
-    // Add generated slide URLs
-    carouselData.slides
-      .filter(slide => slide.type !== 'original')
-      .forEach((_, index) => {
-        const slideIndex = story.image_blob ? index + 1 : index;
-        mediaUrls.push(instagramService.getImageUploadUrl(story.id, slideIndex));
+      carouselData.slides
+        .filter((slide: any) => slide.type !== 'original')
+        .forEach((_: any, index: number) => {
+          const slideIndex = story.image_blob ? index + 1 : index;
+          mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, slideIndex));
+        });
+    } else {
+      console.log(`No cached data found, generating fresh carousel for story ${story.id}`);
+      
+      // Generate carousel slides (fallback if preview wasn't called)
+      carouselData = await imageProcessor.generateCarouselSlides({
+        id: story.id,
+        title: story.title,
+        content: story.fiction_content,
+        type: 'combined',
+        image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+        image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+        parameters: story.prompt_data,
+        year: story.metadata?.year || null,
+        metadata: story.metadata || undefined,
+        created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
       });
 
-    // Generate Instagram caption
-    const caption = imageProcessor.generateInstagramCaption({
-      id: story.id,
-      title: story.title,
-      content: story.fiction_content,
-      type: 'combined',
-      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-      parameters: story.prompt_data,
-      year: story.metadata?.year || null,
-      metadata: story.metadata || undefined,
-      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+      // Generate media URLs for Instagram API
+      if (story.image_blob) {
+        mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, 0));
+      }
+
+      carouselData.slides
+        .filter((slide: any) => slide.type !== 'original')
+        .forEach((_: any, index: number) => {
+          const slideIndex = story.image_blob ? index + 1 : index;
+          mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, slideIndex));
+        });
+
+      // Generate Instagram caption
+      caption = imageProcessor.generateInstagramCaption({
+        id: story.id,
+        title: story.title,
+        content: story.fiction_content,
+        type: 'combined',
+        image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+        image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+        parameters: story.prompt_data,
+        year: story.metadata?.year || null,
+        metadata: story.metadata || undefined,
+        created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+      });
+
+      // Cache the data for image serving
+      await cacheCarouselData(story.id, carouselData, caption);
+    }
 
     // Create Instagram carousel post
-    const carouselPost = await instagramService.createCarouselPost({
+    const carouselPost = await getInstagramService().createCarouselPost({
       mediaUrls,
       caption
     });
@@ -169,7 +323,7 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
     });
 
     // Cache the carousel data for image serving
-    await cacheCarouselData(story.id, carouselData);
+    await cacheCarouselData(story.id, carouselData, caption);
 
     res.status(201).json({
       success: true,
@@ -226,7 +380,7 @@ router.post('/comment', asyncErrorHandler(async (req: TypedRequestBody<CommentRe
     const handle = validatedData.handle.startsWith('@') ? validatedData.handle : `@${validatedData.handle}`;
     
     // Add comment to Instagram post
-    const comment = await instagramService.addComment({
+    const comment = await getInstagramService().addComment({
       postId: validatedData.postId,
       message: `Connect with me: ${handle}`
     });
@@ -338,7 +492,7 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
 
     // Calculate the correct slide index (accounting for original image)
     const slideIndex = story.image_blob ? imageIndex - 1 : imageIndex;
-    const slide = carouselData.slides.filter(s => s.type !== 'original')[slideIndex];
+    const slide = carouselData.slides.filter((s: any) => s.type !== 'original')[slideIndex];
     
     if (!slide) {
       return next(boom.notFound(`Slide ${imageIndex} not found`));
@@ -539,10 +693,39 @@ router.post('/cache/cleanup', asyncErrorHandler(async (req: Request, res: Respon
   }
 }));
 
-async function cacheCarouselData(storyId: string, carouselData: any): Promise<void> {
+// Simple in-memory cache for carousel data (in production, use Redis)
+const carouselDataCache = new Map<string, { carouselData: any, caption: string, timestamp: number }>();
+
+async function cacheCarouselData(storyId: string, carouselData: any, caption: string): Promise<void> {
   // In a production app, you might want to cache this data in Redis
   // or another cache store for faster image serving
-  console.log(`Caching carousel data for story ${storyId}:`, carouselData.slides.length, 'slides');
+  carouselDataCache.set(storyId, {
+    carouselData,
+    caption,
+    timestamp: Date.now()
+  });
+  console.log(`Cached carousel data for story ${storyId}:`, carouselData.slides.length, 'slides');
+}
+
+async function getCachedCarouselData(storyId: string): Promise<{ carouselData: any, caption: string } | null> {
+  const cached = carouselDataCache.get(storyId);
+  
+  if (!cached) {
+    return null;
+  }
+  
+  // Check if cache is older than 1 hour
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  if (cached.timestamp < oneHourAgo) {
+    carouselDataCache.delete(storyId);
+    console.log(`Cache expired for story ${storyId}`);
+    return null;
+  }
+  
+  return {
+    carouselData: cached.carouselData,
+    caption: cached.caption
+  };
 }
 
 export default router;

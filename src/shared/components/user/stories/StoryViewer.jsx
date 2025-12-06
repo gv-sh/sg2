@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import ReactDOM from 'react-dom/client';
-import InstagramShareButton from './InstagramShareButton.jsx';
+import CarouselPreview from './CarouselPreview.jsx';
 import InstagramHandleDialog from './InstagramHandleDialog.jsx';
 
 // Format date helper function (moved outside component for reuse in PDF generation)
@@ -269,8 +269,8 @@ const StoryViewer = ({
               Share
             </Button>
 
-            {/* Instagram Share Button - only show for stories that haven't been shared */}
-            <InstagramShareButton 
+            {/* Instagram Carousel Preview - only show for stories that haven't been shared */}
+            <CarouselPreview 
               story={story}
               onShareComplete={handleInstagramShareComplete}
               disabled={loading}

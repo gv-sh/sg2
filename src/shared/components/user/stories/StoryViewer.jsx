@@ -426,9 +426,20 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs }) => {
 
   const pdfBlob = pdf.output('blob');
   const pdfUrl = URL.createObjectURL(pdfBlob);
-  const printWindow = window.open(pdfUrl);
-  printWindow.onload = function () {
-    printWindow.focus();
-    printWindow.print();
+  
+  // Create hidden iframe for printing instead of opening new window
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = pdfUrl;
+  document.body.appendChild(iframe);
+  
+  iframe.onload = function () {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    // Clean up after printing
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      URL.revokeObjectURL(pdfUrl);
+    }, 1000);
   };
 };

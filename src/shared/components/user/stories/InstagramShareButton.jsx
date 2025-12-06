@@ -139,14 +139,9 @@ const InstagramShareButton = ({
           </div>
           {shareResult.carouselUrl && (
             <div className="mt-1">
-              <a 
-                href={shareResult.carouselUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                View on Instagram →
-              </a>
+              <span className="text-blue-500">
+                Instagram post created successfully
+              </span>
             </div>
           )}
         </div>
@@ -164,7 +159,6 @@ const InstagramShareButton = ({
       {shareState === 'ready' && (
         <div className="text-xs text-muted-foreground">
           <div className="flex items-center space-x-1">
-            <span>✨</span>
             <span>One-time sharing opportunity for this story</span>
           </div>
         </div>

@@ -11,7 +11,7 @@ interface BrowserConfig {
   pageTimeout: number;
   browserTimeout: number;
   retryAttempts: number;
-  headless: boolean | 'new';
+  headless: boolean;
 }
 
 export class BrowserManager {
@@ -56,8 +56,19 @@ export class BrowserManager {
       const igConfig = getInstagramConfig();
       
       this.browser = await puppeteer.launch({
-        headless: this.config.headless === 'new' ? true : this.config.headless,
-        args: igConfig.browser.launchArgs,
+        headless: this.config.headless,
+        args: [
+          ...igConfig.browser.launchArgs,
+          '--no-first-run',
+          '--disable-extensions',
+          '--disable-default-apps',
+          '--no-default-browser-check',
+          '--disable-infobars',
+          '--disable-notifications',
+          '--disable-popup-blocking',
+          '--disable-translate',
+          '--mute-audio'
+        ],
         timeout: this.config.browserTimeout,
         ...(igConfig.browser.executablePath && {
           executablePath: igConfig.browser.executablePath

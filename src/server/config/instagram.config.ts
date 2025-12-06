@@ -20,7 +20,7 @@ export interface InstagramConfig {
     pageTimeout: number;
     browserTimeout: number;
     retryAttempts: number;
-    headless: boolean | 'new';
+    headless: boolean;
     executablePath?: string;
     launchArgs: string[];
   };
@@ -89,10 +89,7 @@ export function getInstagramConfig(): InstagramConfig {
       pageTimeout: parseInt(process.env.INSTAGRAM_PAGE_TIMEOUT || '30000'),
       browserTimeout: parseInt(process.env.INSTAGRAM_BROWSER_TIMEOUT || '60000'),
       retryAttempts: parseInt(process.env.INSTAGRAM_BROWSER_RETRY_ATTEMPTS || '3'),
-      headless: process.env.INSTAGRAM_BROWSER_HEADLESS ? 
-        (process.env.INSTAGRAM_BROWSER_HEADLESS === 'new' ? 'new' : 
-         process.env.INSTAGRAM_BROWSER_HEADLESS === 'true') : 
-        (isProduction ? 'new' : false),
+      headless: process.env.INSTAGRAM_BROWSER_HEADLESS !== 'false',
       executablePath: process.env.INSTAGRAM_BROWSER_EXECUTABLE || 
         (isProduction ? '/usr/bin/chromium-browser' : undefined),
       launchArgs: [
@@ -207,7 +204,7 @@ export function getProductionOptimizations(): Partial<InstagramConfig> {
       pageTimeout: 30000,
       browserTimeout: 60000,
       retryAttempts: 3,
-      headless: 'new',
+      headless: true,
       launchArgs: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

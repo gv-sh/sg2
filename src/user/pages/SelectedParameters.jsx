@@ -16,38 +16,38 @@ import { Trash2, Sparkles, Play } from 'lucide-react';
 // Individual selected parameter card - simplified
 const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
   // Initialize value if not set
-  const currentValue = parameter.value !== null && parameter.value !== undefined 
-    ? parameter.value 
+  const currentValue = parameter.value !== null && parameter.value !== undefined
+    ? parameter.value
     : (() => {
-        // Set default and update parameter
-        let defaultValue;
-        const parameterValues = parameter.parameter_values || parameter.values || [];
-        const parameterConfig = parameter.parameter_config || parameter.config || {};
-        
-        switch (parameter.type) {
-          case 'boolean': 
-            defaultValue = false; 
-            break;
-          case 'range': 
-            defaultValue = parameterConfig.default ?? parameterConfig.min ?? 0;
-            break;
-          case 'select':
-          case 'radio':
-            const firstOption = parameterValues[0];
-            defaultValue = firstOption?.id || firstOption?.label || firstOption || '';
-            break;
-          case 'text': 
-            defaultValue = ''; 
-            break;
-          case 'number':
-            defaultValue = 0;
-            break;
-          default: 
-            defaultValue = '';
-        }
-        onUpdate(parameter.id, defaultValue);
-        return defaultValue;
-      })();
+      // Set default and update parameter
+      let defaultValue;
+      const parameterValues = parameter.parameter_values || parameter.values || [];
+      const parameterConfig = parameter.parameter_config || parameter.config || {};
+
+      switch (parameter.type) {
+        case 'boolean':
+          defaultValue = false;
+          break;
+        case 'range':
+          defaultValue = parameterConfig.default ?? parameterConfig.min ?? 0;
+          break;
+        case 'select':
+        case 'radio':
+          const firstOption = parameterValues[0];
+          defaultValue = firstOption?.id || firstOption?.label || firstOption || '';
+          break;
+        case 'text':
+          defaultValue = '';
+          break;
+        case 'number':
+          defaultValue = 0;
+          break;
+        default:
+          defaultValue = '';
+      }
+      onUpdate(parameter.id, defaultValue);
+      return defaultValue;
+    })();
 
   const handleValueChange = (newValue) => {
     onUpdate(parameter.id, newValue);
@@ -57,7 +57,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
     // Extract parameter values and config from database format
     const parameterValues = parameter.parameter_values || parameter.values || [];
     const parameterConfig = parameter.parameter_config || parameter.config || {};
-    
+
     switch (parameter.type) {
       case 'select':
         // Create a lookup function to find label for selected value
@@ -68,14 +68,14 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
           });
           return option ? (option.label || option) : value;
         };
-        
+
         return (
           <div className="space-y-2">
             {parameter.description && (
               <p className="text-xs text-muted-foreground">{parameter.description}</p>
             )}
-            <Select 
-              value={currentValue || ''} 
+            <Select
+              value={currentValue || ''}
               onValueChange={handleValueChange}
               findLabelForValue={findLabelForValue}
             >
@@ -111,15 +111,15 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
                 onChange={(e) => handleValueChange(e.target.checked)}
               />
               <label htmlFor={`selected-${parameter.id}`} className="text-sm">
-                {currentValue ? 
-                  (parameterValues?.on || 'Enabled') : 
+                {currentValue ?
+                  (parameterValues?.on || 'Enabled') :
                   (parameterValues?.off || 'Disabled')
                 }
               </label>
             </div>
           </div>
         );
-        
+
       case 'radio':
         return (
           <div className="space-y-2">
@@ -130,7 +130,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
               {parameterValues.map((option, index) => {
                 const optionId = option.id || option.label || option || `option-${index}`;
                 const optionLabel = option.label || option;
-                
+
                 return (
                   <div key={optionId} className="flex items-center space-x-2">
                     <input
@@ -161,7 +161,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
         const step = parameterConfig.step ?? 1;
         const minLabel = parameterConfig.minLabel || parameterValues?.[0]?.label;
         const maxLabel = parameterConfig.maxLabel || parameterValues?.[1]?.label;
-        
+
         return (
           <div className="space-y-2">
             {parameter.description && (
@@ -254,11 +254,11 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
   );
 };
 
-const SelectedParameters = ({ 
-  parameters, 
-  onRemoveParameter, 
+const SelectedParameters = ({
+  parameters,
+  onRemoveParameter,
   onUpdateParameterValue,
-  onNavigateToGenerate 
+  onNavigateToGenerate
 }) => {
   const [storyYear, setStoryYear] = useState(() => {
     // Generate a random year between 2026 and 2126
@@ -279,7 +279,7 @@ const SelectedParameters = ({
         <div className="flex flex-col items-left">
           <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Selected Parameters</h3>
         </div>
-        
+
         <div className="flex flex-col items-center justify-center h-48 text-center">
           <Sparkles className="h-8 w-8 text-muted-foreground mb-3" />
           <h4 className="text-sm font-medium mb-1">No Parameters Selected</h4>
@@ -310,37 +310,44 @@ const SelectedParameters = ({
       </div>
 
       {/* Story Year Setting - anchored to bottom */}
-      <div className="p-2 border rounded-md space-y-2 mt-auto mb-6 bg-background">
-        <h4 className="text-sm font-medium">Story Year</h4>
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>2026</span>
-            <span>2126</span>
+      <div className="p-2 border-t rounded-md mt-auto mb-6 bg-background/10 flex justify-center">
+        <div className="flex items-center gap-4 w-3/4 mt-2">
+          {/* Slider + min/max under it */}
+          <div className="flex-1">
+            <Slider
+              min={2026}
+              max={2126}
+              step={1}
+              value={storyYear}
+              onValueChange={(value) => setStoryYear(value)}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>2026</span>
+              <span>2126</span>
+            </div>
           </div>
-          <Slider
-            min={2026}
-            max={2126}
-            step={1}
-            value={storyYear}
-            onValueChange={(value) => setStoryYear(value)}
-            className="w-full"
-          />
-          <div className="text-center">
-            <span className="text-xs text-muted-foreground">Current: {storyYear}</span>
+
+          {/* Label + current year (stacked) */}
+          <div className="flex flex-col items-center ml-4">
+            <span className="text-xl text-primary font-semibold">{storyYear}</span>
+            <span className="text-xs font-medium">Story Year</span>
           </div>
-        </div>
-        <div className="pt-1">
+
+          {/* Button */}
           <Button
             onClick={handleGenerate}
             size="sm"
             disabled={parameters.length === 0}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
+            className="w-1/4 bg-primary hover:bg-primary/90 text-primary-foreground ml-4"
           >
             <Play className="h-3 w-3 mr-1" />
-            Generate
+            Generate Content
           </Button>
         </div>
       </div>
+
+
 
     </div>
   );

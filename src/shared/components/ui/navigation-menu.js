@@ -41,8 +41,8 @@ const NavigationMenuLink = React.forwardRef(
     <Component
       ref={ref}
       className={cn(
-        "block select-none space-y-1 rounded-xl p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/30 hover:text-accent-foreground focus:bg-accent/30 focus:text-accent-foreground",
-        active && "bg-accent/20 text-accent-foreground",
+        "block select-none space-y-1 p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/30 hover:text-foreground focus:bg-accent/30 focus:text-foreground",
+        active && "bg-accent/20 text-foreground",
         className
       )}
       {...props}

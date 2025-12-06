@@ -19,18 +19,18 @@ function Navbar() {
         <Link to="/admin" className="font-medium text-lg text-primary">
           FOH Behind the Scenes
         </Link>
-        
+
         <nav className="flex items-center space-x-4">
           {routes.map(({ path, label }) => (
             <Link
               key={path}
               to={path}
               className={cn(
-                "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                "hover:bg-accent hover:text-accent-foreground",
+                "flex items-center px-3 py-2 text-sm font-medium transition-colors",
+                "hover:bg-accent hover:text-foreground",
                 "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                location.pathname === path 
-                  ? "bg-accent text-accent-foreground" 
+                location.pathname === path
+                  ? "bg-accent text-foreground"
                   : "text-muted-foreground"
               )}
             >

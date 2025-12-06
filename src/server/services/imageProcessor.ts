@@ -229,10 +229,11 @@ export class ImageProcessorService {
   }
 
   /**
-   * Generate complete carousel slide data for a story
+   * Generate complete carousel slide data for a story (max 10 slides for Instagram)
    */
   async generateCarouselSlides(story: ContentApiData): Promise<GeneratedCarouselSlides> {
     const slides: CarouselSlide[] = [];
+    const maxSlides = 10; // Instagram carousel limit
 
     try {
       // Determine theme based on story content
@@ -251,15 +252,25 @@ export class ImageProcessorService {
       const titleSlide = this.createTitleSlide(story.title, story.year, theme);
       slides.push(titleSlide);
 
-      // Slides 3-N: Story content split into readable chunks
-      const contentSlides = this.createContentSlides(story.content || '', theme);
+      // Calculate remaining slots for content
+      const hasOriginalImage = !!story.image_original_url;
+      const reserveForBranding = 1;
+      const maxContentSlides = maxSlides - (hasOriginalImage ? 1 : 0) - 1 - reserveForBranding; // Title + Branding
+
+      // Slides 3-N: Story content split into readable chunks (limited)
+      const contentSlides = this.createContentSlides(story.content || '', theme, maxContentSlides);
       slides.push(...contentSlides);
 
-      // Final slide: Branding card
-      const brandingSlide = this.createBrandingSlide(theme);
-      slides.push(brandingSlide);
+      // Final slide: Branding card (if we have room)
+      if (slides.length < maxSlides) {
+        const brandingSlide = this.createBrandingSlide(theme);
+        slides.push(brandingSlide);
+      }
 
-      return { slides, totalCount: slides.length };
+      // Ensure we don't exceed Instagram's limit
+      const finalSlides = slides.slice(0, maxSlides);
+
+      return { slides: finalSlides, totalCount: finalSlides.length };
     } catch (error) {
       console.error('Failed to generate carousel slides:', error);
       throw new Error(`Slide generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -288,7 +299,7 @@ export class ImageProcessorService {
   /**
    * Create content slides from story text with improved chunking
    */
-  private createContentSlides(content: string, theme: ThemeColors): CarouselSlide[] {
+  private createContentSlides(content: string, theme: ThemeColors, maxContentSlides?: number): CarouselSlide[] {
     const slides: CarouselSlide[] = [];
     
     // Clean and split content into paragraphs
@@ -301,7 +312,7 @@ export class ImageProcessorService {
     if (paragraphs.length === 0) return slides;
 
     // Intelligent content chunking based on content length
-    const chunks = this.chunkContentIntelligently(paragraphs);
+    const chunks = this.chunkContentIntelligently(paragraphs, maxContentSlides);
     
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
@@ -343,7 +354,7 @@ export class ImageProcessorService {
   /**
    * Intelligently chunk content based on visual space and readability
    */
-  private chunkContentIntelligently(paragraphs: string[]): string[][] {
+  private chunkContentIntelligently(paragraphs: string[], maxSlides?: number): string[][] {
     const chunks: string[][] = [];
     // Reduced character limits to account for visual space with better formatting
     const maxCharsPerSlide = 600; // Optimal for smaller font size and better spacing
@@ -372,12 +383,19 @@ export class ImageProcessorService {
     }
     
     // Ensure no single chunk is too long by splitting large paragraphs
-    return chunks.map(chunk => {
+    const processedChunks = chunks.map(chunk => {
       if (chunk.length === 1 && chunk[0].length > maxCharsPerSlide) {
         return this.splitLongParagraph(chunk[0], maxCharsPerSlide);
       }
       return chunk;
     });
+
+    // Limit to maxSlides if specified
+    if (maxSlides && maxSlides > 0) {
+      return processedChunks.slice(0, maxSlides);
+    }
+
+    return processedChunks;
   }
 
   /**

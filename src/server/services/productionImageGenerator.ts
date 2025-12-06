@@ -59,13 +59,15 @@ export class ProductionImageGenerator {
 
         // Load HTML content with proper styling
         const styledHTML = this.wrapHTMLWithStyles(html, opts);
+        
+        // Use a more lenient wait strategy for better performance
         await page.setContent(styledHTML, { 
-          waitUntil: 'networkidle0',
-          timeout: opts.timeout 
+          waitUntil: 'domcontentloaded', // Changed from 'networkidle0' to 'domcontentloaded' for faster loading
+          timeout: Math.min(opts.timeout, 10000) // Cap initial load timeout at 10s
         });
 
-        // Wait for fonts and animations to load
-        await this.waitForContentReady(page);
+        // Wait for fonts and animations to load with shorter timeout
+        await this.waitForContentReady(page, opts.timeout - 10000);
 
         // Generate screenshot
         const buffer = await page.screenshot({
@@ -272,25 +274,28 @@ export class ProductionImageGenerator {
   /**
    * Wait for content to be fully ready for screenshot
    */
-  private async waitForContentReady(page: Page): Promise<void> {
-    // Wait for fonts to load
+  private async waitForContentReady(page: Page, remainingTimeout: number = 5000): Promise<void> {
+    const fontTimeout = Math.min(remainingTimeout * 0.6, 3000); // 60% of remaining time, max 3s
+    const contentTimeout = Math.min(remainingTimeout * 0.3, 1000); // 30% of remaining time, max 1s
+    
+    // Wait for fonts to load with dynamic timeout
     await page.waitForFunction(
       () => document.body.getAttribute('data-fonts-loaded') === 'true',
-      { timeout: 5000 }
+      { timeout: fontTimeout }
     ).catch(() => {
-      console.warn('Fonts loading timeout, proceeding with screenshot');
+      console.warn(`Fonts loading timeout (${fontTimeout}ms), proceeding with screenshot`);
     });
 
-    // Wait for content to be ready
+    // Wait for content to be ready with dynamic timeout
     await page.waitForFunction(
       () => document.body.getAttribute('data-content-ready') === 'true',
-      { timeout: 2000 }
+      { timeout: contentTimeout }
     ).catch(() => {
-      console.warn('Content ready timeout, proceeding with screenshot');
+      console.warn(`Content ready timeout (${contentTimeout}ms), proceeding with screenshot`);
     });
 
-    // Additional small delay for any remaining rendering
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Minimal delay for final rendering
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   /**

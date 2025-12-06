@@ -85,10 +85,10 @@ export function getInstagramConfig(): InstagramConfig {
     },
 
     browser: {
-      maxPages: parseInt(process.env.INSTAGRAM_MAX_BROWSER_PAGES || (isProduction ? '5' : '2')),
-      pageTimeout: parseInt(process.env.INSTAGRAM_PAGE_TIMEOUT || '30000'),
-      browserTimeout: parseInt(process.env.INSTAGRAM_BROWSER_TIMEOUT || '60000'),
-      retryAttempts: parseInt(process.env.INSTAGRAM_BROWSER_RETRY_ATTEMPTS || '3'),
+      maxPages: parseInt(process.env.INSTAGRAM_MAX_BROWSER_PAGES || (isProduction ? '5' : '3')), // Increased from 2 to 3
+      pageTimeout: parseInt(process.env.INSTAGRAM_PAGE_TIMEOUT || '20000'), // Reduced from 30s to 20s
+      browserTimeout: parseInt(process.env.INSTAGRAM_BROWSER_TIMEOUT || '45000'), // Reduced from 60s to 45s
+      retryAttempts: parseInt(process.env.INSTAGRAM_BROWSER_RETRY_ATTEMPTS || '2'), // Reduced from 3 to 2
       headless: process.env.INSTAGRAM_BROWSER_HEADLESS !== 'false',
       executablePath: process.env.INSTAGRAM_BROWSER_EXECUTABLE || 
         (isProduction ? '/usr/bin/chromium-browser' : undefined),
@@ -121,8 +121,8 @@ export function getInstagramConfig(): InstagramConfig {
       defaultQuality: parseInt(process.env.INSTAGRAM_IMAGE_QUALITY || '95'),
       defaultFormat: (process.env.INSTAGRAM_IMAGE_FORMAT as 'png' | 'jpeg') || 'png',
       deviceScaleFactor: parseInt(process.env.INSTAGRAM_DEVICE_SCALE_FACTOR || '2'),
-      timeout: parseInt(process.env.INSTAGRAM_IMAGE_GENERATION_TIMEOUT || '30000'),
-      maxConcurrentImages: parseInt(process.env.INSTAGRAM_MAX_CONCURRENT_IMAGES || (isProduction ? '3' : '1'))
+      timeout: parseInt(process.env.INSTAGRAM_IMAGE_GENERATION_TIMEOUT || '15000'), // Reduced from 30s to 15s
+      maxConcurrentImages: parseInt(process.env.INSTAGRAM_MAX_CONCURRENT_IMAGES || (isProduction ? '3' : '2')) // Increased from 1 to 2
     },
 
     cache: {

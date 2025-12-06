@@ -41,7 +41,10 @@ const config: Config = {
     },
     cors: {
       origins: {
-        development: ['http://localhost:3000'],
+        development: [
+          'http://localhost:3000',
+          ...(process.env.BASE_URL ? [process.env.BASE_URL] : [])
+        ],
         production: process.env.ALLOWED_ORIGINS?.split(',') || ['https://yourdomain.com'],
         test: ['http://localhost:3000']
       },

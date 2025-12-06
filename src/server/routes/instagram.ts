@@ -230,76 +230,144 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       return next(boom.badRequest('This story has already been shared to Instagram'));
     }
 
-    // Try to use cached carousel data first (from preview step)
-    let carouselData;
-    let caption;
-    let mediaUrls: string[] = [];
-
-    // Check if we have cached data from preview step
-    const cachedData = await getCachedCarouselData(story.id);
+    // Generate carousel slides and pre-generate all images
+    console.log(`Generating carousel and pre-generating all images for story ${story.id}`);
     
-    if (cachedData) {
-      console.log(`Using cached carousel data for story ${story.id}`);
-      carouselData = cachedData.carouselData;
-      caption = cachedData.caption;
-      
-      // Generate media URLs from cached data
-      if (story.image_blob) {
-        mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, 0));
-      }
+    const carouselData = await imageProcessor.generateCarouselSlides({
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined',
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
 
-      carouselData.slides
-        .filter((slide: any) => slide.type !== 'original')
-        .forEach((_: any, index: number) => {
-          const slideIndex = story.image_blob ? index + 1 : index;
-          mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, slideIndex));
+    // Generate Instagram caption
+    const caption = imageProcessor.generateInstagramCaption({
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined',
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
+
+    // PRE-GENERATE ALL IMAGES BEFORE INSTAGRAM API CALLS
+    console.log(`Pre-generating ${carouselData.slides.length} images for Instagram posting...`);
+    
+    const imageOptions = {
+      width: 1080,
+      height: 1080,
+      quality: 95,
+      format: 'png' as const,
+      deviceScaleFactor: 2,
+      timeout: 12000 // Reduced timeout for individual images
+    };
+    
+    // Prepare images to generate (exclude original images)
+    const imagesToGenerate: { html: string; index: number }[] = [];
+    carouselData.slides.forEach((slide: any, i: number) => {
+      if (slide.type !== 'original') {
+        imagesToGenerate.push({
+          html: slide.html,
+          index: story.image_blob ? i + 1 : i
         });
-    } else {
-      console.log(`No cached data found, generating fresh carousel for story ${story.id}`);
-      
-      // Generate carousel slides (fallback if preview wasn't called)
-      carouselData = await imageProcessor.generateCarouselSlides({
-        id: story.id,
-        title: story.title,
-        content: story.fiction_content,
-        type: 'combined',
-        image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-        image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-        parameters: story.prompt_data,
-        year: story.metadata?.year || null,
-        metadata: story.metadata || undefined,
-        created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-      });
-
-      // Generate media URLs for Instagram API
-      if (story.image_blob) {
-        mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, 0));
       }
-
-      carouselData.slides
-        .filter((slide: any) => slide.type !== 'original')
-        .forEach((_: any, index: number) => {
-          const slideIndex = story.image_blob ? index + 1 : index;
-          mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, slideIndex));
-        });
-
-      // Generate Instagram caption
-      caption = imageProcessor.generateInstagramCaption({
-        id: story.id,
-        title: story.title,
-        content: story.fiction_content,
-        type: 'combined',
-        image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-        image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-        parameters: story.prompt_data,
-        year: story.metadata?.year || null,
-        metadata: story.metadata || undefined,
-        created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    });
+    
+    console.log(`Generating ${imagesToGenerate.length} images in batches...`);
+    
+    const preGeneratedImages: { buffer: Buffer; index: number }[] = [];
+    const batchSize = 2; // Process in smaller batches for better timeout handling
+    
+    for (let i = 0; i < imagesToGenerate.length; i += batchSize) {
+      const batch = imagesToGenerate.slice(i, i + batchSize);
+      console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(imagesToGenerate.length / batchSize)}`);
+      
+      const batchPromises = batch.map(async ({ html, index }) => {
+        const cacheKey = imageCache.generateCacheKey(html, imageOptions);
+        let cachedImage = await imageCache.get(cacheKey);
+        
+        if (!cachedImage) {
+          try {
+            console.log(`Generating image for slide ${index}...`);
+            const generatedImage = await imageGenerator.generateImageFromHTML(html, imageOptions);
+            
+            cachedImage = {
+              buffer: generatedImage.buffer,
+              format: generatedImage.format,
+              width: generatedImage.width,
+              height: generatedImage.height,
+              cacheKey,
+              createdAt: new Date()
+            };
+            
+            await imageCache.set(cacheKey, cachedImage);
+            console.log(`Successfully generated image for slide ${index}`);
+          } catch (error) {
+            console.error(`Failed to generate image for slide ${index}:`, error);
+            // Create a fallback simple image instead of failing completely
+            const fallbackImage = await generateFallbackImage(index, imageOptions);
+            cachedImage = {
+              buffer: fallbackImage.buffer,
+              format: fallbackImage.format,
+              width: fallbackImage.width,
+              height: fallbackImage.height,
+              cacheKey,
+              createdAt: new Date()
+            };
+          }
+        }
+        
+        return {
+          buffer: cachedImage.buffer,
+          index
+        };
       });
-
-      // Cache the data for image serving
-      await cacheCarouselData(story.id, carouselData, caption);
+      
+      try {
+        const batchResults = await Promise.all(batchPromises);
+        preGeneratedImages.push(...batchResults);
+        
+        // Small delay between batches to prevent overwhelming the browser
+        if (i + batchSize < imagesToGenerate.length) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } catch (error) {
+        console.error(`Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
+        // Continue with next batch rather than failing completely
+      }
     }
+    
+    // Store pre-generated images in cache with story association
+    await cachePreGeneratedImages(story.id, preGeneratedImages);
+    
+    // Generate media URLs for Instagram API (these will now serve pre-generated images)
+    const mediaUrls: string[] = [];
+    
+    if (story.image_blob) {
+      mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, 0));
+    }
+
+    carouselData.slides
+      .filter((slide: any) => slide.type !== 'original')
+      .forEach((_: any, index: number) => {
+        const slideIndex = story.image_blob ? index + 1 : index;
+        mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, slideIndex));
+      });
+
+    // Cache the carousel data for image serving
+    await cacheCarouselData(story.id, carouselData, caption);
+    
+    console.log(`All ${preGeneratedImages.length} images pre-generated successfully`)
 
     // Create Instagram carousel post
     const carouselPost = await getInstagramService().createCarouselPost({
@@ -476,7 +544,20 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
       return res.end(story.image_blob);
     }
 
-    // Generate carousel slide
+    // Try to get pre-generated image first (for Instagram sharing)
+    const preGeneratedImage = await getPreGeneratedImage(storyId, imageIndex);
+    if (preGeneratedImage) {
+      console.log(`Serving pre-generated image ${imageIndex} for story ${storyId}`);
+      res.set({
+        'Content-Type': 'image/png',
+        'Content-Length': preGeneratedImage.length.toString(),
+        'Cache-Control': 'public, max-age=86400' // 24 hours cache
+      });
+      
+      return res.end(preGeneratedImage);
+    }
+
+    // Generate carousel slide on-demand (fallback)
     const carouselData = await imageProcessor.generateCarouselSlides({
       id: story.id,
       title: story.title,
@@ -695,6 +776,7 @@ router.post('/cache/cleanup', asyncErrorHandler(async (req: Request, res: Respon
 
 // Simple in-memory cache for carousel data (in production, use Redis)
 const carouselDataCache = new Map<string, { carouselData: any, caption: string, timestamp: number }>();
+const preGeneratedImagesCache = new Map<string, { images: { buffer: Buffer; index: number }[], timestamp: number }>();
 
 async function cacheCarouselData(storyId: string, carouselData: any, caption: string): Promise<void> {
   // In a production app, you might want to cache this data in Redis
@@ -705,6 +787,14 @@ async function cacheCarouselData(storyId: string, carouselData: any, caption: st
     timestamp: Date.now()
   });
   console.log(`Cached carousel data for story ${storyId}:`, carouselData.slides.length, 'slides');
+}
+
+async function cachePreGeneratedImages(storyId: string, images: { buffer: Buffer; index: number }[]): Promise<void> {
+  preGeneratedImagesCache.set(storyId, {
+    images,
+    timestamp: Date.now()
+  });
+  console.log(`Cached ${images.length} pre-generated images for story ${storyId}`);
 }
 
 async function getCachedCarouselData(storyId: string): Promise<{ carouselData: any, caption: string } | null> {
@@ -726,6 +816,40 @@ async function getCachedCarouselData(storyId: string): Promise<{ carouselData: a
     carouselData: cached.carouselData,
     caption: cached.caption
   };
+}
+
+async function getPreGeneratedImage(storyId: string, imageIndex: number): Promise<Buffer | null> {
+  const cached = preGeneratedImagesCache.get(storyId);
+  
+  if (!cached) {
+    return null;
+  }
+  
+  // Check if cache is older than 1 hour
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  if (cached.timestamp < oneHourAgo) {
+    preGeneratedImagesCache.delete(storyId);
+    console.log(`Pre-generated images cache expired for story ${storyId}`);
+    return null;
+  }
+  
+  const image = cached.images.find(img => img.index === imageIndex);
+  return image ? image.buffer : null;
+}
+
+// Fallback image generation for when HTML rendering fails
+async function generateFallbackImage(index: number, options: any): Promise<{ buffer: Buffer; format: string; width: number; height: number }> {
+  const fallbackHtml = `
+    <div class="carousel-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${options.width}px; height: ${options.height}px; color: white; font-family: Arial, sans-serif;">
+      <h1 style="font-size: 48px; margin: 20px;">Slide ${index + 1}</h1>
+      <p style="font-size: 24px; opacity: 0.8;">Content unavailable</p>
+    </div>
+  `;
+  
+  return await imageGenerator.generateImageFromHTML(fallbackHtml, {
+    ...options,
+    timeout: 5000 // Shorter timeout for fallback
+  });
 }
 
 export default router;

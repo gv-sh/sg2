@@ -29,17 +29,21 @@ interface CommentRequest {
 export class InstagramService {
   private accessToken: string;
   private appId: string;
+  private facebookPageId: string;
+  private instagramBusinessAccountId: string | null = null;
 
   constructor() {
     this.accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
     this.appId = process.env.INSTAGRAM_APP_ID || '';
+    this.facebookPageId = process.env.FACEBOOK_PAGE_ID || '';
 
     // Debug logging
     console.log('[Instagram Service] App ID:', this.appId || 'NOT SET');
+    console.log('[Instagram Service] Facebook Page ID:', this.facebookPageId || 'NOT SET');
     console.log('[Instagram Service] Access Token:', this.accessToken ? `${this.accessToken.slice(0, 20)}...` : 'NOT SET');
 
-    if (!this.accessToken || !this.appId) {
-      throw new Error('Instagram credentials are not properly configured');
+    if (!this.accessToken || !this.facebookPageId) {
+      throw new Error('Instagram credentials are not properly configured. Need INSTAGRAM_ACCESS_TOKEN and FACEBOOK_PAGE_ID');
     }
   }
 
@@ -55,9 +59,14 @@ export class InstagramService {
       }
 
       // Step 1: Create individual media containers for each image
+      // Instagram carousels support 2-10 images maximum
+      const maxImages = 10;
+      const limitedMediaUrls = request.mediaUrls.slice(0, maxImages);
+      console.log(`[Instagram Service] Using ${limitedMediaUrls.length} images (max ${maxImages}) for carousel`);
+      
       const mediaContainers: InstagramMediaContainer[] = [];
       
-      for (const mediaUrl of request.mediaUrls) {
+      for (const mediaUrl of limitedMediaUrls) {
         const container = await this.createMediaContainer(mediaUrl);
         mediaContainers.push(container);
       }
@@ -68,7 +77,10 @@ export class InstagramService {
         request.caption
       );
 
-      // Step 3: Publish the carousel
+      // Step 3: Wait a moment for media processing, then publish the carousel
+      console.log(`[Instagram Service] Waiting 5 seconds for media processing...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
       const publishedPost = await this.publishCarousel(carouselContainer.id);
 
       return publishedPost;
@@ -117,29 +129,92 @@ export class InstagramService {
   }
 
   /**
-   * Check if Instagram credentials are valid
+   * Check if Instagram credentials are valid and get Instagram Business Account
    */
   async validateCredentials(): Promise<boolean> {
     try {
-      // Use Instagram Graph API endpoint instead of Facebook Graph API
-      const response = await fetch(
-        `https://graph.instagram.com/me?fields=id,username&access_token=${this.accessToken}`
+      // Step 1: Get Facebook Page information using Facebook Graph API
+      console.log('[Instagram Service] Validating Facebook Page access...');
+      const pageResponse = await fetch(
+        `https://graph.facebook.com/v18.0/${this.facebookPageId}?fields=id,name,instagram_business_account&access_token=${this.accessToken}`
       );
 
-      const result = await response.json();
-      console.log('[Instagram Service] Validation response:', result);
+      const pageResult = await pageResponse.json();
+      console.log('[Instagram Service] Facebook Page validation response:', pageResult);
       
-      if (response.ok && result.id) {
-        console.log('[Instagram Service] Credentials valid for user:', result.username);
+      if (!pageResponse.ok || pageResult.error) {
+        console.error('[Instagram Service] Facebook Page validation failed:', pageResult.error);
+        const errorCode = pageResult.error?.code;
+        const errorMessage = pageResult.error?.message;
+        
+        if (errorCode === 190) {
+          throw new Error('Instagram access token is invalid or expired. Please refresh your token.');
+        } else if (errorCode === 200) {
+          throw new Error('Instagram permissions error. Please ensure your app has content_management permissions.');
+        } else if (errorCode === 100) {
+          throw new Error('Invalid Facebook Page ID. Please check your INSTAGRAM_APP_ID configuration.');
+        } else {
+          throw new Error(`Facebook API error: ${errorMessage || 'Unknown error'}`);
+        }
+      }
+
+      if (!pageResult.instagram_business_account) {
+        throw new Error('No Instagram Business Account linked to this Facebook Page. Please link an Instagram Business Account to your Facebook Page.');
+      }
+
+      // Step 2: Validate Instagram Business Account access
+      console.log('[Instagram Service] Validating Instagram Business Account access...');
+      const igAccountId = pageResult.instagram_business_account.id;
+      const igResponse = await fetch(
+        `https://graph.facebook.com/v18.0/${igAccountId}?fields=id,username&access_token=${this.accessToken}`
+      );
+
+      const igResult = await igResponse.json();
+      console.log('[Instagram Service] Instagram Business Account validation response:', igResult);
+      
+      if (igResponse.ok && igResult.id) {
+        console.log('[Instagram Service] Credentials valid for Instagram Business Account:', igResult.username || igResult.id);
+        this.instagramBusinessAccountId = igResult.id; // Store for media operations
         return true;
       }
       
-      console.error('[Instagram Service] Invalid credentials:', result);
-      return false;
+      console.error('[Instagram Service] Invalid Instagram Business Account:', igResult);
+      
+      if (igResult.error) {
+        const errorCode = igResult.error.code;
+        const errorMessage = igResult.error.message;
+        
+        if (errorCode === 190) {
+          throw new Error('Instagram access token expired. Please refresh your Instagram access token.');
+        } else if (errorCode === 200) {
+          throw new Error('Insufficient permissions for Instagram Business Account. Please ensure your app has instagram_content_publish permissions.');
+        } else {
+          throw new Error(`Instagram Business Account error: ${errorMessage}`);
+        }
+      }
+      
+      throw new Error('Instagram Business Account validation failed. Please check your account setup.');
     } catch (error) {
       console.error('Instagram credentials validation failed:', error);
       return false;
     }
+  }
+
+  /**
+   * Get Instagram Business Account ID
+   */
+  private async getInstagramBusinessAccountId(): Promise<string> {
+    if (this.instagramBusinessAccountId) {
+      return this.instagramBusinessAccountId;
+    }
+
+    // If not cached, validate credentials to get it
+    const isValid = await this.validateCredentials();
+    if (!isValid || !this.instagramBusinessAccountId) {
+      throw new Error('Unable to get Instagram Business Account ID. Please check your credentials.');
+    }
+
+    return this.instagramBusinessAccountId;
   }
 
   /**
@@ -148,8 +223,10 @@ export class InstagramService {
   private async createMediaContainer(imageUrl: string): Promise<InstagramMediaContainer> {
     console.log('[Instagram Service] Creating media container for URL:', imageUrl);
     
+    const igAccountId = await this.getInstagramBusinessAccountId();
+    
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${this.appId}/media`,
+      `https://graph.facebook.com/v18.0/${igAccountId}/media`,
       {
         method: 'POST',
         headers: {
@@ -180,8 +257,10 @@ export class InstagramService {
    * Create a carousel container with multiple media items
    */
   private async createCarouselContainer(mediaIds: string[], caption: string): Promise<InstagramMediaContainer> {
+    const igAccountId = await this.getInstagramBusinessAccountId();
+    
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${this.appId}/media`,
+      `https://graph.facebook.com/v18.0/${igAccountId}/media`,
       {
         method: 'POST',
         headers: {
@@ -209,8 +288,12 @@ export class InstagramService {
    * Publish a carousel container
    */
   private async publishCarousel(containerId: string): Promise<InstagramCarouselPost> {
+    const igAccountId = await this.getInstagramBusinessAccountId();
+    
+    console.log(`[Instagram Service] Publishing carousel container ${containerId} to account ${igAccountId}`);
+    
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${this.appId}/media_publish`,
+      `https://graph.facebook.com/v18.0/${igAccountId}/media_publish`,
       {
         method: 'POST',
         headers: {
@@ -223,12 +306,16 @@ export class InstagramService {
       }
     );
 
+    console.log(`[Instagram Service] Publish response status: ${response.status}`);
+
     if (!response.ok) {
       const error = await response.json();
+      console.error(`[Instagram Service] Publish error:`, error);
       throw new Error(`Failed to publish carousel: ${error.error?.message || response.statusText}`);
     }
 
     const result = await response.json();
+    console.log(`[Instagram Service] Carousel published successfully:`, result);
     return { id: result.id };
   }
 
@@ -236,9 +323,9 @@ export class InstagramService {
    * Get the public URL for uploading images (for external hosting)
    */
   getImageUploadUrl(storyId: string, imageIndex: number): string {
-    // Return the full URL that Instagram can access to fetch the image
-    // This assumes the images will be served from our API
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    // Use BASE_URL environment variable for public access
+    // For local development, use ngrok or similar tunneling service
+    const baseUrl = process.env.BASE_URL || process.env.PUBLIC_URL || 'http://localhost:3000';
     return `${baseUrl}/api/instagram/images/${storyId}/${imageIndex}`;
   }
 }

@@ -138,7 +138,7 @@ router.post('/preview', asyncErrorHandler(async (req: TypedRequestBody<ShareRequ
       });
 
     // Generate Instagram caption
-    const caption = imageProcessor.generateInstagramCaption({
+    const caption = await imageProcessor.generateInstagramCaption({
       id: story.id,
       title: story.title,
       content: story.fiction_content,
@@ -247,7 +247,7 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
     });
 
     // Generate Instagram caption
-    const caption = imageProcessor.generateInstagramCaption({
+    const caption = await imageProcessor.generateInstagramCaption({
       id: story.id,
       title: story.title,
       content: story.fiction_content,

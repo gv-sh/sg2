@@ -25,6 +25,9 @@ const DEFAULT_SETTINGS = {
       }
     }
   },
+  instagram: {
+    default_caption: '{title}\n\n{intro}\n\nSet in the year {year}\n\nThemes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\nWhat future do you envision? Share your thoughts below!\n\n#carousel #story #fiction'
+  },
   defaults: { content_type: 'fiction' }
 };
 
@@ -54,6 +57,9 @@ function Settings() {
             prompt_suffix: flatSettings['ai.parameters.image.prompt_suffix'] || DEFAULT_SETTINGS.ai.parameters.image.prompt_suffix
           }
         }
+      },
+      instagram: {
+        default_caption: flatSettings['instagram.default_caption'] || DEFAULT_SETTINGS.instagram.default_caption
       },
       defaults: {
         content_type: flatSettings['defaults.content_type'] || DEFAULT_SETTINGS.defaults.content_type
@@ -127,6 +133,9 @@ function Settings() {
     flattened['ai.parameters.image.size'] = settingsObj.ai.parameters.image.size;
     flattened['ai.parameters.image.quality'] = settingsObj.ai.parameters.image.quality;
     flattened['ai.parameters.image.prompt_suffix'] = settingsObj.ai.parameters.image.prompt_suffix;
+    
+    // Instagram settings
+    flattened['instagram.default_caption'] = settingsObj.instagram.default_caption;
     
     // Defaults
     flattened['defaults.content_type'] = settingsObj.defaults.content_type;
@@ -368,6 +377,49 @@ function Settings() {
                   <p className="text-xs text-muted-foreground">
                     Quality of generated images
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Instagram Settings Card */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Instagram Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="instagramCaption" className="text-sm font-medium">Default Instagram Caption Template</label>
+                  <Textarea
+                    id="instagramCaption"
+                    rows={10}
+                    value={settings.instagram.default_caption || ''}
+                    onChange={(e) => handleSettingsChange('instagram', null, 'default_caption', e.target.value)}
+                    className={settings.instagram.default_caption !== DEFAULT_SETTINGS.instagram.default_caption ? 'border border-destructive' : ''}
+                    placeholder="Enter the default caption template for Instagram posts..."
+                  />
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">
+                        This template is used when sharing stories to Instagram. Use template variables for dynamic content:
+                      </p>
+                      <div className="text-xs text-muted-foreground space-y-1 pl-2">
+                        <div><code className="bg-muted px-1 rounded text-xs">{'{title}'}</code> - Story title</div>
+                        <div><code className="bg-muted px-1 rounded text-xs">{'{intro}'}</code> - Thematic introduction</div>
+                        <div><code className="bg-muted px-1 rounded text-xs">{'{year}'}</code> - Story year</div>
+                        <div><code className="bg-muted px-1 rounded text-xs">{'{themes}'}</code> - Comma-separated themes</div>
+                        <div><code className="bg-muted px-1 rounded text-xs">{'{mood}'}</code> - Story mood</div>
+                        <div><code className="bg-muted px-1 rounded text-xs">{'{hashtags}'}</code> - Generated hashtags</div>
+                      </div>
+                    </div>
+                    <div className="text-right text-xs text-muted-foreground">
+                      <span className={settings.instagram.default_caption?.length > 2000 ? 'text-destructive' : ''}>
+                        {settings.instagram.default_caption?.length || 0}/2200
+                      </span>
+                      <div className="text-xs mt-1">characters</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

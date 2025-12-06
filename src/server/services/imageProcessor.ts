@@ -446,7 +446,7 @@ export class ImageProcessorService {
   /**
    * Get Instagram-optimized caption with content analysis
    */
-  generateInstagramCaption(story: ContentApiData): string {
+  async generateInstagramCaption(story: ContentApiData): Promise<string> {
     const analysis = this.analyzeStoryContent(story.title, story.content || '');
     const dynamicHashtags = this.generateDynamicHashtags(analysis);
     
@@ -459,29 +459,78 @@ export class ImageProcessorService {
       '#AIWriting',
       '#CreativeAI'
     ];
-
+    
     // Create engaging opening based on story themes
     const thematicIntro = this.generateThematicIntro(analysis);
     
-    const caption = `${story.title}
+    // Try to get custom caption template from settings
+    let captionTemplate = await this.getInstagramCaptionTemplate();
+    
+    // If no custom template, use default
+    if (!captionTemplate) {
+      captionTemplate = `{title}
 
-${thematicIntro}
+{intro}
 
-Set in the year ${story.year || 'the future'}
-Themes: ${analysis.themes.slice(0, 3).join(', ')}
-Mood: ${analysis.mood}
+Set in the year {year}
+
+Themes: {themes}
+Mood: {mood}
 
 Generated with AI
 Speculative Fiction
 Created with Futures of Hope
 
-${[...baseHashtags, ...dynamicHashtags].slice(0, 20).join(' ')}
+{hashtags}
 
 What future do you envision? Share your thoughts below!
 
 #carousel #story #fiction`;
+    }
+    
+    // Process template variables
+    const caption = this.processTemplateVariables(captionTemplate, {
+      title: story.title,
+      intro: thematicIntro,
+      year: story.year ? String(story.year) : 'the future',
+      themes: analysis.themes.slice(0, 3).join(', '),
+      mood: analysis.mood,
+      hashtags: [...baseHashtags, ...dynamicHashtags].slice(0, 20).join(' ')
+    });
 
     return caption;
+  }
+  
+  /**
+   * Get Instagram caption template from settings
+   */
+  private async getInstagramCaptionTemplate(): Promise<string | null> {
+    try {
+      // Import database service dynamically to avoid circular dependencies
+      const { default: services } = await import('../services.js');
+      const db = services.dataService;
+      
+      const setting = await db.getSetting('instagram.default_caption');
+      return setting?.value || null;
+    } catch (error) {
+      console.warn('Failed to get Instagram caption template from settings:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Process template variables in caption template
+   */
+  private processTemplateVariables(template: string, variables: Record<string, string>): string {
+    let processedTemplate = template;
+    
+    // Replace each variable in the template
+    Object.entries(variables).forEach(([key, value]) => {
+      const regex = new RegExp(`\\{${key}\\}`, 'g');
+      processedTemplate = processedTemplate.replace(regex, value || '');
+    });
+    
+    return processedTemplate;
   }
 
   /**

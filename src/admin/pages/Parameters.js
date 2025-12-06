@@ -135,13 +135,13 @@ function Parameters() {
           </CardHeader>
           <CardContent>
             <div className="border rounded-lg overflow-hidden">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="text-left">Parameter</TableHead>
-                    <TableHead className="text-center">Type</TableHead>
-                    <TableHead className="text-left">Description</TableHead>
-                    <TableHead className="text-center">Category</TableHead>
+                    <TableHead className="text-left w-[200px]">Parameter</TableHead>
+                    <TableHead className="text-center w-[80px]">Type</TableHead>
+                    <TableHead className="text-left w-[300px]">Description</TableHead>
+                    <TableHead className="text-center w-[150px]">Category</TableHead>
                     <TableHead className="w-[140px] text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -171,7 +171,7 @@ function Parameters() {
                             {parameter.type}
                           </span>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap text-left">
+                        <TableCell className="whitespace-nowrap text-left max-w-[300px]">
                           <span className="text-sm text-muted-foreground truncate block">
                             {parameter.description || "—"}
                           </span>

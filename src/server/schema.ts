@@ -95,7 +95,8 @@ export const DEFAULT_SETTINGS: DefaultSetting[] = [
   { key: 'enable_image_generation', value: 'true', data_type: 'boolean' },
   { key: 'default_fiction_length', value: 'medium', data_type: 'string' },
   { key: 'rate_limit_per_minute', value: '10', data_type: 'number' },
-  { key: 'maintenance_mode', value: 'false', data_type: 'boolean' }
+  { key: 'maintenance_mode', value: 'false', data_type: 'boolean' },
+  { key: 'instagram.default_caption', value: '{title}\n\n{intro}\n\nSet in the year {year}\n\nThemes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\nWhat future do you envision? Share your thoughts below!\n\n#carousel #story #fiction', data_type: 'string' }
 ];
 
 /**

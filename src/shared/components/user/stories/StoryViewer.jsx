@@ -27,27 +27,27 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', options);
 };
 
-const StoryViewer = ({ 
-  story, 
-  onRegenerateStory, 
-  onCreateNew, 
+const StoryViewer = ({
+  story,
+  onRegenerateStory,
+  onCreateNew,
   loading,
   instagramData
 }) => {
   const navigate = useNavigate();
-  
+
   // Handle regenerate button click
   const handleRegenerateClick = () => {
     // Navigate to the generating page first
     navigate('/generating');
-    
+
     // Then call the regeneration function
     onRegenerateStory();
   };
   // Parse content into paragraphs
-  const contentParagraphs = story.content ? 
+  const contentParagraphs = story.content ?
     story.content.split('\n\n').filter(p => p.trim()) : [];
-  
+
   // Copy to clipboard function
   const copyToClipboard = async (text) => {
     try {
@@ -62,7 +62,7 @@ const StoryViewer = ({
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
+
       try {
         const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
@@ -74,7 +74,7 @@ const StoryViewer = ({
       }
     }
   };
-  
+
   // Share content function
   const shareContent = async (shareData) => {
     if (navigator.share) {
@@ -90,46 +90,46 @@ const StoryViewer = ({
       return false;
     }
   };
-  
+
   // Enhanced image handling function - matches admin pattern
   const getStoryImage = (story) => {
     if (!story) return null;
-    
+
     // Use API image URL directly (like admin side does)
     if (story.image_original_url) {
       return story.image_original_url;
     }
-    
+
     // Legacy support for base64 image data
     if (story.imageData) {
       if (typeof story.imageData === 'string') {
         // If it already starts with data:image, it's already properly formatted
         if (story.imageData.startsWith('data:image')) {
           return story.imageData;
-        } 
+        }
         // Otherwise, assume it's raw base64 and add proper prefix
         return `data:image/png;base64,${story.imageData}`;
       }
     }
-    
+
     // Handle legacy imageUrl field
     if (story.imageUrl) {
       return story.imageUrl;
     }
-    
+
     return null;
   };
 
   // Get the image source
   const imageSource = getStoryImage(story);
-  
+
   // Generate Instagram post URL if we have post ID
   const getInstagramPostUrl = (postId) => {
     if (!postId) return null;
     // Instagram post URL format: https://www.instagram.com/p/{media-id}/
     return `https://www.instagram.com/p/${postId}/`;
   };
-  
+
 
   // Handle share button click
   const handleShare = async () => {
@@ -138,10 +138,10 @@ const StoryViewer = ({
       text: `${story.title} - Year ${story.year}\n\n${story.content.substring(0, 100)}...`,
       url: window.location.href
     };
-    
+
     // Try to use Web Share API
     const shared = await shareContent(shareData);
-    
+
     // Fallback to copy to clipboard if sharing fails
     if (!shared) {
       const shareText = `${story.title} - Year ${story.year}\n\n${story.content}`;
@@ -151,7 +151,7 @@ const StoryViewer = ({
     }
   };
 
-  
+
   return (
     <div className="w-full max-w-screen-2xl mx-auto h-full flex flex-col" id={'jsx-template'}>
       {/* Header */}
@@ -164,10 +164,10 @@ const StoryViewer = ({
               <span>Year {story.year}</span>
             </div>
           </div>
-          
+
           <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleRegenerateClick}
               disabled={loading}
@@ -186,14 +186,14 @@ const StoryViewer = ({
           </div>
         </div>
       </header>
-      
+
       <div className="py-8">
         <div className="prose prose-lg max-w-3xl mx-auto">
           {imageSource && (
             <div className="mb-8 not-prose">
-              <img 
-                src={imageSource} 
-                alt={story.title} 
+              <img
+                src={imageSource}
+                alt={story.title}
                 className="w-full h-auto rounded-lg"
                 onError={(e) => {
                   console.error("Story image failed to load:", imageSource);
@@ -203,7 +203,7 @@ const StoryViewer = ({
               />
             </div>
           )}
-          
+
           {contentParagraphs.map((paragraph, index) => {
             // Skip title paragraphs
             if (paragraph.includes('**Title:')) {
@@ -215,25 +215,23 @@ const StoryViewer = ({
           })}
         </div>
       </div>
-      
+
       {/* Instagram Status Section */}
       {(instagramData?.shared || instagramData?.rateLimited || instagramData?.instagramFailed) && (
         <div className="max-w-3xl mx-auto mt-6 mb-4">
-          <div className={`rounded-lg p-4 border ${
-            instagramData?.shared 
-              ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800'
-              : instagramData?.instagramFailed
+          <div className={`rounded-lg p-4 border ${instagramData?.shared
+            ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800'
+            : instagramData?.instagramFailed
               ? 'bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 border-red-200 dark:border-red-800'
               : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800'
-          }`}>
+            }`}>
             <div className="flex items-start space-x-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                instagramData?.shared 
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                  : instagramData?.instagramFailed
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${instagramData?.shared
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                : instagramData?.instagramFailed
                   ? 'bg-gradient-to-r from-red-500 to-red-600'
                   : 'bg-gradient-to-r from-amber-500 to-orange-500'
-              }`}>
+                }`}>
                 <Instagram className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -247,22 +245,21 @@ const StoryViewer = ({
                     </span>
                   )}
                 </div>
-                
+
                 {(instagramData?.rateLimited || instagramData?.instagramFailed) ? (
                   <div className="space-y-2">
-                    <div className={`text-sm mb-3 ${
-                      instagramData?.instagramFailed 
-                        ? 'text-red-700 dark:text-red-300'
-                        : 'text-amber-700 dark:text-amber-300'
-                    }`}>
-                      {instagramData.error || (instagramData?.instagramFailed 
-                        ? 'Instagram posting failed. Your story is ready and saved.' 
+                    <div className={`text-sm mb-3 ${instagramData?.instagramFailed
+                      ? 'text-red-700 dark:text-red-300'
+                      : 'text-amber-700 dark:text-amber-300'
+                      }`}>
+                      {instagramData.error || (instagramData?.instagramFailed
+                        ? 'Instagram posting failed. Your story is ready and saved.'
                         : 'Instagram posting limit reached. Your story is ready but posting will need to wait.')
                       }
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => {
                           // Manual sharing with text
@@ -279,12 +276,11 @@ const StoryViewer = ({
                         <Share className="h-3 w-3 mr-1" />
                         Share Manually
                       </Button>
-                      <span className={`text-xs ${
-                        instagramData?.instagramFailed 
-                          ? 'text-red-600 dark:text-red-400'
-                          : 'text-amber-600 dark:text-amber-400'
-                      }`}>
-                        {instagramData?.instagramFailed 
+                      <span className={`text-xs ${instagramData?.instagramFailed
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-amber-600 dark:text-amber-400'
+                        }`}>
+                        {instagramData?.instagramFailed
                           ? 'Instagram posting failed - share manually'
                           : 'Try again later for Instagram posting'
                         }
@@ -299,11 +295,11 @@ const StoryViewer = ({
                         <span>👤 @{instagramData.handle}</span>
                       )}
                     </div>
-                    
+
                     {instagramData.postId && (
                       <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => {
                             // Use carouselUrl if available, otherwise generate from postId
@@ -327,13 +323,13 @@ const StoryViewer = ({
           </div>
         </div>
       )}
-      
+
       {/* Footer with actions */}
       <footer className="py-6 border-t mt-auto">
         <div className="flex items-center justify-start max-w-3xl mx-auto space-x-8">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               // onClick={handleDownload}
               onClick={() =>
@@ -348,8 +344,8 @@ const StoryViewer = ({
               Download
             </Button>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() =>
                 printStyledPDF({
@@ -362,11 +358,11 @@ const StoryViewer = ({
               <Printer className="h-4 w-4 mr-2" />
               Print
             </Button>
-            
+
             {/* Only show regular Share button if not shared to Instagram */}
             {!instagramData?.shared && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={handleShare}
               >
@@ -374,7 +370,7 @@ const StoryViewer = ({
                 Share
               </Button>
             )}
-            
+
             {/* Show Instagram share status in footer */}
             {instagramData?.shared && (
               <div className="flex items-center text-sm text-green-600 dark:text-green-400">
@@ -382,19 +378,18 @@ const StoryViewer = ({
                 <span>Shared to Instagram</span>
               </div>
             )}
-            
+
             {(instagramData?.rateLimited || instagramData?.instagramFailed) && (
-              <div className={`flex items-center text-sm ${
-                instagramData?.instagramFailed 
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-amber-600 dark:text-amber-400'
-              }`}>
+              <div className={`flex items-center text-sm ${instagramData?.instagramFailed
+                ? 'text-red-600 dark:text-red-400'
+                : 'text-amber-600 dark:text-amber-400'
+                }`}>
                 <Instagram className="h-4 w-4 mr-2" />
                 <span>{instagramData?.instagramFailed ? 'Instagram posting failed' : 'Instagram posting limited'}</span>
               </div>
             )}
           </div>
-          
+
           {/* Collection info with date moved here */}
           <div className="text-sm text-muted-foreground ml-auto">
             <div className="flex items-center">
@@ -411,108 +406,200 @@ const StoryViewer = ({
 export default StoryViewer;
 
 const preload = src =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = resolve;
-      img.onerror = reject;
-      img.src = src;
-    });
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = src;
+  });
 
-const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, returnInstance = false }) => {
-  const pageParagraphCount = 10; // Adjust this based on visual size
-  const pageChunks = [];
-
-  for (let i = 1; i < contentParagraphs.length; i += pageParagraphCount) {
-    pageChunks.push(contentParagraphs.slice(i, i + pageParagraphCount));
-  }
-
-  const pdf = new jsPDF('p', 'mm', 'a4');
+const downloadStyledPDF = async ({ story, imageSource, returnInstance = false }) => {
+  // 4R postcard = ~152 x 102 mm, landscape
+  const pdf = new jsPDF('l', 'mm', [152, 102]);
   const pageWidth = pdf.internal.pageSize.getWidth();
 
+  // Create off-screen container
+  const container = document.createElement('div');
+  container.id = 'pdf-postcard-container';
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = '600px';
+  container.style.padding = '0';
+  container.style.backgroundColor = '#ffffff';
+  container.style.color = '#111827';
+  document.body.appendChild(container);
 
-  for (let pageIndex = 0; pageIndex < pageChunks.length; pageIndex++) {
-    const container = document.createElement('div');
-    container.id = `pdf-render-container-${pageIndex}`;
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '794px';
-    container.style.padding = '10mm';
-    container.style.backgroundColor = 'hsl(var(--background))';
-    container.style.columnCount = '1';
-    container.style.columnGap = '40px';
-    container.style.fontSize = '0.75rem'; // 12px for print readability
-    container.style.lineHeight = '1.8';
-    document.body.appendChild(container);
-
-  // before rendering the page with the image:
   if (imageSource) await preload(imageSource);
 
-    const jsxContent = (
-      <div>
-        {pageIndex === 0 && (
-          <>
-
-            {imageSource && (
-              <div className="not-prose w-3/4 mx-auto h-[450px] mb-5 rounded-sm relative overflow-hidden">
-                <img
-                  src={imageSource}
-                  alt={story.title}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full"
-                />
-              </div>
-            )}
-            <h1 className="mx-auto w-3/4 text-2xl text-gray-900 font-bold mb-2 tracking-tight ">{story.title}</h1>
-            <p className="mx-auto w-3/4 text-gray-500 mb-4 text-base ">Year {story.year}</p>
-              
-          </>
-        )}
-
-        {pageChunks[pageIndex].map((paragraph, idx) => (
-          <p key={idx} className="w-3/4 mb-5 mx-auto text-story text-foreground">
-            {paragraph}
-          </p>
-        ))}
-
-       
-        <div className="w-3/4 mx-auto flex items-center text-caption text-muted-foreground space-x-2 border-t mt-10 mb-2">
-          <span>Created on</span>
-          <span>{formatDate(story.createdAt)}</span>
-          <span>|</span>
-          <span>Futures of Hope</span>
+  const jsxContent = (
+    <div
+      style={{
+        fontFamily: 'Work Sans, sans-serif',
+        color: '#111827',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      {imageSource && (
+        <div
+          style={{
+            width: '100%',
+            height: '3.5in',
+            position: 'relative',
+            overflow: 'hidden',
+            top: '0',
+            left: '0',
+          }}
+        >
+          <img
+            src={imageSource}
+            alt={story.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
         </div>
-        
+      )}
 
+      <div
+        style={{
+          flex: '1 0 auto',
+          boxSizing: 'border-box',
+          height: '0.75in',
+        }}
+      >
+
+        <div
+          style={{
+            width: '0.8in',
+            height: '1.15in',
+            border: '1px solid #000000ff',
+            zIndex: '10',
+            position: 'absolute',
+            top: '2.90in',
+            left: '0.1in',
+            backgroundColor: '#ffffff',
+
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '0.01in',
+          }}
+        >
+          <img
+            //src={qrImageSrc} // your QR image or canvas png - Place QR here
+            //alt="QR code"
+            style={{
+              width: '0.75in',
+              height: '0.75in',
+              backgroundColor: '#ffffff',
+              boxSizing: 'border-box',
+            }}
+          />
+
+          <p
+            style={{
+              margin: '0 0 0 0',
+              fontSize: '11px',
+              lineHeight: '1.0',
+              textAlign: 'left',
+              fontWeight: 300,
+            }}
+          >
+            scan to read<br />the future
+          </p>
+        </div>
+
+        <div
+          style={{
+            width: '4.25in',
+            height: '0.60in',
+            zIndex: '10',
+            position: 'absolute',
+            top: '3.45in',
+            left: '1in',
+
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'left',
+            justifyContent: 'center',
+            padding: '0.01in',
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              width: '100%',
+              fontSize: '18px',
+              fontWeight: 500,
+              letterSpacing: '-0.01em',
+              color: '#111827',
+              lineHeight: '1.0',
+            }}
+          >
+            {story.title}
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '14px',
+              fontWeight: 500,
+              letterSpacing: '-0.01em',
+              color: '#111827',
+            }}
+          >
+            Year {story.year}
+          </p>
+
+        </div>
+
+        <img
+          src="/QLO_logo_color.png"
+          alt="Quest Learning Observatory Logo"
+          style={{
+            position: 'absolute',
+            marginLeft: '0px',
+            marginTop: '16px',
+            top: '3.5in',
+            left: '5.2in',
+            height: '0.3in',
+            width: 'auto',
+            boxSizing: 'border-box',
+
+          }}
+        />
       </div>
+    </div>
+  );
 
-      
+  const root = ReactDOM.createRoot(container);
+  root.render(jsxContent);
 
-    );
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const root = ReactDOM.createRoot(container);
-    root.render(jsxContent);
-    await new Promise(resolve => setTimeout(resolve, 500));
+  const canvas = await html2canvas(container, {
+    scale: 2,
+    useCORS: true,
+    scrollY: -window.scrollY,
+    backgroundColor: '#ffffff',
+    windowWidth: container.scrollWidth,
+  });
 
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      scrollY: -window.scrollY,
-      backgroundColor: 'hsl(var(--background))',
-      windowWidth: container.scrollWidth
-    });
+  const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+  const scaledWidth = pageWidth;
+  const scaledHeight = (canvas.height * scaledWidth) / canvas.width;
 
-    const scaledWidth = pageWidth;
-    const scaledHeight = (canvas.height * scaledWidth) / canvas.width;
+  pdf.addImage(imgData, 'JPEG', 0, 0, scaledWidth, scaledHeight);
 
-    if (pageIndex > 0) pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', 0, 0, scaledWidth, scaledHeight);
-
-    root.unmount();
-    document.body.removeChild(container);
-  }
+  root.unmount();
+  document.body.removeChild(container);
 
   const safeTitle = story.title.replace(/\s+/g, '_').toLowerCase();
 
@@ -522,6 +609,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, return
     pdf.save(`${safeTitle}.pdf`);
   }
 };
+
 
 const printStyledPDF = async ({ story, imageSource, contentParagraphs }) => {
   const pdf = await downloadStyledPDF({
@@ -533,13 +621,13 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs }) => {
 
   const pdfBlob = pdf.output('blob');
   const pdfUrl = URL.createObjectURL(pdfBlob);
-  
+
   // Create hidden iframe for printing instead of opening new window
   const iframe = document.createElement('iframe');
   iframe.style.display = 'none';
   iframe.src = pdfUrl;
   document.body.appendChild(iframe);
-  
+
   iframe.onload = function () {
     iframe.contentWindow.focus();
     iframe.contentWindow.print();

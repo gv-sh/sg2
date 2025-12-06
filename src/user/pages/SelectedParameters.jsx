@@ -21,16 +21,19 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
     : (() => {
         // Set default and update parameter
         let defaultValue;
+        const parameterValues = parameter.parameter_values || parameter.values || [];
+        const parameterConfig = parameter.parameter_config || parameter.config || {};
+        
         switch (parameter.type) {
           case 'boolean': 
             defaultValue = false; 
             break;
           case 'range': 
-            const rangeConfig = parameter.parameter_config || {};
-            defaultValue = rangeConfig.default ?? rangeConfig.min ?? 0;
+            defaultValue = parameterConfig.default ?? parameterConfig.min ?? 0;
             break;
-          case 'select': 
-            const firstOption = parameter.parameter_values?.[0];
+          case 'select':
+          case 'radio':
+            const firstOption = parameterValues[0];
             defaultValue = firstOption?.id || firstOption?.label || firstOption || '';
             break;
           case 'text': 
@@ -51,81 +54,167 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
   };
 
   const renderValueInput = () => {
+    // Extract parameter values and config from database format
+    const parameterValues = parameter.parameter_values || parameter.values || [];
+    const parameterConfig = parameter.parameter_config || parameter.config || {};
+    
     switch (parameter.type) {
       case 'select':
+        // Create a lookup function to find label for selected value
+        const findLabelForValue = (value) => {
+          const option = parameterValues.find(opt => {
+            const optionId = opt.id || opt.label || opt;
+            return optionId === value;
+          });
+          return option ? (option.label || option) : value;
+        };
+        
         return (
-          <Select value={currentValue || ''} onValueChange={handleValueChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent>
-              {parameter.parameter_values?.map(option => {
-                // Handle both {id, label} and {label} formats
-                const optionId = option.id || option.label || option;
-                const optionLabel = option.label || option;
-                return (
-                  <SelectItem key={optionId} value={optionId}>
-                    {optionLabel}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            {parameter.description && (
+              <p className="text-xs text-muted-foreground">{parameter.description}</p>
+            )}
+            <Select 
+              value={currentValue || ''} 
+              onValueChange={handleValueChange}
+              findLabelForValue={findLabelForValue}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                {parameterValues.map((option, index) => {
+                  // Handle both {id, label} and {label} formats
+                  const optionId = option.id || option.label || option;
+                  const optionLabel = option.label || option;
+                  return (
+                    <SelectItem key={optionId || index} value={optionId}>
+                      {optionLabel}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         );
 
       case 'boolean':
         return (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={`selected-${parameter.id}`}
-              checked={currentValue || false}
-              onChange={(e) => handleValueChange(e.target.checked)}
-            />
-            <label htmlFor={`selected-${parameter.id}`} className="text-sm">
-              {currentValue ? 
-                (parameter.parameter_values?.on || 'Enabled') : 
-                (parameter.parameter_values?.off || 'Disabled')
-              }
-            </label>
+          <div className="space-y-2">
+            {parameter.description && (
+              <p className="text-xs text-muted-foreground">{parameter.description}</p>
+            )}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`selected-${parameter.id}`}
+                checked={currentValue || false}
+                onChange={(e) => handleValueChange(e.target.checked)}
+              />
+              <label htmlFor={`selected-${parameter.id}`} className="text-sm">
+                {currentValue ? 
+                  (parameterValues?.on || 'Enabled') : 
+                  (parameterValues?.off || 'Disabled')
+                }
+              </label>
+            </div>
+          </div>
+        );
+        
+      case 'radio':
+        return (
+          <div className="space-y-2">
+            {parameter.description && (
+              <p className="text-xs text-muted-foreground">{parameter.description}</p>
+            )}
+            <div className="space-y-2">
+              {parameterValues.map((option, index) => {
+                const optionId = option.id || option.label || option || `option-${index}`;
+                const optionLabel = option.label || option;
+                
+                return (
+                  <div key={optionId} className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id={`${parameter.id}-${optionId}`}
+                      name={parameter.id}
+                      value={optionId}
+                      checked={currentValue === optionId}
+                      onChange={() => handleValueChange(optionId)}
+                      className="h-4 w-4"
+                    />
+                    <label
+                      htmlFor={`${parameter.id}-${optionId}`}
+                      className="text-sm"
+                    >
+                      {optionLabel}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
 
       case 'range':
-        const rangeConfig = parameter.parameter_config || {};
-        const min = rangeConfig.min ?? 0;
-        const max = rangeConfig.max ?? 100;
-        const step = rangeConfig.step ?? 1;
+        const min = parameterConfig.min ?? 0;
+        const max = parameterConfig.max ?? 100;
+        const step = parameterConfig.step ?? 1;
+        const minLabel = parameterConfig.minLabel || parameterValues?.[0]?.label;
+        const maxLabel = parameterConfig.maxLabel || parameterValues?.[1]?.label;
+        
         return (
-          <Slider
-            min={min}
-            max={max}
-            step={step}
-            value={currentValue || min}
-            onValueChange={(newValue) => handleValueChange(newValue)}
-            className="w-full"
-          />
+          <div className="space-y-2">
+            {parameter.description && (
+              <p className="text-xs text-muted-foreground">{parameter.description}</p>
+            )}
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{minLabel || min}</span>
+              <span>{maxLabel || max}</span>
+            </div>
+            <Slider
+              min={min}
+              max={max}
+              step={step}
+              value={currentValue || min}
+              onValueChange={(newValue) => handleValueChange(newValue)}
+              className="w-full"
+            />
+            <div className="text-center">
+              <span className="text-xs text-muted-foreground">Current: {currentValue || min}</span>
+            </div>
+          </div>
         );
 
       case 'text':
         return (
-          <Input
-            type="text"
-            value={currentValue || ''}
-            onChange={(e) => handleValueChange(e.target.value)}
-            placeholder={parameter.description || "Enter text..."}
-            className="w-full"
-          />
+          <div className="space-y-2">
+            {parameter.description && (
+              <p className="text-xs text-muted-foreground">{parameter.description}</p>
+            )}
+            <Input
+              type="text"
+              value={currentValue || ''}
+              onChange={(e) => handleValueChange(e.target.value)}
+              placeholder={parameter.description || "Enter text..."}
+              className="w-full"
+            />
+          </div>
         );
 
       case 'number':
         return (
-          <Input
-            type="number"
-            value={currentValue || ''}
-            onChange={(e) => handleValueChange(Number(e.target.value) || 0)}
-            placeholder={parameter.description || "Enter number..."}
-            className="w-full"
-          />
+          <div className="space-y-2">
+            {parameter.description && (
+              <p className="text-xs text-muted-foreground">{parameter.description}</p>
+            )}
+            <Input
+              type="number"
+              value={currentValue || ''}
+              onChange={(e) => handleValueChange(Number(e.target.value) || 0)}
+              placeholder={parameter.description || "Enter number..."}
+              className="w-full"
+            />
+          </div>
         );
 
       default:
@@ -223,21 +312,29 @@ const SelectedParameters = ({
       {/* Story Year Setting - anchored to bottom */}
       <div className="p-2 border rounded-md space-y-2 mt-auto mb-6 bg-background">
         <h4 className="text-sm font-medium">Story Year</h4>
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>2026</span>
+            <span>2126</span>
+          </div>
+          <Slider
+            min={2026}
+            max={2126}
+            step={1}
             value={storyYear}
-            onChange={(e) => setStoryYear(parseInt(e.target.value) || storyYear)}
-            min={2000}
-            max={3000}
-            placeholder="Enter year (e.g., 2050)"
-            className="flex-1"
+            onValueChange={(value) => setStoryYear(value)}
+            className="w-full"
           />
+          <div className="text-center">
+            <span className="text-xs text-muted-foreground">Current: {storyYear}</span>
+          </div>
+        </div>
+        <div className="pt-1">
           <Button
             onClick={handleGenerate}
             size="sm"
             disabled={parameters.length === 0}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground flex-shrink-0"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
           >
             <Play className="h-3 w-3 mr-1" />
             Generate

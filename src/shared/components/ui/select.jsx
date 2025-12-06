@@ -7,7 +7,7 @@ import { ChevronDown } from "lucide-react"
 const SelectContext = React.createContext()
 
 // Main Select component
-const Select = ({ value, onValueChange, children, ...props }) => {
+const Select = ({ value, onValueChange, findLabelForValue, children, ...props }) => {
   const [open, setOpen] = React.useState(false)
   const [selectedValue, setSelectedValue] = React.useState(value || '')
   const selectRef = React.useRef(null)
@@ -42,7 +42,8 @@ const Select = ({ value, onValueChange, children, ...props }) => {
     open,
     setOpen,
     selectedValue,
-    handleValueChange
+    handleValueChange,
+    findLabelForValue
   }
 
   return (
@@ -110,12 +111,26 @@ SelectTrigger.displayName = "SelectTrigger"
 const SelectValue = ({ placeholder, className, ...props }) => {
   const context = React.useContext(SelectContext)
   
+  // Get display value - use label lookup if available, otherwise show raw value
+  const displayValue = React.useMemo(() => {
+    if (!context?.selectedValue) return placeholder
+    
+    // If we have a label lookup function, use it to get the display label
+    if (context.findLabelForValue && typeof context.findLabelForValue === 'function') {
+      const label = context.findLabelForValue(context.selectedValue)
+      if (label) return label
+    }
+    
+    // Fall back to raw value for backward compatibility
+    return context.selectedValue
+  }, [context?.selectedValue, context?.findLabelForValue, placeholder])
+  
   return (
     <div
       className={cn("text-sm", className)}
       {...props}
     >
-      {context?.selectedValue || placeholder}
+      {displayValue}
     </div>
   )
 }

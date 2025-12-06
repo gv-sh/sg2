@@ -23,7 +23,12 @@ const ParameterItem = ({ parameter, onSelect, onRemove, isSelected }) => {
       }`}
       onClick={handleToggle}
     >
-      <h4 className="text-sm">{parameter.name}</h4>
+      <h4 className="text-sm font-medium">{parameter.name}</h4>
+      {parameter.description && (
+        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+          {parameter.description}
+        </p>
+      )}
     </div>
   );
 };

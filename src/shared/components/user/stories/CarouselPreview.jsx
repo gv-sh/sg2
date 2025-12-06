@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { Button } from '../../ui/button.tsx';
 import { Instagram, Loader2, Check, AlertTriangle, Eye, X, ChevronLeft, ChevronRight, Maximize2, Edit3 } from 'lucide-react';
 import { Alert, AlertDescription } from '../../ui/alert.tsx';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '../../ui/dialog.js';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog.js';
 import axios from 'axios';
 
 // Modal component for carousel preview
@@ -220,19 +220,19 @@ const CarouselPreviewModal = ({
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 overflow-y-auto max-h-[70vh]">
-          {/* Main Carousel View */}
-          {previewData && (
-            <>
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-sm font-medium text-foreground">
-                    Carousel Preview ({previewData.slideCount} slides)
-                  </div>
-                  <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                    <span>{currentSlide + 1} / {slideCount}</span>
-                  </div>
+        {/* Two-Column Layout */}
+        {previewData && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column - Image Preview */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-foreground">
+                  Carousel Preview ({previewData.slideCount} slides)
                 </div>
+                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                  <span>{currentSlide + 1} / {slideCount}</span>
+                </div>
+              </div>
                 
                 {/* Large Preview with Navigation */}
                 <div className="relative">
@@ -241,7 +241,7 @@ const CarouselPreviewModal = ({
                       <img
                         src={previewData.previewUrls[currentSlide]}
                         alt={`Slide ${currentSlide + 1}`}
-                        className="w-full h-full object-cover cursor-pointer transition-transform hover:scale-105"
+                        className="w-full h-full object-cover cursor-pointer"
                         onClick={() => openFullSize(currentSlide)}
                         onError={(e) => {
                           e.target.onerror = null;
@@ -255,15 +255,15 @@ const CarouselPreviewModal = ({
                       <>
                         <button
                           onClick={prevSlide}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-colors"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-background border border-border hover:bg-muted text-foreground p-2 rounded-md"
                         >
-                          <ChevronLeft className="h-5 w-5" />
+                          <ChevronLeft className="h-4 w-4" />
                         </button>
                         <button
                           onClick={nextSlide}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-colors"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-background border border-border hover:bg-muted text-foreground p-2 rounded-md"
                         >
-                          <ChevronRight className="h-5 w-5" />
+                          <ChevronRight className="h-4 w-4" />
                         </button>
                       </>
                     )}
@@ -271,7 +271,7 @@ const CarouselPreviewModal = ({
                     {/* Full Size Button */}
                     <button
                       onClick={() => openFullSize(currentSlide)}
-                      className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-md transition-colors"
+                      className="absolute top-2 right-2 bg-background border border-border hover:bg-muted text-foreground p-2 rounded-md"
                     >
                       <Maximize2 className="h-4 w-4" />
                     </button>
@@ -279,7 +279,7 @@ const CarouselPreviewModal = ({
                   
                   {/* Slide Indicators */}
                   {slideCount > 1 && (
-                    <div className="flex justify-center space-x-2 mt-4">
+                    <div className="flex justify-center space-x-2 mt-2">
                       {previewData.previewUrls.map((_, index) => (
                         <button
                           key={index}
@@ -294,13 +294,13 @@ const CarouselPreviewModal = ({
                 </div>
                 
                 {/* Thumbnail Strip */}
-                <div className="mt-4">
-                  <div className="grid grid-cols-6 sm:grid-cols-8 lg:grid-cols-10 gap-2">
+                <div className="mt-2">
+                  <div className="grid grid-cols-8 gap-1">
                     {previewData.previewUrls.map((url, index) => (
                       <div
                         key={index}
-                        className={`relative aspect-square border-2 rounded-md overflow-hidden cursor-pointer transition-all ${
-                          index === currentSlide ? 'border-primary' : 'border-border hover:border-primary/50'
+                        className={`relative aspect-square border-2 rounded-md overflow-hidden cursor-pointer ${
+                          index === currentSlide ? 'border-primary' : 'border-border hover:border-muted-foreground'
                         }`}
                         onClick={() => setCurrentSlide(index)}
                       >
@@ -309,18 +309,20 @@ const CarouselPreviewModal = ({
                           alt={`Slide ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                          <span className="text-white text-xs font-medium">{index + 1}</span>
+                        <div className="absolute bottom-1 right-1 bg-background border border-border text-foreground text-xs font-medium px-1 rounded">
+                          {index + 1}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
+            </div>
 
+            {/* Right Column - Caption and Actions */}
+            <div className="space-y-4">
               {/* Caption Section with Editing */}
               <div>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <div className="text-sm font-medium text-foreground">Caption Preview</div>
                   <Button
                     variant="ghost"
@@ -347,7 +349,7 @@ const CarouselPreviewModal = ({
                     <textarea
                       value={editedCaption}
                       onChange={(e) => setEditedCaption(e.target.value)}
-                      className="w-full h-40 p-3 border rounded-md bg-background resize-none text-sm"
+                      className="w-full h-32 p-3 border rounded-md bg-background resize-none text-sm"
                       placeholder="Edit your Instagram caption..."
                     />
                     <div className="flex justify-between items-center text-xs text-muted-foreground">
@@ -363,93 +365,96 @@ const CarouselPreviewModal = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="border rounded-md p-3 bg-muted/30 max-h-40 overflow-y-auto">
+                  <div className="border rounded-md p-3 bg-muted/30 max-h-24 overflow-y-auto">
                     <div className="text-sm text-foreground whitespace-pre-wrap">
                       {editedCaption || previewData.caption}
                     </div>
                   </div>
                 )}
               </div>
-            </>
-          )}
 
-          {/* Error Messages */}
-          {error && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
+              {/* Error Messages */}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-          {/* Success Message */}
-          {shareState === 'success' && shareResult && (
-            <Alert className="border-green-200 bg-green-50">
-              <Check className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                <div className="font-medium">Instagram post created successfully!</div>
-                <div className="mt-1">
-                  {shareResult.slideCount} slides • Post ID: {shareResult.postId}
+              {/* Success Message */}
+              {shareState === 'success' && shareResult && (
+                <Alert className="border-green-200 bg-green-50">
+                  <Check className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <div className="font-medium">Instagram post created successfully!</div>
+                    <div className="mt-1">
+                      {shareResult.slideCount} slides • Post ID: {shareResult.postId}
+                    </div>
+                    {shareResult.carouselUrl && (
+                      <div className="mt-2">
+                        <span className="text-blue-600">
+                          Post ID: {shareResult.postId} created successfully
+                        </span>
+                      </div>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Sharing Progress */}
+              {shareState === 'sharing' && (
+                <div className="flex items-center justify-center space-x-3 py-4">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm text-muted-foreground">Posting to Instagram...</span>
                 </div>
-                {shareResult.carouselUrl && (
-                  <div className="mt-2">
-                    <span className="text-blue-600">
-                      Post ID: {shareResult.postId} created successfully
-                    </span>
-                  </div>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
+              )}
 
-          {/* Sharing Progress */}
-          {shareState === 'sharing' && (
-            <div className="flex items-center justify-center space-x-3 py-4">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span className="text-sm text-muted-foreground">Posting to Instagram...</span>
+              {/* Action Buttons */}
+              <div className="flex flex-col space-y-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={onRegeneratePreview}
+                  disabled={shareState === 'sharing' || shareState === 'success'}
+                  className="w-full"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Regenerate Preview
+                </Button>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={shareState === 'sharing'}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant={getShareButtonVariant()}
+                    onClick={handleShareToInstagram}
+                    disabled={shareState === 'sharing' || shareState === 'success'}
+                    className={`flex-1 ${shareState === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                  >
+                    {getShareButtonContent()}
+                  </Button>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-
-        <DialogFooter className="flex justify-between sm:justify-between">
-          <Button
-            variant="outline"
-            onClick={onRegeneratePreview}
-            disabled={shareState === 'sharing' || shareState === 'success'}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Regenerate Preview
-          </Button>
-          
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={shareState === 'sharing'}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant={getShareButtonVariant()}
-              onClick={handleShareToInstagram}
-              disabled={shareState === 'sharing' || shareState === 'success'}
-              className={shareState === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}
-            >
-              {getShareButtonContent()}
-            </Button>
           </div>
-        </DialogFooter>
+        )}
       </DialogContent>
       
       {/* Full Size Image Overlay */}
       {showFullSize && (
-        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-[100] flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center p-4">
             {/* Close Button */}
             <button
               onClick={() => setShowFullSize(false)}
-              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors z-10"
+              className="absolute top-4 right-4 bg-background border border-border hover:bg-muted text-foreground p-2 rounded-md z-10"
             >
               <X className="h-6 w-6" />
             </button>
@@ -459,15 +464,15 @@ const CarouselPreviewModal = ({
               <>
                 <button
                   onClick={prevFullSizeSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-background border border-border hover:bg-muted text-foreground p-3 rounded-md z-10"
                 >
-                  <ChevronLeft className="h-8 w-8" />
+                  <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={nextFullSizeSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-background border border-border hover:bg-muted text-foreground p-3 rounded-md z-10"
                 >
-                  <ChevronRight className="h-8 w-8" />
+                  <ChevronRight className="h-6 w-6" />
                 </button>
               </>
             )}
@@ -481,7 +486,7 @@ const CarouselPreviewModal = ({
             />
             
             {/* Slide Counter */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background border border-border text-foreground px-3 py-1 rounded-md text-sm">
               {fullSizeSlide + 1} / {slideCount}
             </div>
           </div>

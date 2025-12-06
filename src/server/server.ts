@@ -33,6 +33,9 @@ const PORT = config.get('server.port');
 
 // ==================== MIDDLEWARE SETUP ====================
 
+// Trust proxy for rate limiting (required when behind ngrok or other proxies)
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet({
   crossOriginEmbedderPolicy: false,

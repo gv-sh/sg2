@@ -275,7 +275,7 @@ export class ProductionImageGenerator {
    * Wait for content to be fully ready for screenshot
    */
   private async waitForContentReady(page: Page, remainingTimeout: number = 5000): Promise<void> {
-    const fontTimeout = Math.min(remainingTimeout * 0.6, 3000); // 60% of remaining time, max 3s
+    const fontTimeout = Math.min(remainingTimeout * 0.7, 5000); // 70% of remaining time, max 5s (increased from 3s)
     const contentTimeout = Math.min(remainingTimeout * 0.3, 1000); // 30% of remaining time, max 1s
     
     // Wait for fonts to load with dynamic timeout
@@ -283,7 +283,10 @@ export class ProductionImageGenerator {
       () => document.body.getAttribute('data-fonts-loaded') === 'true',
       { timeout: fontTimeout }
     ).catch(() => {
-      console.warn(`Fonts loading timeout (${fontTimeout}ms), proceeding with screenshot`);
+      // Only log timeout in debug mode to reduce noise
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(`Fonts loading timeout (${fontTimeout}ms), proceeding with screenshot`);
+      }
     });
 
     // Wait for content to be ready with dynamic timeout

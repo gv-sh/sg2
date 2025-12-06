@@ -261,7 +261,9 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
     });
 
     // PRE-GENERATE ALL IMAGES BEFORE INSTAGRAM API CALLS
-    console.log(`Pre-generating ${carouselData.slides.length} images for Instagram posting...`);
+    console.log(`Pre-generating images for Instagram posting...`);
+    console.log(`Total slides generated: ${carouselData.slides.length}`);
+    console.log(`Slide types:`, carouselData.slides.map((s: any, i: number) => `${i}: ${s.type}`));
     
     const imageOptions = {
       width: 1080,
@@ -272,18 +274,31 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       timeout: 12000 // Reduced timeout for individual images
     };
     
-    // Prepare images to generate (exclude original images)
-    const imagesToGenerate: { html: string; index: number }[] = [];
-    carouselData.slides.forEach((slide: any, i: number) => {
+    // Prepare images to generate (exclude original images) - FIXED INDEXING
+    const imagesToGenerate: { html: string; index: number; slideType: string }[] = [];
+    let nextImageIndex = 0;
+    
+    // Reserve index 0 for original image if it exists
+    if (story.image_blob) {
+      nextImageIndex = 1;
+      console.log(`Original image will be at index 0`);
+    }
+    
+    // Process non-original slides in order
+    carouselData.slides.forEach((slide: any, slidePosition: number) => {
       if (slide.type !== 'original') {
+        console.log(`Slide ${slidePosition} (${slide.type}) -> Image index ${nextImageIndex}`);
         imagesToGenerate.push({
           html: slide.html,
-          index: story.image_blob ? i + 1 : i
+          index: nextImageIndex,
+          slideType: slide.type
         });
+        nextImageIndex++;
       }
     });
     
     console.log(`Generating ${imagesToGenerate.length} images in batches...`);
+    console.log(`Image indices:`, imagesToGenerate.map(img => `${img.index} (${img.slideType})`));
     
     const preGeneratedImages: { buffer: Buffer; index: number }[] = [];
     const batchSize = 2; // Process in smaller batches for better timeout handling
@@ -292,13 +307,13 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       const batch = imagesToGenerate.slice(i, i + batchSize);
       console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(imagesToGenerate.length / batchSize)}`);
       
-      const batchPromises = batch.map(async ({ html, index }) => {
+      const batchPromises = batch.map(async ({ html, index, slideType }) => {
         const cacheKey = imageCache.generateCacheKey(html, imageOptions);
         let cachedImage = await imageCache.get(cacheKey);
         
         if (!cachedImage) {
           try {
-            console.log(`Generating image for slide ${index}...`);
+            console.log(`Generating image for index ${index} (${slideType})...`);
             const generatedImage = await imageGenerator.generateImageFromHTML(html, imageOptions);
             
             cachedImage = {
@@ -311,9 +326,9 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
             };
             
             await imageCache.set(cacheKey, cachedImage);
-            console.log(`Successfully generated image for slide ${index}`);
+            console.log(`Successfully generated image for index ${index} (${slideType})`);
           } catch (error) {
-            console.error(`Failed to generate image for slide ${index}:`, error);
+            console.error(`Failed to generate image for index ${index} (${slideType}):`, error);
             // Create a fallback simple image instead of failing completely
             const fallbackImage = await generateFallbackImage(index, imageOptions);
             cachedImage = {
@@ -350,19 +365,28 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
     // Store pre-generated images in cache with story association
     await cachePreGeneratedImages(story.id, preGeneratedImages);
     
-    // Generate media URLs for Instagram API (these will now serve pre-generated images)
+    // Generate media URLs for Instagram API (these will now serve pre-generated images) - FIXED INDEXING
     const mediaUrls: string[] = [];
+    let nextUrlIndex = 0;
     
+    // Add original image URL first if it exists
     if (story.image_blob) {
       mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, 0));
+      nextUrlIndex = 1;
+      console.log(`Added original image URL at index 0`);
     }
 
-    carouselData.slides
-      .filter((slide: any) => slide.type !== 'original')
-      .forEach((_: any, index: number) => {
-        const slideIndex = story.image_blob ? index + 1 : index;
-        mediaUrls.push(getInstagramService().getImageUploadUrl(story.id, slideIndex));
-      });
+    // Add URLs for generated slides in the same order as generation
+    carouselData.slides.forEach((slide: any, slidePosition: number) => {
+      if (slide.type !== 'original') {
+        const url = getInstagramService().getImageUploadUrl(story.id, nextUrlIndex);
+        mediaUrls.push(url);
+        console.log(`Added ${slide.type} slide URL at index ${nextUrlIndex} (slide position ${slidePosition})`);
+        nextUrlIndex++;
+      }
+    });
+    
+    console.log(`Total media URLs: ${mediaUrls.length}`);
 
     // Cache the carousel data for image serving
     await cacheCarouselData(story.id, carouselData, caption);
@@ -571,13 +595,27 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
       created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
     });
 
-    // Calculate the correct slide index (accounting for original image)
+    // Calculate the correct slide index (accounting for original image) - FIXED INDEXING
+    console.log(`Serving image index ${imageIndex} for story ${storyId}`);
+    console.log(`Story has original image: ${!!story.image_blob}`);
+    console.log(`Available slides:`, carouselData.slides.map((s: any, i: number) => `${i}: ${s.type}`));
+    
+    // Get non-original slides in order
+    const nonOriginalSlides = carouselData.slides.filter((s: any) => s.type !== 'original');
+    console.log(`Non-original slides count: ${nonOriginalSlides.length}`);
+    
+    // Calculate slide index: if we have original image, generated slides start at index 1
     const slideIndex = story.image_blob ? imageIndex - 1 : imageIndex;
-    const slide = carouselData.slides.filter((s: any) => s.type !== 'original')[slideIndex];
+    console.log(`Looking for slide at slideIndex ${slideIndex} in non-original slides`);
+    
+    const slide = nonOriginalSlides[slideIndex];
     
     if (!slide) {
+      console.error(`Slide not found: imageIndex=${imageIndex}, slideIndex=${slideIndex}, available non-original slides=${nonOriginalSlides.length}`);
       return next(boom.notFound(`Slide ${imageIndex} not found`));
     }
+    
+    console.log(`Found slide type: ${slide.type}`);
 
     // Check cache first
     const imageOptions = {

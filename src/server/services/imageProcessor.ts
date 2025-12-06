@@ -127,7 +127,6 @@ export class ImageProcessorService {
       .title-card {
         background: ${theme.background};
         text-align: center;
-        border-radius: 8px;
       }
       
       .title-card h1 {
@@ -153,7 +152,6 @@ export class ImageProcessorService {
       .content-card {
         background: ${theme.background};
         text-align: left;
-        border-radius: 8px;
         padding: 80px 80px 120px 80px;
       }
       
@@ -196,7 +194,6 @@ export class ImageProcessorService {
       .branding-card {
         background: ${theme.background};
         text-align: center;
-        border-radius: 8px;
       }
       
       .branding-card h1 {
@@ -464,10 +461,12 @@ export class ImageProcessorService {
     const thematicIntro = this.generateThematicIntro(analysis);
     
     // Try to get custom caption template from settings
+    console.log('Generating Instagram caption for story:', story.title);
     let captionTemplate = await this.getInstagramCaptionTemplate();
     
     // If no custom template, use default
     if (!captionTemplate) {
+      console.log('Using default Instagram caption template');
       captionTemplate = `{title}
 
 {intro}
@@ -486,6 +485,8 @@ Created with Futures of Hope
 What future do you envision? Share your thoughts below!
 
 #carousel #story #fiction`;
+    } else {
+      console.log('Using custom Instagram caption template from admin settings');
     }
     
     // Process template variables
@@ -510,8 +511,17 @@ What future do you envision? Share your thoughts below!
       const { default: services } = await import('../services.js');
       const db = services.dataService;
       
+      console.log('Attempting to get Instagram caption template from settings...');
       const setting = await db.getSetting('instagram.default_caption');
-      return setting?.value || null;
+      console.log('Instagram caption setting retrieved:', setting ? 'Found' : 'Not found');
+      
+      if (setting?.value) {
+        console.log('Using custom Instagram caption template from settings');
+        return setting.value;
+      } else {
+        console.log('No custom Instagram caption template found, using default');
+        return null;
+      }
     } catch (error) {
       console.warn('Failed to get Instagram caption template from settings:', error);
       return null;
@@ -529,6 +539,12 @@ What future do you envision? Share your thoughts below!
       const regex = new RegExp(`\\{${key}\\}`, 'g');
       processedTemplate = processedTemplate.replace(regex, value || '');
     });
+    
+    // Convert escaped newlines to actual newlines
+    processedTemplate = processedTemplate.replace(/\\n/g, '\n');
+    
+    // Convert unicode characters back to their actual symbols
+    processedTemplate = processedTemplate.replace(/\\u2022/g, '•');
     
     return processedTemplate;
   }

@@ -106,7 +106,7 @@ export class ProductionImageGenerator {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instagram Carousel</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
     * {
       margin: 0;
@@ -143,32 +143,18 @@ export class ProductionImageGenerator {
 
     /* Enhanced title card */
     .title-card {
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0a0a0a 100%);
+      background: #1a1a1a;
       text-align: center;
     }
     
-    .title-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
 
     .title-card h1 {
-      font-size: clamp(44px, 5vw, 72px);
-      font-weight: 800;
+      font-size: 48px;
+      font-weight: 700;
       margin: 0 0 40px 0;
-      line-height: 1.1;
-      max-width: 100%;
-      background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      line-height: 1.3;
+      max-width: 90%;
+      color: #ffffff;
       letter-spacing: -0.02em;
       position: relative;
       z-index: 1;
@@ -195,36 +181,21 @@ export class ProductionImageGenerator {
 
     /* Enhanced content card */
     .content-card {
-      background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+      background: #1a1a1a;
       text-align: left;
-      border: 2px solid;
-      border-image: linear-gradient(135deg, #6366f1, #8b5cf6, #6366f1) 1;
       position: relative;
     }
     
-    .content-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
-      pointer-events: none;
-    }
     
     .content-card .content {
       font-size: 28px;
       font-weight: 400;
-      line-height: 1.6;
+      line-height: 1.7;
       margin: 0;
-      max-height: 800px;
-      overflow: hidden;
       position: relative;
       z-index: 1;
       color: #f8fafc;
+      padding: 80px;
     }
     
     .content-card .content p {
@@ -237,40 +208,14 @@ export class ProductionImageGenerator {
       margin-bottom: 0;
     }
     
-    .content-card .page-number {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #8b5cf6;
-      font-size: 22px;
-      font-weight: 600;
-      background: rgba(139, 92, 246, 0.1);
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      backdrop-filter: blur(10px);
-    }
 
     /* Enhanced branding card */
     .branding-card {
-      background: radial-gradient(circle at center, #6366f1 0%, #1e1b4b  70%, #0f172a 100%);
+      background: #1a1a1a;
       text-align: center;
       position: relative;
     }
     
-    .branding-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.2) 0%, transparent 60%);
-      pointer-events: none;
-    }
     
     .branding-card h1 {
       font-size: 58px;
@@ -285,10 +230,7 @@ export class ProductionImageGenerator {
       font-size: 74px;
       font-weight: 800;
       margin: 0 0 40px 0;
-      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #ffffff;
       letter-spacing: -0.02em;
       position: relative;
       z-index: 1;

@@ -127,18 +127,17 @@ export class ImageProcessorService {
       .title-card {
         background: ${theme.background};
         text-align: center;
-        border: 2px solid ${theme.primary};
         border-radius: 8px;
       }
       
       .title-card h1 {
-        font-size: clamp(42px, 4.5vw, 72px);
-        font-weight: 800;
+        font-size: 48px;
+        font-weight: 700;
         margin: 0 0 30px 0;
-        line-height: 1.1;
+        line-height: 1.3;
         letter-spacing: -0.02em;
         color: ${theme.text};
-        text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        max-width: 90%;
       }
       
       .title-card .year {
@@ -161,35 +160,18 @@ export class ImageProcessorService {
       .content-card {
         background: ${theme.background};
         text-align: left;
-        border-left: 6px solid ${theme.primary};
         border-radius: 8px;
         padding: 80px 80px 120px 80px;
       }
       
       .content-card .content {
-        font-size: clamp(28px, 2.8vw, 34px);
+        font-size: 28px;
         line-height: 1.7;
         margin: 0;
-        max-height: 750px;
-        overflow: hidden;
         font-weight: 400;
         color: ${theme.text};
       }
       
-      .content-card .page-number {
-        position: absolute;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: ${theme.primary};
-        font-size: 24px;
-        font-weight: 600;
-        font-family: 'JetBrains Mono', monospace;
-        background: ${theme.background};
-        padding: 6px 12px;
-        border-radius: 4px;
-        border: 1px solid ${theme.primary};
-      }
       
       .content-card p {
         margin: 0 0 28px 0;
@@ -221,7 +203,6 @@ export class ImageProcessorService {
       .branding-card {
         background: ${theme.background};
         text-align: center;
-        border: 2px solid ${theme.primary};
         border-radius: 8px;
       }
       
@@ -362,7 +343,6 @@ export class ImageProcessorService {
           <div class="content">
             ${contentHtml}
           </div>
-          <div class="page-number">${slideNumber}</div>
         </div>
       `;
 
@@ -377,12 +357,13 @@ export class ImageProcessorService {
   }
 
   /**
-   * Intelligently chunk content to avoid breaking sentences
+   * Intelligently chunk content based on visual space and readability
    */
   private chunkContentIntelligently(paragraphs: string[]): string[][] {
     const chunks: string[][] = [];
-    const maxCharsPerSlide = 800; // Optimal for readability
-    const minCharsPerSlide = 400;
+    // Reduced character limits to account for visual space with better formatting
+    const maxCharsPerSlide = 600; // Optimal for smaller font size and better spacing
+    const minCharsPerSlide = 300;
     
     let currentChunk: string[] = [];
     let currentChunkLength = 0;

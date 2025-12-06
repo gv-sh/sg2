@@ -1,0 +1,3020 @@
+{
+  "categories": [
+    {
+      "id": "test-category",
+      "name": "Narrative Style",
+      "visibility": "Show",
+      "description": "Narrative Style defines how your story is told. Is it linear or fragmented, personal or omniscient, poetic or analytical? Choose the voice, structure, and tone that shape how your future world is experienced—through characters, events, or atmosphere. The way the story unfolds is as important as the world itself."
+    },
+    {
+      "id": "politics",
+      "name": "Politics",
+      "visibility": "Show",
+      "description": "Politics is about how people make decisions and lead their communities. Explore who makes the rules, how problems are solved, and what kind of leaders or systems your future world might have. Will people vote, share power, or be controlled by machines? What does fairness look like in your world?"
+    },
+    {
+      "id": "economics",
+      "name": "Economics",
+      "visibility": "Show",
+      "description": "Economics is about how your world handles resources, work, and value. Choose from different systems—capitalist, socialist, post-scarcity—and shape how wealth is shared, who owns what, and how people live. Explore labor, currency, and innovation to decide what drives your future economy and who it truly serves."
+    },
+    {
+      "id": "society",
+      "name": "Society",
+      "visibility": "Show",
+      "description": "Society explores the values, relationships, and systems that shape everyday life in your future world. From social classes and gender roles to education, healthcare, and morality, each parameter reveals how people live, connect, and find meaning. Will your society be structured or fluid, nurturing or oppressive? Define how communities function, what they value, and how they respond to change, care, and difference."
+    },
+    {
+      "id": "technology",
+      "name": "Technology",
+      "visibility": "Show",
+      "description": "Technology explores how your future world uses, regulates, and relates to innovation. From energy and communication to AI, cybernetics, and genetic editing, this category examines how deeply technology is integrated into life. Will your society embrace post-scarcity abundance, explore space, or manipulate time itself? Decide how fast technology advances, who benefits from it, and what ethical lines are crossed—or erased—in your imagined future."
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "visibility": "Show",
+      "description": "**Environment** explores the natural systems that shape life in your future world. From temperature and atmosphere to biodiversity, disasters, and urbanization, this category lets you define how the planet looks, feels, and responds. Will it be fertile or barren, harmonious or unstable? Choose how air, water, light, and living systems evolve—whether healed, transformed, or pushed to the edge.",
+      "year": null
+    },
+    {
+      "id": "legal",
+      "name": "Legal",
+      "visibility": "Show",
+      "description": "Legal defines how order, justice, and rights function in your world. Explore the sources of law, systems of punishment, freedoms, and enforcement. Will your society prioritize fairness, control, or survival? From genetic regulations to AI governance, transparency to corruption—decide how laws are made, upheld, and challenged in your future.",
+      "year": null
+    }
+  ],
+  "parameters": [
+    {
+      "id": "politics-centralization",
+      "name": "Centralization",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Centralization is about where power lives. In some futures, one group or leader makes all the decisions. In others, power is shared across many places and people. Explore how your world is organized—does it have a strong center, or do communities decide for themselves? Who controls what, and why?",
+      "values": [
+        {
+          "id": "ca01-pol-01-val01",
+          "label": "Autocracy"
+        },
+        {
+          "id": "ca01-pol-01-val02",
+          "label": "Oligarchy"
+        },
+        {
+          "id": "ca01-pol-01-val03",
+          "label": "Democracy"
+        },
+        {
+          "id": "ca01-pol-01-val04",
+          "label": "Theocracy"
+        },
+        {
+          "id": "ca01-pol-01-val05",
+          "label": "Anarchy"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "politics-legitimacy-source",
+      "name": "Legitimacy Source",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Legitimacy Source is about why people accept someone as a leader or believe a system is fair. Is it because of tradition, religion, elections, or technology? Explore what gives power its meaning in your future world. Who do people trust—and what makes that trust strong or weak?",
+      "values": [
+        {
+          "id": "ca01-pol-02-val01",
+          "label": "Traditional"
+        },
+        {
+          "id": "ca01-pol-02-val02",
+          "label": "Charismatic"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-power-distribution",
+      "name": "Power Distribution",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Legitimacy Source explores where people believe authority comes from. Is power trusted because it’s unified and strong at the center, or because it’s shared and rooted in local voices?",
+      "values": [
+        {
+          "id": "ca01-pol-03-val01",
+          "label": "Centralized"
+        },
+        {
+          "id": "ca01-pol-03-val02",
+          "label": "Fragmented"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-economic-ideology",
+      "name": "Economic Ideology",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Economic Ideology is about the system your world uses to manage money, work, and resources. Will it follow capitalism, where markets lead? Socialism, where resources are shared? A mixed system with elements of both? Or a post-scarcity future where no one needs to compete? Choose how your future economy works.",
+      "values": [
+        {
+          "id": "ca01-pol-04-val01",
+          "label": "Capitalism"
+        },
+        {
+          "id": "ca01-pol-04-val02",
+          "label": "Socialist"
+        },
+        {
+          "id": "ca01-pol-04-val03",
+          "label": "Mixed"
+        },
+        {
+          "id": "ca01-pol-04-val04",
+          "label": "Post-Scarcity"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "politics-social-values",
+      "name": "Social Values",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Social Values reflect what a society believes is important. Are your future communities rooted in long-held traditions, or do they embrace new, progressive ideas? ",
+      "values": [
+        {
+          "id": "ca01-pol-05-val01",
+          "label": "Traditional"
+        },
+        {
+          "id": "ca01-pol-05-val02",
+          "label": "Progressive"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-authority",
+      "name": "Authority",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Authority is about how much control leaders or systems have over people’s lives. Does your future world prioritize strict rules and order, or personal freedom and choice? Use the scale to explore how power is used—through control, trust, or something in between.",
+      "values": [
+        {
+          "id": "ca01-pol-06-val01",
+          "label": "Control"
+        },
+        {
+          "id": "ca01-pol-06-val02",
+          "label": "Freedom"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-civil-liberties",
+      "name": "Civil Liberties",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Civil Liberties are the freedoms people have in everyday life. Does your future society allow open expression and movement, or tightly control behavior and speech? Use the scale to explore a world where rights are fully protected—or severely limited.",
+      "values": [
+        {
+          "id": "ca01-pol-08-val01",
+          "label": "Oppressive"
+        },
+        {
+          "id": "ca01-pol-08-val02",
+          "label": "Free"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-diplomatic-stance",
+      "name": "Diplomatic Stance",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Diplomatic Stance shows how your society relates to others. Is it open and cooperative, or defensive and hostile? Use the scale to decide if your future world builds alliances, seeks peace, or chooses isolation and conflict. How does your society handle difference, negotiation, and global connection?",
+      "values": [
+        {
+          "id": "ca01-pol-09-val01",
+          "label": "Cooperative"
+        },
+        {
+          "id": "ca01-pol-09-val02",
+          "label": "Hostile"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-civic-engagement",
+      "name": "Civic Engagement",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Civic Engagement reflects how actively people participate in shaping their society. Are they disengaged and apathetic, moderately involved, actively organizing, or pushing for radical change? Choose from apathetic, moderate, activist, or revolutionary to define how the people in your future world engage with politics and power.",
+      "values": [
+        {
+          "id": "ca01-pol-10-val01",
+          "label": "Apathetic"
+        },
+        {
+          "id": "ca01-pol-10-val02",
+          "label": "Moderate"
+        },
+        {
+          "id": "ca01-pol-10-val02",
+          "label": "Activist"
+        },
+        {
+          "id": "ca01-pol-10-val02",
+          "label": "Revolutionary"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-resource-availability",
+      "name": "Resource Availability",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Resource Availability defines how much your world has to work with. Are resources extremely scarce, just enough, or overflowing? Choose from scarcity to abundance to imagine how people live—do they compete for survival, manage carefully, or enjoy endless supply? How does resource access shape daily life in your future?",
+      "values": [
+        {
+          "id": "ca02-eco-01-val01",
+          "label": "Extremely Scarce"
+        },
+        {
+          "id": "ca02-eco-01-val02",
+          "label": "Scarce"
+        },
+        {
+          "id": "ca02-eco-01-val03",
+          "label": "Balanced"
+        },
+        {
+          "id": "ca02-eco-01-val04",
+          "label": "Abundant"
+        },
+        {
+          "id": "ca02-eco-01-val05",
+          "label": "Limitless"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-resource-renewability",
+      "name": "Resource Renewability",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Resource Renewability defines how your world’s resources behave over time. Are they limited and depleting, slowly replenished, naturally renewable, or self-sustaining? Choose how your future manages energy, materials, and ecosystems—does it rely on extraction, careful balance, or advanced systems that regenerate resources endlessly?",
+      "values": [
+        {
+          "id": "ca02-eco-02-val01",
+          "label": "Non-Renewable"
+        },
+        {
+          "id": "ca02-eco-02-val02",
+          "label": "Slow-Renewing"
+        },
+        {
+          "id": "ca02-eco-03-val03",
+          "label": "Renewable"
+        },
+        {
+          "id": "ca02-eco-04-val04",
+          "label": "Self-Replenishing"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-resource-accesibility",
+      "name": "Resource Accesibility",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Resource Accessibility determines who can use the resources in your world. Are they open to all, regulated fairly, restricted to a few, or controlled by powerful monopolies? Decide how access shapes equity, power, and survival in your future society.",
+      "values": [
+        {
+          "id": "ca02-eco-03-val01",
+          "label": "Open-access"
+        },
+        {
+          "id": "ca02-eco-02-val02",
+          "label": "Regulated"
+        },
+        {
+          "id": "ca02-eco-03-val03",
+          "label": "Restricted"
+        },
+        {
+          "id": "ca02-eco-04-val04",
+          "label": "Monopolized"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-ownership-models",
+      "name": "Ownership Models",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Ownership Models define who controls land, resources, and production in your world. Is property privately held, shared cooperatively, managed by the state, or owned communally? Choose the model that shapes power, responsibility, and access in your future economy.",
+      "values": [
+        {
+          "id": "ca02-eco-05-val01",
+          "label": "Private"
+        },
+        {
+          "id": "ca02-eco-05-val02",
+          "label": "Cooperative"
+        },
+        {
+          "id": "ca02-eco-05-val03",
+          "label": "State-owned"
+        },
+        {
+          "id": "ca02-eco-05-val04",
+          "label": "Communal"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-innovation-rate",
+      "name": "Innovation Rate",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Innovation Rate shows how quickly new ideas, tools, and technologies emerge in your world. Is progress stagnant, steady, or accelerating rapidly? Choose the pace of change—does your future evolve slowly, or leap forward with exponential breakthroughs?",
+      "values": [
+        {
+          "id": "ca02-eco-06-val01",
+          "label": "Stagnant"
+        },
+        {
+          "id": "ca02-eco-06-val02",
+          "label": "Slow"
+        },
+        {
+          "id": "ca02-eco-06-val03",
+          "label": "Moderate"
+        },
+        {
+          "id": "ca02-eco-06-val04",
+          "label": "Rapid"
+        },
+        {
+          "id": "ca02-eco-06-val04",
+          "label": "Exponential"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-market-structure",
+      "name": "Market Structure",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Market Structure explores how trade and economic activity are organized. Is your future economy decentralized, with many small players, or centralized under powerful institutions or platforms? Use the scale to decide who sets the rules, who benefits, and how goods and services move in your imagined world.",
+      "values": [
+        {
+          "id": "ca02-eco-07-val01",
+          "label": "Decentralized"
+        },
+        {
+          "id": "ca02-eco-07-val02",
+          "label": "Centralized"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "economics-infrastructure",
+      "name": "Infrastructure",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Infrastructure defines the physical and digital backbone of your world. Is it underdeveloped, improving, fully advanced, or hyper-connected with seamless global systems? Choose how transportation, communication, and energy networks shape daily life, opportunity, and access in your future society.",
+      "values": [
+        {
+          "id": "ca02-eco-08-val01",
+          "label": "Underdeveloped"
+        },
+        {
+          "id": "ca02-eco-08-val02",
+          "label": "Developing"
+        },
+        {
+          "id": "ca02-eco-08-val03",
+          "label": "Advanced"
+        },
+        {
+          "id": "ca02-eco-08-val04",
+          "label": "Hyper-Connected"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-equity",
+      "name": "Equity",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Equity measures how fairly resources, opportunities, and wealth are shared in your world. Is your society just and inclusive, or marked by deep inequality? Use the scale to decide whether your future supports fairness—or reinforces imbalance. Who thrives, who struggles, and why?",
+      "values": [
+        {
+          "id": "ca02-eco-09-val01",
+          "label": "Fair"
+        },
+        {
+          "id": "ca02-eco-09-val02",
+          "label": "Unfair"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "economics-trade-openness",
+      "name": "Trade Openness",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Trade Openness defines how your world connects with others through exchange. Is it isolated, protective of local goods, open to free trade, or fully globalized? Choose how borders, goods, and relationships shape your future economy.",
+      "values": [
+        {
+          "id": "ca02-eco-10-val01",
+          "label": "Isolationalist"
+        },
+        {
+          "id": "ca02-eco-10-val02",
+          "label": "Protectionist"
+        },
+        {
+          "id": "ca02-eco-10-val03",
+          "label": "Free Trade"
+        },
+        {
+          "id": "ca02-eco-10-val04",
+          "label": "Globalized"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-currency-type",
+      "name": "Currency Type",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Currency Type determines how value is exchanged in your world. Is it based on gold or resources, government-issued money, digital crypto, or simple bartering? Choose the system that powers trade and defines worth in your future economy.",
+      "values": [
+        {
+          "id": "ca02-eco-11-val01",
+          "label": "Commodity Backed"
+        },
+        {
+          "id": "ca02-eco-11-val02",
+          "label": "Fiat"
+        },
+        {
+          "id": "ca02-eco-11-val03",
+          "label": "Crypto Currency"
+        },
+        {
+          "id": "ca02-eco-11-val04",
+          "label": "Resource-backed"
+        },
+        {
+          "id": "ca02-eco-11-val05",
+          "label": "Barter"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-monetory-control",
+      "name": "Monetory Control",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Monetary Control explores who manages money in your future world. Is it tightly controlled by central banks, or distributed across decentralized systems like crypto? Use the scale to shape how financial power is held and exercised.",
+      "values": [
+        {
+          "id": "ca02-eco-12-val01",
+          "label": "Centralized"
+        },
+        {
+          "id": "ca02-eco-12-val02",
+          "label": "Decentralized"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "economics-economic-ideology",
+      "name": "Economic Ideology",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Economic Ideology defines the core beliefs behind how your world runs its economy. Is it driven by markets, collective ownership, strict hierarchy, or total freedom from structure? Choose from capitalism, socialism, communism, feudalism, or anarchism to shape how work, wealth, and power are organized in your future society.",
+      "values": [
+        {
+          "id": "ca02-eco-13-val01",
+          "label": "Capitalism"
+        },
+        {
+          "id": "ca02-eco-13-val02",
+          "label": "Socialism"
+        },
+        {
+          "id": "ca02-eco-13-val03",
+          "label": "Communism"
+        },
+        {
+          "id": "ca02-eco-13-val04",
+          "label": "Feudalism"
+        },
+        {
+          "id": "ca02-eco-13-val05",
+          "label": "Anarchism"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "economics-regulations",
+      "name": "Regulations",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Regulations define how much control your world’s economy is under. Is it laissez-faire with minimal rules, or tightly managed by authorities? Use the scale to explore how laws, oversight, and intervention shape economic activity, fairness, and freedom in your imagined future.",
+      "values": [
+        {
+          "id": "ca02-eco-14-val01",
+          "label": "Laissez-Faire"
+        },
+        {
+          "id": "ca02-eco-14-val02",
+          "label": "Authoritarian"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "economics-environmental-policy",
+      "name": "Environmental Policy",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Environmental Policy reflects how your world treats nature. Is it exploitative, focused on extraction and profit, or restorative, aiming to heal and sustain ecosystems? Use the scale to decide whether your future depletes the Earth—or protects and regenerates it.",
+      "values": [
+        {
+          "id": "ca02-eco-14-val01",
+          "label": "Exploitative"
+        },
+        {
+          "id": "ca02-eco-14-val02",
+          "label": "Restorative"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "society-social-hierarchy",
+      "name": "Social Hierarchy",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Social Hierarchy defines how status and power are structured in your world. Choose from egalitarian to caste-based, tribal to tech-driven systems—what determines a person’s place, and how fixed or flexible is it?",
+      "values": [
+        {
+          "id": "ca03-soc-01-val01",
+          "label": "Egalitarian"
+        },
+        {
+          "id": "ca03-soc-01-val02",
+          "label": "Caste-Based"
+        },
+        {
+          "id": "ca03-soc-01-val03",
+          "label": "Class-Based"
+        },
+        {
+          "id": "ca03-soc-01-val04",
+          "label": "Meritocratic"
+        },
+        {
+          "id": "ca03-soc-01-val05",
+          "label": "Patriarchal"
+        },
+        {
+          "id": "ca03-soc-01-val06",
+          "label": "Matriarchal"
+        },
+        {
+          "id": "ca03-soc-01-val07",
+          "label": "Technology based"
+        },
+        {
+          "id": "ca03-soc-01-val08",
+          "label": "Nomadic"
+        },
+        {
+          "id": "ca03-soc-01-val09",
+          "label": "Tribal"
+        },
+        {
+          "id": "ca03-soc-01-val10",
+          "label": "Feudal"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-social-classes",
+      "name": "Social Classes",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Social Classes measure how divided your society is. Use the scale to decide if your world has little class difference—or sharp, deep divisions that shape every aspect of life.",
+      "values": [
+        {
+          "id": "ca03-soc-02-val01",
+          "label": "Minimal"
+        },
+        {
+          "id": "ca03-soc-02-val02",
+          "label": "Extremely Classified"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-community-bonds",
+      "name": "Community Bonds",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Community Bonds describe how people relate to each other in your world. Are they independent, part of tight-knit clans, collective communities, or corporate structures? Choose the kind of social ties that hold your future society together.",
+      "values": [
+        {
+          "id": "ca03-soc-03-val01",
+          "label": "Individualist"
+        },
+        {
+          "id": "ca03-soc-03-val02",
+          "label": "Clan-Based"
+        },
+        {
+          "id": "ca03-soc-03-val03",
+          "label": "Communal"
+        },
+        {
+          "id": "ca03-soc-03-val04",
+          "label": "Collectivist"
+        },
+        {
+          "id": "ca03-soc-03-val05",
+          "label": "Corporate"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-cultural-norms",
+      "name": "Cultural Norms",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Cultural Norms shape everyday behavior, beliefs, and traditions. Use the scale to decide if your society holds onto conservative values or embraces radical change and experimentation. What’s normal—and what’s challenged—in your imagined world?",
+      "values": [
+        {
+          "id": "ca03-soc-04-val01",
+          "label": "Conservative"
+        },
+        {
+          "id": "ca03-soc-04-val02",
+          "label": "Radical"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-gender-roles",
+      "name": "Gender Roles",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Gender Roles define how your society understands and expects people to behave based on gender. Use the scale to explore a world where roles are completely flexible—or strictly enforced by tradition, law, or culture.",
+      "values": [
+        {
+          "id": "ca03-soc-05-val01",
+          "label": "Flexible"
+        },
+        {
+          "id": "ca03-soc-05-val02",
+          "label": "Enforced"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-family-unit",
+      "name": "Family Unit",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Family Unit explores how people form households and raise the next generation. Is your society built around nuclear families, extended kin, polyamorous bonds, communal living, or solitary life? Choose the structure that shapes relationships in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-06-val01",
+          "label": "Nuclear"
+        },
+        {
+          "id": "ca03-soc-06-val02",
+          "label": "Extended"
+        },
+        {
+          "id": "ca03-soc-06-val03",
+          "label": "Polyamorous"
+        },
+        {
+          "id": "ca03-soc-06-val04",
+          "label": "Communal"
+        },
+        {
+          "id": "ca03-soc-06-val05",
+          "label": "Solitary"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-education-access",
+      "name": "Education Access",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Education Access determines who gets to learn in your future world. Use the scale to explore a society where education is a privilege for a few—or a right for all.",
+      "values": [
+        {
+          "id": "ca03-soc-07-val01",
+          "label": "Exclusive"
+        },
+        {
+          "id": "ca03-soc-07-val02",
+          "label": "Inclusive"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-educational-content",
+      "name": "Educational Content",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Educational Content explores what kind of knowledge is taught. Is your society focused on control and indoctrination, or on critical thinking and enlightenment? Use the scale to shape how minds are formed in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-08-val01",
+          "label": "Indoctrination"
+        },
+        {
+          "id": "ca03-soc-08-val02",
+          "label": "Enlightenment"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-knowledge-storage",
+      "name": "Knowledge Storage",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Knowledge Storage defines how your society preserves and passes on information. Is it stored through oral tradition, written texts, digital systems, holograms, or even encoded in DNA? Choose how memory and knowledge endure in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-09-val01",
+          "label": "Oral"
+        },
+        {
+          "id": "ca03-soc-09-val02",
+          "label": "Written"
+        },
+        {
+          "id": "ca03-soc-09-val03",
+          "label": "Digital"
+        },
+        {
+          "id": "ca03-soc-09-val04",
+          "label": "Holographic"
+        },
+        {
+          "id": "ca03-soc-09-val05",
+          "label": "Genetic"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-innovation",
+      "name": "Innovation",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Innovation reflects how your society views new ideas and change. Is innovation feared and forbidden, carefully controlled, actively supported, celebrated like a religion—or so powerful it's disruptive? Choose how your world handles progress.",
+      "values": [
+        {
+          "id": "ca03-soc-10-val01",
+          "label": "Forbidden"
+        },
+        {
+          "id": "ca03-soc-10-val02",
+          "label": "Regulated"
+        },
+        {
+          "id": "ca03-soc-10-val03",
+          "label": "Encouraged"
+        },
+        {
+          "id": "ca03-soc-10-val04",
+          "label": "Revered"
+        },
+        {
+          "id": "ca03-soc-10-val05",
+          "label": "Disruptive"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-aspirations",
+      "name": "Aspirations",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Aspirations reveal what drives people in your world. Are their goals grounded in practicality and survival, or guided by dreams, values, and big ideas? Use the scale to shape what your society hopes for.",
+      "values": [
+        {
+          "id": "ca03-soc-11-val01",
+          "label": "Pragmatic"
+        },
+        {
+          "id": "ca03-soc-11-val02",
+          "label": "Idealistic"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-rebellion",
+      "name": "Rebellion",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Rebellion explores how people respond to injustice or control. Is resistance expressed through peaceful protest, or through radical, revolutionary action? Use the scale to define how change is demanded in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-12-val01",
+          "label": "Peaceful"
+        },
+        {
+          "id": "ca03-soc-12-val02",
+          "label": "Revolutionary"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-work-life-balance",
+      "name": "Work-Life Balance",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Work-Life Balance defines how your society organizes time between labor and living. Is life dominated by work, carefully balanced, centered on leisure, fluid and self-directed—or does the concept not exist at all? Choose how people live and work in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-13-val01",
+          "label": "Exploitative"
+        },
+        {
+          "id": "ca03-soc-13-val02",
+          "label": "Balanced"
+        },
+        {
+          "id": "ca03-soc-13-val03",
+          "label": "Leisure-Focused"
+        },
+        {
+          "id": "ca03-soc-13-val04",
+          "label": "Fluid"
+        },
+        {
+          "id": "ca03-soc-13-val05",
+          "label": "None"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-healthcare-access",
+      "name": "Healthcare Access",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Healthcare Access determines who receives care and how. Is it a universal right, a private service, based on caste, charity, or limited by rationing? Choose how health and well-being are valued in your future society.",
+      "values": [
+        {
+          "id": "ca03-soc-14-val01",
+          "label": "Universal"
+        },
+        {
+          "id": "ca03-soc-14-val02",
+          "label": "Private"
+        },
+        {
+          "id": "ca03-soc-14-val03",
+          "label": "Caste-Based"
+        },
+        {
+          "id": "ca03-soc-14-val04",
+          "label": "Charity"
+        },
+        {
+          "id": "ca03-soc-14-val05",
+          "label": "Rationed"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-life-expectancy",
+      "name": "Life Expectancy",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Life Expectancy defines the typical lifespan in your future society. Is life brief, naturally long, scientifically extended, or has death been eliminated altogether? Choose how time shapes identity, ambition, and meaning in your world.",
+      "values": [
+        {
+          "id": "ca03-soc-15-val01",
+          "label": "Short"
+        },
+        {
+          "id": "ca03-soc-15-val02",
+          "label": "Moderate"
+        },
+        {
+          "id": "ca03-soc-15-val03",
+          "label": "Long"
+        },
+        {
+          "id": "ca03-soc-15-val04",
+          "label": "Extended"
+        },
+        {
+          "id": "ca03-soc-15-val05",
+          "label": "Immortal"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-mental-health",
+      "name": "Mental Health",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Mental Health explores how your society understands and supports emotional well-being. Is it hidden and stigmatized, or openly embraced and cared for? Use the scale to shape how mental health is treated in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-16-val01",
+          "label": "Taboo"
+        },
+        {
+          "id": "ca03-soc-16-val02",
+          "label": "Embraced"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-censorship",
+      "name": "Censorship",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Censorship defines how much information people can access or share. Is your society open and free, or tightly controlled and monitored? Use the scale to decide how truth, expression, and knowledge flow in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-17-val01",
+          "label": "Free"
+        },
+        {
+          "id": "ca03-soc-17-val02",
+          "label": "Controlled"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-public-spaces",
+      "name": "Public Spaces",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Public Spaces shape how people gather, interact, and belong. Are they tightly controlled, freely open, owned by corporations, shared communally, or entirely virtual? Choose the spaces that define daily life and connection in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-18-val01",
+          "label": "Controlled"
+        },
+        {
+          "id": "ca03-soc-18-val02",
+          "label": "Open"
+        },
+        {
+          "id": "ca03-soc-18-val03",
+          "label": "Commercialized"
+        },
+        {
+          "id": "ca03-soc-18-val04",
+          "label": "Communal"
+        },
+        {
+          "id": "ca03-soc-18-val05",
+          "label": "Virtual"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-moral-basis",
+      "name": "Moral Basis",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Moral Basis explores where your society’s sense of right and wrong comes from. Is it based on fixed, universal truths—or shaped by personal, cultural, or situational perspectives? Use the scale to define how ethics are understood in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-19-val01",
+          "label": "Objective"
+        },
+        {
+          "id": "ca03-soc-19-val02",
+          "label": "Subjective"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-altruism",
+      "name": "Altruism",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Altruism reflects how people treat one another in your world. Are actions driven by self-interest, or by care and generosity? Use the scale to explore whether your society values personal gain or collective well-being.",
+      "values": [
+        {
+          "id": "ca03-soc-20-val01",
+          "label": "Selfish"
+        },
+        {
+          "id": "ca03-soc-20-val02",
+          "label": "Selfless"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-reigious-tolerance",
+      "name": "Reigious Tolerance",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Religious Tolerance shows how your society handles different beliefs. Is it hostile toward other faiths, or open and inclusive? Use the scale to decide whether religion divides or unites people in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-21-val01",
+          "label": "Hostile"
+        },
+        {
+          "id": "ca03-soc-21-val02",
+          "label": "Inclusive"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "society-religion's-role",
+      "name": "Religion's Role",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Religion's Role defines how much influence faith has in your society. Is it separate from daily life, quietly present, guiding culture, deeply embedded in governance, or completely controlling? Choose how belief shapes power, identity, and everyday experience in your future world.",
+      "values": [
+        {
+          "id": "ca03-soc-22-val01",
+          "label": "Secular"
+        },
+        {
+          "id": "ca03-soc-22-val02",
+          "label": "Marginal"
+        },
+        {
+          "id": "ca03-soc-22-val03",
+          "label": "Influential"
+        },
+        {
+          "id": "ca03-soc-22-val04",
+          "label": "Dominant"
+        },
+        {
+          "id": "ca03-soc-22-val05",
+          "label": "Totalitarian"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "society-divine-focus",
+      "name": "Divine Focus",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "society",
+      "description": "Divine Focus explores what your society believes about the divine. Is it atheistic with no gods, animistic with spirits in nature, polytheistic with many gods, monotheistic with one, or pantheistic where everything is divine? Choose the worldview that shapes faith and meaning in your imagined future.",
+      "values": [
+        {
+          "id": "ca03-soc-23-val01",
+          "label": "Atheistic"
+        },
+        {
+          "id": "ca03-soc-23-val02",
+          "label": "Animistic"
+        },
+        {
+          "id": "ca03-soc-23-val03",
+          "label": "Polytheistic"
+        },
+        {
+          "id": "ca03-soc-23-val04",
+          "label": "Monotheistic"
+        },
+        {
+          "id": "ca03-soc-23-val05",
+          "label": "Pantheistic"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-technology-adoption",
+      "name": "Technology Adoption",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Technology Adoption defines the level of technological development in your world. Is it rooted in pre-industrial tools, driven by digital systems, or operating beyond scarcity through quantum or post-singularity breakthroughs? Choose the stage that shapes daily life, progress, and power in your future society.",
+      "values": [
+        {
+          "id": "ca04-tec-01-val01",
+          "label": "Pre-Industrial"
+        },
+        {
+          "id": "ca04-tec-01-val02",
+          "label": "Industrial"
+        },
+        {
+          "id": "ca04-tec-01-val03",
+          "label": "Digital"
+        },
+        {
+          "id": "ca04-tec-01-val04",
+          "label": "Nanotech"
+        },
+        {
+          "id": "ca04-tec-01-val05",
+          "label": "Quantum"
+        },
+        {
+          "id": "ca04-tec-01-val06",
+          "label": "Post-Scarcity"
+        },
+        {
+          "id": "ca04-tec-01-val07",
+          "label": "Singularity"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-energy-sources",
+      "name": "Energy Sources",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Energy Sources determine how your world is powered. Are you relying on fossil fuels, harnessing the sun, splitting atoms, or tapping into advanced sources like fusion or zero-point energy? Choose the technologies that fuel your society—and shape its impact on the planet and beyond.",
+      "values": [
+        {
+          "id": "ca04-tec-02-val01",
+          "label": "Fossil Fuels"
+        },
+        {
+          "id": "ca04-tec-02-val02",
+          "label": "Nuclear"
+        },
+        {
+          "id": "ca04-tec-02-val03",
+          "label": "Solar/Wind"
+        },
+        {
+          "id": "ca04-tec-02-val04",
+          "label": "Geothermal"
+        },
+        {
+          "id": "ca04-tec-02-val05",
+          "label": "Fusion"
+        },
+        {
+          "id": "ca04-tec-02-val06",
+          "label": "Antimatter"
+        },
+        {
+          "id": "ca04-tec-02-val07",
+          "label": "Zero-Point Energy"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-ai-integration",
+      "name": "AI Integration",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "AI Integration explores how artificial intelligence functions in your world. Is there no AI, or is it narrow and task-based, fully autonomous, or beyond human comprehension? Choose the level—from assistive tools to sentient, superintelligent, or even godlike entities—and define how AI shapes life, labor, and decision-making in your future society.",
+      "values": [
+        {
+          "id": "ca04-tec-03-val01",
+          "label": "None"
+        },
+        {
+          "id": "ca04-tec-03-val02",
+          "label": "Narrow AI"
+        },
+        {
+          "id": "ca04-tec-03-val03",
+          "label": "Assistive"
+        },
+        {
+          "id": "ca04-tec-03-val04",
+          "label": "Autonomous"
+        },
+        {
+          "id": "ca04-tec-03-val05",
+          "label": "General AI"
+        },
+        {
+          "id": "ca04-tec-03-val06",
+          "label": "Sentient"
+        },
+        {
+          "id": "ca04-tec-02-val07",
+          "label": "Superintelligent"
+        },
+        {
+          "id": "ca04-tec-02-val08",
+          "label": "Godlike"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-cybernetic-mods",
+      "name": "Cybernetic Mods",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Cybernetic Mods explore how humans integrate with machines. From no enhancements to wearables, implants, neural links, or full cyborg bodies—choose how technology reshapes the body, identity, and daily life in your future world.",
+      "values": [
+        {
+          "id": "ca04-tec-04-val01",
+          "label": "None"
+        },
+        {
+          "id": "ca04-tec-04-val02",
+          "label": "Wearables"
+        },
+        {
+          "id": "ca04-tec-04-val03",
+          "label": "Implants"
+        },
+        {
+          "id": "ca04-tec-04-val04",
+          "label": "Neural"
+        },
+        {
+          "id": "ca04-tec-04-val05",
+          "label": "Full Cyborg"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-genetic-editing",
+      "name": "Genetic Editing",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Genetic Editing defines how your society alters life at the genetic level. Is it banned, used for healing, enhancing traits, creating new species, reviving extinct ones, or unlocking post-human evolution? Choose how far life is rewritten.",
+      "values": [
+        {
+          "id": "ca04-tec-05-val01",
+          "label": "Banned"
+        },
+        {
+          "id": "ca04-tec-05-val02",
+          "label": "Therapeutic"
+        },
+        {
+          "id": "ca04-tec-05-val03",
+          "label": "Enhancement"
+        },
+        {
+          "id": "ca04-tec-05-val04",
+          "label": "Speciation"
+        },
+        {
+          "id": "ca04-tec-05-val05",
+          "label": "De-Extinction"
+        },
+        {
+          "id": "ca04-tec-05-val06",
+          "label": "Transcendence"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-communication",
+      "name": "Communication",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Communication explores how people connect and share information. Is it through spoken word, writing, digital devices, direct neural links, or instant quantum networks? Choose the method that defines interaction, connection, and understanding in your future world.",
+      "values": [
+        {
+          "id": "ca04-tec-06-val01",
+          "label": "Oral"
+        },
+        {
+          "id": "ca04-tec-06-val02",
+          "label": "Written"
+        },
+        {
+          "id": "ca04-tec-06-val03",
+          "label": "Digital"
+        },
+        {
+          "id": "ca04-tec-06-val04",
+          "label": "Neural"
+        },
+        {
+          "id": "ca04-tec-06-val05",
+          "label": "Quantum-Linked"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-ai-rights",
+      "name": "AI Rights",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "AI Rights define how artificial intelligences are treated in your world. Are they tools with no rights, granted limited protections, full citizenship, or even sovereign status? Choose how your society recognizes (or denies) AI autonomy and personhood.",
+      "values": [
+        {
+          "id": "ca04-tec-07-val01",
+          "label": "None"
+        },
+        {
+          "id": "ca04-tec-07-val02",
+          "label": "Limited"
+        },
+        {
+          "id": "ca04-tec-07-val03",
+          "label": "Citizen"
+        },
+        {
+          "id": "ca04-tec-07-val04",
+          "label": "Sovereign"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-data-privacy",
+      "name": "Data Privacy",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Data Privacy explores how personal information is handled in your world. Is there no privacy, corporate surveillance, government regulation, voluntary sharing, full protection, or decentralized control? Choose how much people know—and how much is known about them.",
+      "values": [
+        {
+          "id": "ca04-tec-08-val01",
+          "label": "None"
+        },
+        {
+          "id": "ca04-tec-08-val02",
+          "label": "Corporate-Monitored"
+        },
+        {
+          "id": "ca04-tec-08-val03",
+          "label": "Regulated"
+        },
+        {
+          "id": "ca04-tec-08-val04",
+          "label": "Voluntary"
+        },
+        {
+          "id": "ca04-tec-08-val05",
+          "label": "Absolute"
+        },
+        {
+          "id": "ca04-tec-08-val06",
+          "label": "Decentralized"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-space-colonization",
+      "name": "Space Colonization",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Space Colonization defines how far your society has expanded beyond Earth. Are there no off-world settlements, or thriving colonies in orbit, on the Moon, Mars, or across the galaxy? Choose how your world reaches—and reshapes—the cosmos.",
+      "values": [
+        {
+          "id": "ca04-tec-09-val01",
+          "label": "None"
+        },
+        {
+          "id": "ca04-tec-09-val02",
+          "label": "Orbital"
+        },
+        {
+          "id": "ca04-tec-09-val03",
+          "label": "Lunar"
+        },
+        {
+          "id": "ca04-tec-09-val04",
+          "label": "Martian"
+        },
+        {
+          "id": "ca04-tec-09-val05",
+          "label": "Galactic"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-time-manipulation",
+      "name": "Time Manipulation",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Time Manipulation explores how your society interacts with time. Is it untouched, predicted through data, slowed or sped up, traveled across, or even erased? Choose how time is perceived, controlled, or rewritten in your future world.",
+      "values": [
+        {
+          "id": "ca04-tec-10-val01",
+          "label": "None"
+        },
+        {
+          "id": "ca04-tec-10-val02",
+          "label": "Prediction"
+        },
+        {
+          "id": "ca04-tec-10-val03",
+          "label": "Slowing"
+        },
+        {
+          "id": "ca04-tec-10-val04",
+          "label": "Speeding"
+        },
+        {
+          "id": "ca04-tec-10-val05",
+          "label": "Travel"
+        },
+        {
+          "id": "ca04-tec-10-val06",
+          "label": "Erasing"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 0,
+        "step": 0
+      }
+    },
+    {
+      "id": "technology-transportation",
+      "name": "Transportation",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Transportation defines how people and goods move in your world. Is travel slow and limited, or instant across vast distances? Use the scale to shape how mobility transforms space, time, and connection in your future society.",
+      "values": [
+        {
+          "id": "ca04-tec-11-val01",
+          "label": "Slow"
+        },
+        {
+          "id": "ca04-tec-11-val02",
+          "label": "Instantaneous"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "technology-post-scarcity",
+      "name": "Post-Scarcity",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "technology",
+      "description": "Post-Scarcity measures how technology meets human needs. Is your society focused on basic survival, or does it enjoy effortless abundance through advanced systems? Use the scale to define whether technology liberates people—or still leaves them struggling.",
+      "values": [
+        {
+          "id": "ca04-tec-12-val01",
+          "label": "Survival"
+        },
+        {
+          "id": "ca04-tec-12-val02",
+          "label": "Abundance"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 10
+      }
+    },
+    {
+      "id": "politics-voting-rights",
+      "name": "Voting Rights",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "politics",
+      "description": "Voting Rights determine who gets to participate in making decisions. In your future world, are voting rights restricted to a few, open to everyone, or even required by law? Choose between restricted, limited, universal, or compulsory voting—and explore how access to power shapes fairness, inclusion, and representation in your society.",
+      "required": false,
+      "values": [
+        {
+          "id": "restricted",
+          "label": "Restricted"
+        },
+        {
+          "id": "limited",
+          "label": "Limited"
+        },
+        {
+          "id": "universal",
+          "label": "Universal"
+        },
+        {
+          "id": "compulsory",
+          "label": "Compulsory"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "economics-labor-organisation",
+      "name": "Labor Organisation",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "economics",
+      "description": "Labor Organization explores how work is structured in your future world. Is labor done by individuals and communities, or fully automated by machines and AI? Use the scale to imagine economies powered by human effort, intelligent systems, or a mix of both. Who—or what—does the work in your society?",
+      "required": false,
+      "values": [
+        {
+          "label": "Individual"
+        },
+        {
+          "label": "Automated"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-temperature-range",
+      "name": "Temperature Range",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Temperature Range defines how consistent or extreme your world’s climate is. Use the scale to imagine a stable, liveable environment—or one marked by wild, unpredictable shifts that challenge survival and adaptation.",
+      "required": false,
+      "values": [
+        {
+          "label": "Stable"
+        },
+        {
+          "label": "Volatile"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-atmosphere",
+      "name": "Atmosphere",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Atmosphere defines your world’s air—breathable, thin, toxic, or dense. Choose how it supports or threatens life.\n",
+      "required": false,
+      "values": [
+        {
+          "id": "breathable",
+          "label": "Breathable"
+        },
+        {
+          "id": "thin",
+          "label": "Thin"
+        },
+        {
+          "id": "toxic",
+          "label": "Toxic"
+        },
+        {
+          "id": "high-pressure",
+          "label": "High Pressure"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-biodiversity",
+      "name": "Biodiversity",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Biodiversity measures the variety of life in your world. Is it low, rich with species, or transformed into something post-natural and unfamiliar?\n",
+      "required": false,
+      "values": [
+        {
+          "id": "low",
+          "label": "Low"
+        },
+        {
+          "id": "moderate",
+          "label": "Moderate"
+        },
+        {
+          "id": "high",
+          "label": "High"
+        },
+        {
+          "id": "hyperdiverse",
+          "label": "Hyperdiverse"
+        },
+        {
+          "id": "post-natural",
+          "label": "Post Natural"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-flora",
+      "name": "Flora",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Flora explores how much plant life exists in your world. Use the scale to define a landscape that’s sparse—or lush and overflowing.\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Sparse"
+        },
+        {
+          "label": "Abundant"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-fauna",
+      "name": "Fauna",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Fauna defines the nature of animal life in your world. Use the scale to explore a spectrum from tame and domesticated to wild and predatory.\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Domsiticated"
+        },
+        {
+          "label": "Predators"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-symbiosis",
+      "name": "Symbiosis",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Symbiosis explores how species relate to each other. Is life mostly independent, or deeply interdependent and cooperative across plants, animals, humans, and ecosystems?\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Independant"
+        },
+        {
+          "label": "Interdependent"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-disaster-types",
+      "name": "Disaster Types",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Disaster Types define the kinds of natural forces your world faces. Choose from earthquakes, tsunamis, hurricanes, or floods—each shaping how societies prepare, adapt, or collapse.\n",
+      "required": false,
+      "values": [
+        {
+          "id": "earthquakes",
+          "label": "Earthquakes"
+        },
+        {
+          "id": "tsunamis",
+          "label": "Tsunamis"
+        },
+        {
+          "id": "hurricane",
+          "label": "Hurricane"
+        },
+        {
+          "id": "floods",
+          "label": "Floods"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-disaster-frequency",
+      "name": "Disaster Frequency",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Disaster Frequency shows how often catastrophic events occur in your world. Are they rare, constant, or endlessly repeating in a strange timeloop? Choose your planet’s rhythm of disruption.\n",
+      "required": false,
+      "values": [
+        {
+          "id": "rare",
+          "label": "Rare"
+        },
+        {
+          "id": "occasional",
+          "label": "Occasional"
+        },
+        {
+          "id": "frequent",
+          "label": "Frequent"
+        },
+        {
+          "id": "constant",
+          "label": "Constant"
+        },
+        {
+          "id": "timelooped",
+          "label": "Timelooped"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-disaster-severity",
+      "name": "Disaster Severity",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Disaster Severity defines how intense natural events are in your world. Are they mild and manageable—or cataclysmic forces that reshape entire landscapes and societies?\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Mild"
+        },
+        {
+          "label": "Cataclysmic"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-urbanisation",
+      "name": "Urbanisation",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Urbanisation explores how human settlements evolve. Are cities growing organically within nature, or built as fully artificial environments? Use the scale to shape your world’s living spaces.",
+      "required": false,
+      "values": [
+        {
+          "label": "Natural"
+        },
+        {
+          "label": "Artificial"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-deforestation",
+      "name": "Deforestation",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Deforestation measures how your world treats its forests. Are they heavily exploited and cleared, or protected and actively restored? Use the scale to shape your planet’s ecological balance.",
+      "required": false,
+      "values": [
+        {
+          "label": "Exploited"
+        },
+        {
+          "label": "Restored"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-air-purity",
+      "name": "Air Purity",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Air Purity defines the quality of the air people breathe. Is it clean and refreshing, or polluted and suffocating? Use the scale to shape your world’s breathability.\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Pure"
+        },
+        {
+          "label": "Suffocating"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-water-clarity",
+      "name": "Water Clarity",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Water Clarity explores how clean and visible your world’s water is. Is it crystal-clear and life-sustaining, or dark, polluted, and impenetrable? Use the scale to decide.",
+      "required": false,
+      "values": [
+        {
+          "label": "Transparent"
+        },
+        {
+          "label": "Impenetrable"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-soil-fertility",
+      "name": "Soil Fertility",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Soil Fertility determines how well the land supports life. Is it barren and infertile, or rich and overabundant? Use the scale to shape your world’s ability to grow and sustain.\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Infertile"
+        },
+        {
+          "label": "Overabundant"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-light-quality",
+      "name": "Light Quality",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Light Quality defines the atmosphere of your world through illumination. Is it harsh and blinding, soft and balanced, or dim and murky? Use the scale to shape visibility, mood, and growth.",
+      "required": false,
+      "values": [
+        {
+          "label": "Blinding"
+        },
+        {
+          "label": "Murky"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-source-of-law",
+      "name": "Source of Law",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Source of Law defines where your world’s rules come from—sacred beliefs, traditions, governments, past rulings, corporations, or AI. Who writes the laws, and why?\n",
+      "required": false,
+      "values": [
+        {
+          "id": "divine",
+          "label": "Divine"
+        },
+        {
+          "id": "customary",
+          "label": "Customary"
+        },
+        {
+          "id": "statutory",
+          "label": "Statutory"
+        },
+        {
+          "id": "precedent",
+          "label": "Precedent"
+        },
+        {
+          "id": "corporate",
+          "label": "Corporate"
+        },
+        {
+          "id": "ai-generated",
+          "label": "AI-Generated"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-legal-philosophy",
+      "name": "Legal Philosophy",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Legal Philosophy defines the guiding principles behind justice in your world. Is it about stability, punishment, healing, efficiency, freedom—or strict control? Choose how laws reflect your society’s values.",
+      "required": false,
+      "values": [
+        {
+          "id": "stable",
+          "label": "Stable"
+        },
+        {
+          "id": "retributive",
+          "label": "Retributive"
+        },
+        {
+          "id": "restorative",
+          "label": "Restorative"
+        },
+        {
+          "id": "utalitarian",
+          "label": "Utalitarian"
+        },
+        {
+          "id": "libertarian",
+          "label": "Libertarian"
+        },
+        {
+          "id": "authoritarian",
+          "label": "Authoritarian"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-transparency",
+      "name": "Transparency",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Transparency explores how visible and understandable your legal system is. Is it opaque and hidden, or fully open—even omniscient—where nothing is private or unknown?",
+      "required": false,
+      "values": [
+        {
+          "label": "Opaque"
+        },
+        {
+          "label": "Omniscient"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-moral-basis",
+      "name": "Moral Basis",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Moral Basis defines what guides your legal system’s sense of right and wrong. Is it rooted in rigid beliefs, or shaped by practical needs and outcomes?",
+      "required": false,
+      "values": [
+        {
+          "label": "Dogmatic"
+        },
+        {
+          "label": "Pragmatic"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-penalties",
+      "name": "Penalties",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Penalties describe how your society punishes wrongdoing. Are people fined, physically punished, imprisoned, exiled, rehabilitated—or subjected to extreme measures like mind-wiping or genetic reprogramming? Choose how justice is enforced.",
+      "required": false,
+      "values": [
+        {
+          "id": "fines",
+          "label": "Fines"
+        },
+        {
+          "id": "corporal",
+          "label": "Corporal"
+        },
+        {
+          "id": "imprisonment",
+          "label": "Imprisonment"
+        },
+        {
+          "id": "exile",
+          "label": "Exile"
+        },
+        {
+          "id": "rehabilitation",
+          "label": "Rehabilitation"
+        },
+        {
+          "id": "mind-wiping",
+          "label": "Mind-Wiping"
+        },
+        {
+          "id": "genetic-reprogramming",
+          "label": "Genetic Reprogramming"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-trials",
+      "name": "Trials",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Trials determine how justice is decided in your world. Is it swift mob judgment, a jury, a lone judge, AI-driven, or settled by public vote?",
+      "required": false,
+      "values": [
+        {
+          "id": "mob-justice",
+          "label": "Mob Justice"
+        },
+        {
+          "id": "jury",
+          "label": "Jury"
+        },
+        {
+          "id": "judge",
+          "label": "Judge"
+        },
+        {
+          "id": "ai-arbiter",
+          "label": "AI Arbiter"
+        },
+        {
+          "id": "public-vote",
+          "label": "Public Vote"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-prisons",
+      "name": "Prisons",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Prisons define how your society treats those who break the law. Are they spaces for healing and reform—or harsh, torturous environments of punishment and control?",
+      "required": false,
+      "values": [
+        {
+          "label": "Rehabilitative"
+        },
+        {
+          "label": "Torturous"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-contracts",
+      "name": "Contracts",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Contracts define how agreements work in your world. Are they casual and based on trust, or strictly binding with formal enforcement? Choose how people make and keep promises.",
+      "required": false,
+      "values": [
+        {
+          "label": "Informal"
+        },
+        {
+          "label": "Binding"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-dispute-resolution",
+      "name": "Dispute Resolution",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Dispute Resolution defines how conflicts are settled. Are disagreements resolved through violence and force, or through reasoned, fair processes? Use the scale to shape justice in your world.",
+      "required": false,
+      "values": [
+        {
+          "label": "Barbaric"
+        },
+        {
+          "label": "Rational"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-enforcement-bodies",
+      "name": "Enforcement Bodies",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Enforcement Bodies define who upholds the law in your world. Is there no formal force, or are laws enforced by communities, police, corporations, or autonomous AI systems? Choose your society’s guardians—or oppressors.",
+      "required": false,
+      "values": [
+        {
+          "id": "none",
+          "label": "None"
+        },
+        {
+          "id": "community-watch",
+          "label": "Community Watch"
+        },
+        {
+          "id": "police",
+          "label": "Police"
+        },
+        {
+          "id": "secret-police",
+          "label": "Secret Police"
+        },
+        {
+          "id": "corporate-militias",
+          "label": "Corporate Militias"
+        },
+        {
+          "id": "ai-drones",
+          "label": "AI Drones"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-surveillance",
+      "name": "Surveillance",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Surveillance defines how closely your society watches its people. Is privacy respected, or is every action tracked by omnipresent systems? Use the scale to decide what’s seen—and what stays hidden.",
+      "required": false,
+      "values": [
+        {
+          "label": "Privacy"
+        },
+        {
+          "label": "Omnipresent"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-corruption",
+      "name": "Corruption",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Corruption measures how much dishonesty and abuse of power exist in your legal system. Is it widespread and unchecked, or nearly nonexistent and deeply accountable? Choose your world’s integrity.",
+      "required": false,
+      "values": [
+        {
+          "label": "Rampant"
+        },
+        {
+          "label": "Nonexistent"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-use-of-force",
+      "name": "Use of Force",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Use of Force defines how your society applies power to maintain order. Is it careful and restrained, or harsh and brutal? Use the scale to shape authority’s reach.",
+      "required": false,
+      "values": [
+        {
+          "label": "Restrained"
+        },
+        {
+          "label": "Brutal"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-freedom-of-speech",
+      "name": "Freedom of Speech",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Freedom of Speech defines how openly people can express themselves. Is speech tightly controlled, or fully protected—even when it challenges power? Use the scale to shape your world’s voice.",
+      "required": false,
+      "values": [
+        {
+          "label": "Suppressed"
+        },
+        {
+          "label": "Absolute"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-movement",
+      "name": "Movement",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Movement defines how freely people travel in your world. Is it restricted, tracked, open to all, or guided by intelligent systems? Choose how borders, mobility, and control shape daily life.",
+      "required": false,
+      "values": [
+        {
+          "id": "restricted",
+          "label": "Restricted"
+        },
+        {
+          "id": "monitored",
+          "label": "Monitored"
+        },
+        {
+          "id": "free",
+          "label": "Free"
+        },
+        {
+          "id": "ai-guided",
+          "label": "AI-Guided"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-assembly",
+      "name": "Assembly",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Assembly defines how people gather in your society. Are public gatherings banned, allowed freely, closely monitored, or only permitted in virtual spaces? Choose how collective action is enabled—or controlled.",
+      "required": false,
+      "values": [
+        {
+          "id": "banned",
+          "label": "Banned"
+        },
+        {
+          "id": "permitted",
+          "label": "Permitted"
+        },
+        {
+          "id": "monitored",
+          "label": "Monitored"
+        },
+        {
+          "id": "virtual-only",
+          "label": "Virtual Only"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-ai-governance",
+      "name": "AI Governance",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "AI Governance defines the role of artificial intelligence in political decision-making. Is there no involvement, limited advice, shared power, or full AI control? Choose how much influence machines have in your world.",
+      "required": false,
+      "values": [
+        {
+          "id": "none",
+          "label": "None"
+        },
+        {
+          "id": "advisory",
+          "label": "Advisory"
+        },
+        {
+          "id": "co-governance",
+          "label": "Co-Governance"
+        },
+        {
+          "id": "absolute",
+          "label": "Absolute"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-genetic-laws",
+      "name": "Genetic Laws",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Genetic Laws define how your society governs genetic modification. Is editing banned, tightly regulated, used for eugenics, open to designing new species, or extended to post-human rights? Choose how life is legally reshaped.",
+      "required": false,
+      "values": [
+        {
+          "id": "banned-editing",
+          "label": "Banned Editing"
+        },
+        {
+          "id": "regulated",
+          "label": "Regulated"
+        },
+        {
+          "id": "eugenics",
+          "label": "Eugenics"
+        },
+        {
+          "id": "species-design",
+          "label": "Species Design"
+        },
+        {
+          "id": "post-human-rights",
+          "label": "Post-Human Rights"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "legal-sovereignty",
+      "name": "Sovereignty",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "legal",
+      "description": "Sovereignty defines how power and identity are tied to place. Is your world governed by fixed territories and borders, or is it fluid, decentralized, and borderless? Use the scale to shape control and belonging.\n",
+      "required": false,
+      "values": [
+        {
+          "label": "Territorial"
+        },
+        {
+          "label": "Borderless"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "test-category-ethos",
+      "name": "Ethos",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "test-category",
+      "description": "Ethos defines the overall spirit of your world. Is it hopeful and harmonious, or oppressive and broken? Use the scale to shape your society’s guiding mood and values.",
+      "required": false,
+      "values": [
+        {
+          "label": "Dystopian"
+        },
+        {
+          "label": "Utopian"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "test-category-point-of-view",
+      "name": "Point of View",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "test-category",
+      "description": "Point of View determines who tells the story. Is it a personal first-person voice, an immersive second-person perspective, or a broader third-person view? Choose how your world is seen.",
+      "required": false,
+      "values": [
+        {
+          "id": "first-person",
+          "label": "First Person"
+        },
+        {
+          "id": "second-person",
+          "label": "Second Person"
+        },
+        {
+          "id": "third-person",
+          "label": "Third Person"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "test-category-plot-structure",
+      "name": "Plot Structure",
+      "type": "Slider",
+      "visibility": "Basic",
+      "categoryId": "test-category",
+      "description": "Plot Structure defines how your story unfolds. Is it minimal, with simple events and few turns, or complex, with layered narratives, twists, and intersecting arcs? Use the scale to shape your world’s storytelling depth.",
+      "required": false,
+      "values": [
+        {
+          "label": "Minimalist"
+        },
+        {
+          "label": "Complex"
+        }
+      ],
+      "config": {
+        "min": -100,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "test-category-message",
+      "name": "Message",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "test-category",
+      "description": "Message defines what your story tries to say. Is it built around a clear idea, a moral lesson, layered subtext, open ambiguity, or a universal truth? Choose how meaning is delivered—or discovered—in your narrative.",
+      "required": false,
+      "values": [
+        {
+          "id": "singular-idea",
+          "label": "Singular Idea"
+        },
+        {
+          "id": "moral-reflection",
+          "label": "Moral Reflection"
+        },
+        {
+          "id": "ambiguity",
+          "label": "Ambiguity"
+        },
+        {
+          "id": "universal-truth",
+          "label": "Universal Truth"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "test-category-tone,-mood-&-style",
+      "name": "Tone & Mood",
+      "type": "Dropdown",
+      "visibility": "Basic",
+      "categoryId": "test-category",
+      "description": "Tone, Mood & Style shape the emotional atmosphere of your story. Is it cheerful and light, eerie and mysterious, or reflective and bittersweet? Choose from moods like suspenseful, humorous, calm, or defiant to set the emotional undercurrent of your narrative and guide how readers feel within your imagined world.\n",
+      "required": false,
+      "values": [
+        {
+          "id": "cheerful",
+          "label": "Cheerful"
+        },
+        {
+          "id": "melancholic",
+          "label": "Melancholic"
+        },
+        {
+          "id": "reflective",
+          "label": "Reflective"
+        },
+        {
+          "id": "suspenseful",
+          "label": "Suspenseful"
+        },
+        {
+          "id": "humorous",
+          "label": "Humorous"
+        },
+        {
+          "id": "mysterious",
+          "label": "Mysterious"
+        },
+        {
+          "id": "bittersweet",
+          "label": "Bittersweet"
+        },
+        {
+          "id": "calm",
+          "label": "Calm"
+        },
+        {
+          "id": "defiant",
+          "label": "Defiant"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "test-category-style",
+      "name": "Style",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "test-category",
+      "description": "Style defines how your story is written. Is it minimalist and spare, rich and poetic, casual and colloquial, clear and direct, or deeply evocative and atmospheric? Choose the voice that best brings your world to life.\n",
+      "required": false,
+      "values": [
+        {
+          "id": "minimalist",
+          "label": "Minimalist"
+        },
+        {
+          "id": "poetic",
+          "label": "Poetic"
+        },
+        {
+          "id": "colloquial",
+          "label": "Colloquial"
+        },
+        {
+          "id": "direct",
+          "label": "Direct"
+        },
+        {
+          "id": "evocative",
+          "label": "Evocative"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "id": "environment-seasonality",
+      "name": "Seasonality",
+      "type": "Radio Buttons",
+      "visibility": "Basic",
+      "categoryId": "environment",
+      "description": "Seasonality explores how your world experiences changes over time. Are there stable seasons, extreme shifts, chaotic patterns, or none at all? Choose how nature’s rhythms—or their absence—shape life, behavior, and adaptation in your future environment.",
+      "required": false,
+      "values": [
+        {
+          "id": "stable",
+          "label": "Stable"
+        },
+        {
+          "id": "seasonal",
+          "label": "Seasonal"
+        },
+        {
+          "id": "extreme",
+          "label": "Extreme"
+        },
+        {
+          "id": "chaotic",
+          "label": "Chaotic"
+        },
+        {
+          "id": "no-seasons",
+          "label": "No Seasons"
+        }
+      ],
+      "config": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    }
+  ]
+}

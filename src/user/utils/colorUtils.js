@@ -7,24 +7,24 @@
  * @returns {object} - Object with bgColor, textColor, and borderColor properties
  */
 
-// Define a set of color themes
+// Define a set of color themes based on Quest Alliance brand colors
 const colorThemes = [
-  { bgColor: 'bg-blue-50', textColor: 'text-blue-700', borderColor: 'border-blue-200' },
-  { bgColor: 'bg-green-50', textColor: 'text-green-700', borderColor: 'border-green-200' },
-  { bgColor: 'bg-purple-50', textColor: 'text-purple-700', borderColor: 'border-purple-200' },
-  { bgColor: 'bg-amber-50', textColor: 'text-amber-700', borderColor: 'border-amber-200' },
-  { bgColor: 'bg-cyan-50', textColor: 'text-cyan-700', borderColor: 'border-cyan-200' },
-  { bgColor: 'bg-red-50', textColor: 'text-red-700', borderColor: 'border-red-200' },
-  { bgColor: 'bg-indigo-50', textColor: 'text-indigo-700', borderColor: 'border-indigo-200' },
-  { bgColor: 'bg-pink-50', textColor: 'text-pink-700', borderColor: 'border-pink-200' },
-  { bgColor: 'bg-orange-50', textColor: 'text-orange-700', borderColor: 'border-orange-200' },
-  { bgColor: 'bg-emerald-50', textColor: 'text-emerald-700', borderColor: 'border-emerald-200' },
-  { bgColor: 'bg-teal-50', textColor: 'text-teal-700', borderColor: 'border-teal-200' },
-  { bgColor: 'bg-lime-50', textColor: 'text-lime-700', borderColor: 'border-lime-200' },
-  { bgColor: 'bg-fuchsia-50', textColor: 'text-fuchsia-700', borderColor: 'border-fuchsia-200' },
-  { bgColor: 'bg-rose-50', textColor: 'text-rose-700', borderColor: 'border-rose-200' },
-  { bgColor: 'bg-sky-50', textColor: 'text-sky-700', borderColor: 'border-sky-200' },
-  { bgColor: 'bg-violet-50', textColor: 'text-violet-700', borderColor: 'border-violet-200' }
+  { bgColor: 'bg-primary/10', textColor: 'text-primary', borderColor: 'border-primary/20' },
+  { bgColor: 'bg-secondary/10', textColor: 'text-secondary', borderColor: 'border-secondary/20' },
+  { bgColor: 'bg-accent/10', textColor: 'text-accent', borderColor: 'border-accent/20' },
+  { bgColor: 'bg-blue-50', textColor: 'text-blue-600', borderColor: 'border-blue-200' },
+  { bgColor: 'bg-emerald-50', textColor: 'text-emerald-600', borderColor: 'border-emerald-200' },
+  { bgColor: 'bg-purple-50', textColor: 'text-purple-600', borderColor: 'border-purple-200' },
+  { bgColor: 'bg-pink-50', textColor: 'text-pink-600', borderColor: 'border-pink-200' },
+  { bgColor: 'bg-red-50', textColor: 'text-red-600', borderColor: 'border-red-200' },
+  { bgColor: 'bg-orange-50', textColor: 'text-orange-600', borderColor: 'border-orange-200' },
+  { bgColor: 'bg-amber-50', textColor: 'text-amber-600', borderColor: 'border-amber-200' },
+  { bgColor: 'bg-cyan-50', textColor: 'text-cyan-600', borderColor: 'border-cyan-200' },
+  { bgColor: 'bg-teal-50', textColor: 'text-teal-600', borderColor: 'border-teal-200' },
+  { bgColor: 'bg-indigo-50', textColor: 'text-indigo-600', borderColor: 'border-indigo-200' },
+  { bgColor: 'bg-violet-50', textColor: 'text-violet-600', borderColor: 'border-violet-200' },
+  { bgColor: 'bg-slate-50', textColor: 'text-slate-600', borderColor: 'border-slate-200' },
+  { bgColor: 'bg-gray-50', textColor: 'text-gray-600', borderColor: 'border-gray-200' }
 ];
 
 /**
@@ -69,13 +69,13 @@ export const stringToColor = (str) => {
  */
 export const getTypeColor = (type) => {
   const typeMap = {
-    'Slider': 'bg-amber-50 text-amber-700 border-amber-200',
-    'Dropdown': 'bg-blue-50 text-blue-700 border-blue-200',
-    'Radio': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Radio Buttons': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Toggle Switch': 'bg-green-50 text-green-700 border-green-200',
-    'Checkbox': 'bg-indigo-50 text-indigo-700 border-indigo-200'
+    'Slider': 'bg-primary/10 text-primary border-primary/20',
+    'Dropdown': 'bg-secondary/10 text-secondary border-secondary/20',
+    'Radio': 'bg-accent/10 text-accent border-accent/20',
+    'Radio Buttons': 'bg-accent/10 text-accent border-accent/20',
+    'Toggle Switch': 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    'Checkbox': 'bg-purple-50 text-purple-600 border-purple-200'
   };
   
-  return typeMap[type] || 'bg-gray-100 text-gray-700 border-gray-200';
+  return typeMap[type] || 'bg-muted text-muted-foreground border-border';
 };

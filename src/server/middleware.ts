@@ -68,7 +68,7 @@ const parameterConfigSchema = z.object({
 export const parameterSchema = z.object({
   name: z.string().min(1, 'Name is required').max(config.get('validation.maxNameLength')),
   description: z.string().max(config.get('validation.maxDescriptionLength')).default(''),
-  type: z.enum(['select', 'text', 'number', 'boolean', 'range']),
+  type: z.enum(['select', 'radio', 'text', 'range', 'boolean']),
   category_id: z.string().min(1, 'Category ID is required'),
   parameter_values: z.union([
     z.array(parameterValueSchema),
@@ -79,11 +79,12 @@ export const parameterSchema = z.object({
   if (data.parameter_values !== undefined && data.parameter_values !== null) {
     switch (data.type) {
       case 'select':
+      case 'radio':
         if (!Array.isArray(data.parameter_values)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['parameter_values'],
-            message: 'Select parameters must have parameter_values as an array'
+            message: `${data.type} parameters must have parameter_values as an array`
           });
         } else if (data.parameter_values.length === 0) {
           // Allow empty arrays - service layer will handle initialization
@@ -105,7 +106,6 @@ export const parameterSchema = z.object({
         break;
         
       case 'text':
-      case 'number':
       case 'range':
         if (data.parameter_values !== null) {
           ctx.addIssue({
@@ -123,7 +123,7 @@ export const parameterSchema = z.object({
 export const parameterUpdateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(config.get('validation.maxNameLength')).optional(),
   description: z.string().max(config.get('validation.maxDescriptionLength')).optional(),
-  type: z.enum(['select', 'text', 'number', 'boolean', 'range']).optional(),
+  type: z.enum(['select', 'radio', 'text', 'range', 'boolean']).optional(),
   category_id: z.string().min(1, 'Category ID is required').optional(), // Allow category_id in updates
   parameter_values: z.any().optional() // Accept any parameter_values during updates - service layer validates compatibility
 });
@@ -157,6 +157,7 @@ export async function validateGenerationParameters(parameters: Record<string, an
       // Type-specific validation
       switch (dbParam.type) {
         case 'select':
+        case 'radio':
           if (dbParam.parameter_values && Array.isArray(dbParam.parameter_values)) {
             const validValues = dbParam.parameter_values.map((v: any) => v.id || v.label);
             if (!validValues.includes(value)) {
@@ -171,11 +172,6 @@ export async function validateGenerationParameters(parameters: Record<string, an
             errors.push(`Parameter '${paramId}' cannot be empty`);
           } else if (value.length > 200) {
             errors.push(`Parameter '${paramId}' cannot exceed 200 characters`);
-          }
-          break;
-        case 'number':
-          if (typeof value !== 'number' || isNaN(value)) {
-            errors.push(`Parameter '${paramId}' must be a valid number`);
           }
           break;
         case 'boolean':

@@ -5,17 +5,16 @@
  */
 export const randomizeParameterValue = (parameter) => {
     switch (parameter.type) {
-        case 'Dropdown':
-        case 'Radio':
-        case 'Radio Buttons':
-            if (parameter.values?.length) {
-                const idx = Math.floor(Math.random() * parameter.values.length);
-                return parameter.values[idx].id;
+        case 'select':
+        case 'radio':
+            if (parameter.parameter_values?.length) {
+                const idx = Math.floor(Math.random() * parameter.parameter_values.length);
+                return parameter.parameter_values[idx].id || parameter.parameter_values[idx].label;
             }
             return null;
 
-        case 'Slider': {
-            const config = parameter.config || {};
+        case 'range': {
+            const config = parameter.parameter_config || {};
             const min = config.min ?? 0;
             const max = config.max ?? 100;
             const step = config.step ?? 1;
@@ -24,23 +23,12 @@ export const randomizeParameterValue = (parameter) => {
             return min + randomSteps * step;
         }
 
-        case 'Toggle Switch':
+        case 'boolean':
             return Math.random() >= 0.5;
 
-        case 'Checkbox': {
-            if (parameter.values?.length) {
-                const result = [];
-                parameter.values.forEach((opt) => {
-                    if (Math.random() >= 0.5) result.push(opt.id);
-                });
-                if (!result.length) {
-                    const idx = Math.floor(Math.random() * parameter.values.length);
-                    result.push(parameter.values[idx].id);
-                }
-                return result;
-            }
-            return [];
-        }
+        case 'text':
+            // For text parameters, we can't really generate random meaningful text
+            return '';
 
         default:
             return null;

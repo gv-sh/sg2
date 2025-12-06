@@ -206,6 +206,7 @@ router.post('/database/import', uploadMiddleware.single('file'), async (req: Req
       }
     });
   } catch (error: any) {
+    console.error('Database import error details:', error);
     next(boom.internal('Database import failed', error));
   }
 });

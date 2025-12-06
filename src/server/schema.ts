@@ -40,11 +40,8 @@ export const TABLES: TablesDefinition = {
       'id TEXT PRIMARY KEY',
       'name TEXT NOT NULL',
       'description TEXT DEFAULT \'\'',
-      'type TEXT NOT NULL CHECK(type IN (\'select\', \'text\', \'number\', \'boolean\', \'range\'))',
+      'type TEXT NOT NULL CHECK(type IN (\'select\', \'radio\', \'text\', \'range\', \'boolean\'))',
       'category_id TEXT NOT NULL',
-      'visibility TEXT DEFAULT \'Basic\' CHECK(visibility IN (\'Basic\', \'Advanced\', \'Hide\'))',
-      'required INTEGER DEFAULT 0',
-      'sort_order INTEGER DEFAULT 0',
       'parameter_values TEXT',
       'parameter_config TEXT',
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP',
@@ -52,9 +49,7 @@ export const TABLES: TablesDefinition = {
     ],
     indexes: [
       'CREATE INDEX idx_parameters_category_id ON parameters(category_id)',
-      'CREATE INDEX idx_parameters_type ON parameters(type)',
-      'CREATE INDEX idx_parameters_sort_order ON parameters(sort_order)',
-      'CREATE INDEX idx_parameters_visibility ON parameters(visibility)'
+      'CREATE INDEX idx_parameters_type ON parameters(type)'
     ]
   },
 
@@ -203,7 +198,7 @@ export function getSchemaInitSQL(ifNotExists = false): string[] {
  */
 export const EXPECTED_FIELDS: ExpectedFields = {
   categories: ['id', 'name', 'description', 'created_at'],
-  parameters: ['id', 'name', 'description', 'type', 'category_id', 'visibility', 'required', 'sort_order', 'parameter_values', 'parameter_config', 'created_at'],
+  parameters: ['id', 'name', 'description', 'type', 'category_id', 'parameter_values', 'parameter_config', 'created_at'],
   generated_content: ['id', 'title', 'fiction_content', 'image_blob', 'image_thumbnail', 'image_format', 'image_size_bytes', 'thumbnail_size_bytes', 'prompt_data', 'metadata', 'created_at'],
   settings: ['key', 'value', 'data_type']
 };

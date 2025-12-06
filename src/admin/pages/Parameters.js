@@ -257,6 +257,7 @@ function Parameters() {
                       // This allows the backend to properly initialize defaults
                       switch (newType) {
                         case 'select':
+                        case 'radio':
                           // Don't send parameter_values - let backend initialize empty array
                           typeSpecificData = {
                             parameter_config: null
@@ -276,7 +277,6 @@ function Parameters() {
                           };
                           break;
                         case 'text':
-                        case 'number':
                         default:
                           // Clear both for simple types
                           typeSpecificData = {
@@ -295,7 +295,7 @@ function Parameters() {
                         };
                         
                         // Remove parameter_values if not compatible with new type
-                        if ((newType === 'select' || newType === 'boolean') && !typeSpecificData.hasOwnProperty('parameter_values')) {
+                        if ((newType === 'select' || newType === 'radio' || newType === 'boolean') && !typeSpecificData.hasOwnProperty('parameter_values')) {
                           delete updatedParameter.parameter_values;
                         }
                         
@@ -315,11 +315,11 @@ function Parameters() {
                     }}
                     required
                   >
-                    <option value="select">Dropdown Selection</option>
+                    <option value="select">Select (Dropdown)</option>
+                    <option value="radio">Radio Buttons</option>
                     <option value="text">Text Input</option>
-                    <option value="number">Number Input</option>
-                    <option value="boolean">True/False Toggle</option>
                     <option value="range">Range Slider</option>
+                    <option value="boolean">True/False Toggle</option>
                   </Select>
                   <p className="text-xs text-muted-foreground">Choose the input type</p>
                 </div>
@@ -371,8 +371,8 @@ function Parameters() {
                 </div>
                 
                 
-                {((editingParameter && ['select'].includes(editingParameter.type)) || 
-                  (!editingParameter && ['select'].includes(newParameter.type))) && (
+                {((editingParameter && ['select', 'radio'].includes(editingParameter.type)) || 
+                  (!editingParameter && ['select', 'radio'].includes(newParameter.type))) && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Values</label>
                     <div className="flex gap-2">

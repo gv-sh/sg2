@@ -163,7 +163,7 @@ class DataService {
           name: param.name,
           description: param.description || '',
           type: param.type === 'Dropdown' ? 'select' : param.type.toLowerCase() as any,
-          category_id: param.categoryId,
+          category_id: param.category_id, // Use new format
           parameter_values: param.values || param.parameter_values
         });
       }
@@ -360,7 +360,8 @@ class DataService {
       // Type is changing or incompatible values - initialize appropriate defaults
       switch (newType) {
         case 'select':
-          // Initialize empty array for select options
+        case 'radio':
+          // Initialize empty array for select/radio options
           parameterValues = JSON.stringify([]);
           break;
         case 'boolean':
@@ -368,7 +369,6 @@ class DataService {
           parameterValues = JSON.stringify({ on: 'Yes', off: 'No' });
           break;
         case 'text':
-        case 'number':
           // Clear parameter_values for simple types
           parameterValues = null;
           break;
@@ -457,6 +457,7 @@ class DataService {
 
     switch (type) {
       case 'select':
+      case 'radio':
         // Should be non-empty array with valid structure
         return Array.isArray(values) && 
                values.length > 0 && 
@@ -470,7 +471,6 @@ class DataService {
                typeof values.off === 'string';
         
       case 'text':
-      case 'number':
       case 'range':
         // These types should not have parameter_values
         return values === null;
@@ -663,7 +663,6 @@ class DataService {
   private parseParameters(parameters: any[]): Parameter[] {
     return parameters.map(param => ({
       ...param,
-      required: Boolean(param.required),
       parameter_values: param.parameter_values ? JSON.parse(param.parameter_values) : null,
       parameter_config: param.parameter_config ? JSON.parse(param.parameter_config) : null,
       created_at: new Date(param.created_at)

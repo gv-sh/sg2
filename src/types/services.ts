@@ -19,7 +19,7 @@ export interface Parameter {
   id: string;
   name: string;
   description: string;
-  type: 'select' | 'text' | 'number' | 'boolean' | 'range';
+  type: 'select' | 'radio' | 'text' | 'boolean' | 'range';
   category_id: string;
   category_name?: string;
   parameter_values: any[] | null;
@@ -52,14 +52,13 @@ export interface CategoryData {
   id?: string;
   name: string;
   description?: string;
-  sort_order?: number;
 }
 
 export interface ParameterData {
   id?: string;
   name: string;
   description?: string;
-  type: 'select' | 'text' | 'number' | 'boolean' | 'range';
+  type: 'select' | 'radio' | 'text' | 'boolean' | 'range';
   category_id: string;
   parameter_values?: any[] | { on: string; off: string };
 }

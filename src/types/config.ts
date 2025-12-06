@@ -53,6 +53,21 @@ export interface AIConfig {
     fiction: string;
     image: string;
   };
+  availableModels: {
+    fiction: Array<{
+      id: string;
+      name: string;
+      description: string;
+    }>;
+    image: Array<{
+      id: string;
+      name: string;
+      description: string;
+      sizes: string[];
+      qualities: string[];
+      endpoint: string;
+    }>;
+  };
   parameters: {
     fiction: {
       temperature: number;

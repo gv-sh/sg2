@@ -79,6 +79,49 @@ const config: Config = {
       fiction: 'gpt-4o-mini',
       image: 'dall-e-3'
     },
+    // Available AI models with their specifications
+    availableModels: {
+      fiction: [
+        { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest and most capable model' },
+        { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and cost-effective' },
+        { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'High performance model' },
+        { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Balanced performance and cost' }
+      ],
+      image: [
+        {
+          id: 'dall-e-3',
+          name: 'DALL-E 3',
+          description: 'High quality DALL-E model',
+          sizes: ['1024x1024', '1024x1792', '1792x1024'],
+          qualities: ['standard', 'hd'],
+          endpoint: 'images/generations'
+        },
+        {
+          id: 'dall-e-2', 
+          name: 'DALL-E 2',
+          description: 'Cost-effective, good quality',
+          sizes: ['256x256', '512x512', '1024x1024'],
+          qualities: ['standard'],
+          endpoint: 'images/generations'
+        },
+        {
+          id: 'gpt-image-1',
+          name: 'GPT-Image-1',
+          description: 'Latest flagship multimodal model (2025)',
+          sizes: ['1024x1024', '1024x1536', '1536x1024'],
+          qualities: ['low', 'medium', 'high'],
+          endpoint: 'images/generations'
+        },
+        {
+          id: 'gpt-image-1-mini',
+          name: 'GPT-Image-1 Mini',
+          description: 'Cost-optimized modern model (80% less expensive)',
+          sizes: ['1024x1024', '1024x1536', '1536x1024'],
+          qualities: ['low', 'medium', 'high'],
+          endpoint: 'images/generations'
+        }
+      ]
+    },
     parameters: {
       fiction: {
         temperature: 0.8,
@@ -223,6 +266,15 @@ export default {
       apiKey: openai.apiKey,
       baseUrl: openai.baseUrl
     };
+  },
+
+  getAvailableModels() {
+    return config.ai.availableModels;
+  },
+
+  getModelSpecs(type: 'fiction' | 'image', modelId: string) {
+    const models = config.ai.availableModels[type];
+    return models.find(model => model.id === modelId);
   },
 
 };

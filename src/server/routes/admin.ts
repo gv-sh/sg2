@@ -7,6 +7,7 @@ import boom from '@hapi/boom';
 import { z } from 'zod';
 
 import { dataService } from '../services.js';
+import config from '../config.js';
 import {
   categorySchema,
   categoryUpdateSchema,
@@ -873,6 +874,49 @@ router.put('/settings', async (req: TypedRequestBody<Record<string, any>>, res: 
     });
   } catch (error: any) {
     next(boom.internal('Failed to update settings', error));
+  }
+});
+
+// ==================== MODEL CONFIGURATION ROUTES ====================
+
+/**
+ * @swagger
+ * /api/admin/models:
+ *   get:
+ *     summary: Get available AI models and their specifications
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Available models retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     fiction:
+ *                       type: array
+ *                     image:
+ *                       type: array
+ */
+router.get('/models', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const availableModels = config.getAvailableModels();
+    
+    res.json({
+      success: true,
+      message: 'Available models retrieved successfully',
+      data: availableModels,
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    next(boom.internal('Failed to retrieve available models', error));
   }
 });
 

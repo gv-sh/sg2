@@ -879,10 +879,58 @@ class AIService {
     return this.generateUnified(parameters, year);
   }
 
+  /**
+   * Load AI configuration from database settings with fallback to static config
+   */
+  private async getAISettingsConfig(type: 'fiction' | 'image') {
+    try {
+      const settings = await dataService.getSettings();
+      const staticConfig = config.getAIConfig(type) as any;
+      
+      console.log('Loading AI settings for:', type);
+      console.log('Database settings:', settings);
+      console.log('Static config:', staticConfig);
+      
+      if (type === 'fiction') {
+        return {
+          model: settings['ai.models.fiction'] || staticConfig.model,
+          parameters: {
+            temperature: settings['ai.parameters.fiction.temperature'] !== undefined 
+              ? Number(settings['ai.parameters.fiction.temperature']) 
+              : staticConfig.parameters.temperature,
+            maxTokens: settings['ai.parameters.fiction.max_tokens'] !== undefined 
+              ? Number(settings['ai.parameters.fiction.max_tokens']) 
+              : staticConfig.parameters.maxTokens,
+            defaultStoryLength: settings['ai.parameters.fiction.default_story_length'] !== undefined 
+              ? Number(settings['ai.parameters.fiction.default_story_length']) 
+              : staticConfig.parameters.defaultStoryLength,
+            systemPrompt: settings['ai.parameters.fiction.system_prompt'] || staticConfig.parameters.systemPrompt
+          },
+          apiKey: staticConfig.apiKey,
+          baseUrl: staticConfig.baseUrl
+        };
+      } else {
+        return {
+          model: settings['ai.models.image'] || staticConfig.model,
+          parameters: {
+            size: settings['ai.parameters.image.size'] || staticConfig.parameters.size,
+            quality: settings['ai.parameters.image.quality'] || staticConfig.parameters.quality,
+            promptSuffix: settings['ai.parameters.image.prompt_suffix'] || staticConfig.parameters.promptSuffix
+          },
+          apiKey: staticConfig.apiKey,
+          baseUrl: staticConfig.baseUrl
+        };
+      }
+    } catch (error) {
+      console.warn('Failed to load settings from database, using static config:', error);
+      return config.getAIConfig(type) as any;
+    }
+  }
+
   async generateUnified(parameters: AIGenerationParameters, year: number | null): Promise<GenerationResult> {
-    // Generate fiction first
-    const fictionConfig = config.getAIConfig('fiction') as any;
-    const fictionPrompt = this.buildFictionPrompt(parameters, year);
+    // Load dynamic settings from database
+    const fictionConfig = await this.getAISettingsConfig('fiction');
+    const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength);
     
     let fictionContent: string;
     let fictionTitle: string; 
@@ -912,13 +960,27 @@ class AIService {
         model: fictionResponse.data.model,
         tokens: fictionResponse.data.usage.total_tokens
       };
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Fiction generation error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers,
+        config: {
+          model: fictionConfig.model,
+          temperature: fictionConfig.parameters.temperature,
+          max_tokens: fictionConfig.parameters.maxTokens,
+          hasApiKey: !!this.apiKey
+        }
+      });
       throw boom.internal('Fiction generation failed', error);
     }
 
     // Generate image based on fiction content
-    const imageConfig = config.getAIConfig('image') as any;
-    const imagePrompt = this.buildImagePrompt(year, fictionContent);
+    const imageConfig = await this.getAISettingsConfig('image');
+    const imagePrompt = this.buildImagePrompt(year, fictionContent, imageConfig.parameters.promptSuffix);
     
     let imageBlob: Buffer | undefined;
     let imageFormat: string | undefined;
@@ -926,15 +988,27 @@ class AIService {
     let imageMetadata: any;
 
     try {
+      // Build request payload based on model capabilities
+      const requestPayload: any = {
+        model: imageConfig.model,
+        prompt: imagePrompt.substring(0, 4000),
+        size: imageConfig.parameters.size,
+        n: 1
+      };
+
+      // Add quality parameter for models that support it
+      if (imageConfig.parameters.quality) {
+        // DALL-E 3 uses 'standard'/'hd', while GPT-Image models use 'low'/'medium'/'high'
+        if (imageConfig.model === 'dall-e-3') {
+          requestPayload.quality = imageConfig.parameters.quality;
+        } else if (imageConfig.model === 'gpt-image-1' || imageConfig.model === 'gpt-image-1-mini') {
+          requestPayload.quality = imageConfig.parameters.quality;
+        }
+      }
+
       const imageResponse: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
         `${this.baseUrl}/images/generations`,
-        {
-          model: imageConfig.model,
-          prompt: imagePrompt.substring(0, 4000),
-          size: imageConfig.parameters.size,
-          quality: imageConfig.parameters.quality,
-          n: 1
-        },
+        requestPayload,
         { headers: { Authorization: `Bearer ${this.apiKey}` } }
       );
 
@@ -970,10 +1044,15 @@ class AIService {
     };
   }
 
-  private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null): string {
+  private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null, wordLimit: number): string {
     let prompt = 'Create a compelling speculative fiction story with the following elements:\n\n';
     
     if (year) prompt += `Setting: Year ${year}\n\n`;
+    
+    // Add word count constraint
+    if (wordLimit && wordLimit > 0) {
+      prompt += `Length: Write approximately ${wordLimit} words (this is important - do not exceed this word count)\n\n`;
+    }
     
     // Handle category-grouped parameters
     Object.entries(parameters).forEach(([categoryName, categoryParams]) => {
@@ -995,7 +1074,13 @@ class AIService {
       }
     });
     
-    prompt += 'Write a story that incorporates these elements naturally. Include a compelling title.';
+    prompt += `Write a story that incorporates these elements naturally. Include a compelling title.`;
+    
+    // Emphasize word limit again at the end
+    if (wordLimit && wordLimit > 0) {
+      prompt += ` Keep the story to approximately ${wordLimit} words - this is a strict requirement.`;
+    }
+    
     return prompt;
   }
 
@@ -1036,8 +1121,7 @@ class AIService {
     return String(value);
   }
 
-  private buildImagePrompt(year: number | null, generatedText: string | null): string {
-    const aiConfig = config.getAIConfig('image') as any;
+  private buildImagePrompt(year: number | null, generatedText: string | null, promptSuffix: string): string {
     let prompt = 'Create a beautiful, detailed image';
     
     if (generatedText) {
@@ -1048,7 +1132,7 @@ class AIService {
     }
     
     if (year) prompt += ` Set in year ${year}.`;
-    prompt += ` ${aiConfig.parameters.promptSuffix}`;
+    prompt += ` ${promptSuffix}`;
     
     return prompt;
   }
@@ -1098,15 +1182,36 @@ class AIService {
   }
 
   private extractTitle(content: string): string {
+    // Look for formal title patterns
     const titleMatch = content.match(/\*\*Title:\s*([^*\n]+)\*\*/);
-    if (titleMatch) return titleMatch[1].trim();
+    if (titleMatch) {
+      return this.cleanTitle(titleMatch[1]);
+    }
     
     const firstLine = content.split('\n')[0];
     if (firstLine.length < 100) {
-      return firstLine.replace(/^\*\*|\*\*$/g, '').trim();
+      return this.cleanTitle(firstLine);
     }
     
     return `Fiction ${new Date().toISOString().slice(0, 10)}`;
+  }
+
+  private cleanTitle(title: string): string {
+    return title
+      // Remove markdown headers
+      .replace(/^#{1,6}\s+/g, '')
+      // Remove bold/italic formatting
+      .replace(/^\*\*|\*\*$/g, '')
+      .replace(/^\*|\*$/g, '')
+      .replace(/^__\b|\b__$/g, '')
+      .replace(/^_\b|\b_$/g, '')
+      // Remove surrounding quotes
+      .replace(/^"(.*)"$/g, '$1')
+      .replace(/^'(.*)'$/g, '$1')
+      .replace(/^"(.*)"$/g, '$1') // Smart quotes
+      .replace(/^'(.*)'$/g, '$1') // Smart quotes
+      // Clean up any remaining whitespace
+      .trim();
   }
 
   private removeTitle(content: string): string {

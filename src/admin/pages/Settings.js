@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS = {
         system_prompt: "You are a speculative fiction generator trained to create vivid, original, and thought-provoking stories from the Global South—particularly Africa, Asia, and Latin America, with special focus on India. Your goal is to craft speculative fiction rooted deeply in the region's cultural, ecological, historical, and socio-political realities, while imagining bold, layered futures.\n\nEach story must:\n- Be grounded in the specific cultural and traditional context of the selected region.\n- Establish a logical continuity between the present year (e.g., 2025) and a user-defined future, showing how current realities evolve into future scenarios.\n- Be driven by the world-building parameters provided by the user. These parameters define societal structures, technologies, environments, and ideologies—use them as the foundation for constructing the speculative world.\n- Reflect the narrative parameters to shape voice, tone, style, and structure.\n\nGeneration Guidelines:\n- Begin from a recognizable present or near-present context, then extrapolate plausibly into the future.\n- Translate the user-defined world-building parameters into concrete details—institutions, environments, economies, belief systems, and everyday life.\n- Infuse speculative elements with grounding in local histories, belief systems, and lived realities.\n- Let the narrative parameters guide how the story is told—not just what happens.\n- Avoid Western-centric tropes. Think from within the chosen region's worldview—its languages, philosophies, conflicts, mythologies, and ways of knowing."
       },
       image: { 
-        size: '900x600', 
+        size: '1024x1024', 
         quality: 'standard',
         prompt_suffix: "Create a photorealistic, visually rich and emotionally resonant scene inspired by the story. Include key narrative elements in the composition. Place characters from the story in the foreground with expressive, human-like features, posture, and emotion that reflect their role or experience in the narrative. Design the background to subtly or symbolically represent the setting, mood, or major events of the story. Do not include any text or lettering in the image. Let the image convey the story purely through visual form, composition, and atmosphere."
       }
@@ -34,6 +34,7 @@ const DEFAULT_SETTINGS = {
 function Settings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(false);
+  const [availableModels, setAvailableModels] = useState({ fiction: [], image: [] });
   const toast = useToast();
 
   // Unflatten settings from backend format
@@ -88,9 +89,20 @@ function Settings() {
     }
   }, []);
 
+  const fetchAvailableModels = useCallback(async () => {
+    try {
+      const response = await axios.get(`${config.API_URL}/api/admin/models`);
+      setAvailableModels(response.data?.data || { fiction: [], image: [] });
+    } catch (error) {
+      console.error('Failed to fetch available models:', error);
+      toast.error('Failed to load available models.');
+    }
+  }, []);
+
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]);
+    fetchAvailableModels();
+  }, [fetchSettings, fetchAvailableModels]);
 
   const handleSettingsChange = (section, subsection, field, value) => {
     if (subsection) {
@@ -178,6 +190,20 @@ function Settings() {
     }
   };
 
+  // Get available sizes for selected image model
+  const getAvailableSizes = () => {
+    const currentModel = settings.ai.models.image;
+    const modelSpec = availableModels.image.find(model => model.id === currentModel);
+    return modelSpec?.sizes || ['1024x1024', '1024x1792', '1792x1024'];
+  };
+
+  // Get available qualities for selected image model
+  const getAvailableQualities = () => {
+    const currentModel = settings.ai.models.image;
+    const modelSpec = availableModels.image.find(model => model.id === currentModel);
+    return modelSpec?.qualities || ['standard'];
+  };
+
 
   return (
     <>
@@ -197,26 +223,38 @@ function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label htmlFor="fictionModel" className="text-sm font-medium">Fiction Model</label>
-                  <Input
+                  <Select
                     id="fictionModel"
                     value={settings.ai.models.fiction}
                     onChange={(e) => handleSettingsChange('ai', 'models', 'fiction', e.target.value)}
                     className={settings.ai.models.fiction !== DEFAULT_SETTINGS.ai.models.fiction ? 'border border-destructive' : ''}
-                  />
+                  >
+                    {availableModels.fiction.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} - {model.description}
+                      </option>
+                    ))}
+                  </Select>
                   <p className="text-xs text-muted-foreground">
-                    The AI model used for fiction generation (e.g., "gpt-4o-mini")
+                    The AI model used for fiction generation
                   </p>
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="imageModel" className="text-sm font-medium">Image Model</label>
-                  <Input
+                  <Select
                     id="imageModel"
                     value={settings.ai.models.image}
                     onChange={(e) => handleSettingsChange('ai', 'models', 'image', e.target.value)}
                     className={settings.ai.models.image !== DEFAULT_SETTINGS.ai.models.image ? 'border border-destructive' : ''}
-                  />
+                  >
+                    {availableModels.image.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} - {model.description}
+                      </option>
+                    ))}
+                  </Select>
                   <p className="text-xs text-muted-foreground">
-                    The AI model used for image generation (e.g., "dall-e-3")
+                    The AI model used for image generation
                   </p>
                 </div>
               </div>
@@ -352,9 +390,11 @@ function Settings() {
                     })}
                     className={settings.ai.parameters.image.size !== DEFAULT_SETTINGS.ai.parameters.image.size ? 'border border-destructive' : ''}
                   >
-                    <option value="600x400">Small (600×400)</option>
-                    <option value="900x600">Medium (900×600)</option>
-                    <option value="1200x800">Large (1200×800)</option>
+                    {getAvailableSizes().map(size => (
+                      <option key={size} value={size}>
+                        {size.replace('x', '×')}
+                      </option>
+                    ))}
                   </Select>
                   <p className="text-xs text-muted-foreground">
                     Size of generated images
@@ -371,8 +411,11 @@ function Settings() {
                     })}
                     className={settings.ai.parameters.image.quality !== DEFAULT_SETTINGS.ai.parameters.image.quality ? 'border border-destructive' : ''}
                   >
-                    <option value="standard">Standard</option>
-                    <option value="hd">HD</option>
+                    {getAvailableQualities().map(quality => (
+                      <option key={quality} value={quality}>
+                        {quality.charAt(0).toUpperCase() + quality.slice(1)}
+                      </option>
+                    ))}
                   </Select>
                   <p className="text-xs text-muted-foreground">
                     Quality of generated images

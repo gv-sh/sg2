@@ -238,6 +238,17 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       }
     });
   } catch (error: any) {
+    // Enhanced error logging for debugging
+    console.error('Content generation error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause,
+      response: error.response?.data,
+      status: error.response?.status,
+      headers: error.response?.headers
+    });
+    
     if (error.name === 'ZodError') {
       return next(boom.badRequest('Validation failed', error.errors));
     }

@@ -245,15 +245,6 @@ export class ProductionImageGenerator {
       z-index: 1;
     }
 
-    /* Animation for smoother rendering */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .carousel-card {
-      animation: fadeIn 0.3s ease-out forwards;
-    }
 
     /* High-DPI optimizations */
     @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {

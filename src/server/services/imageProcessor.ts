@@ -101,7 +101,7 @@ export class ImageProcessorService {
 
   private generateCardStyles(theme: ThemeColors): string {
     return `
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       * {
         box-sizing: border-box;
@@ -145,8 +145,8 @@ export class ImageProcessorService {
         font-weight: 600;
         color: ${theme.primary};
         margin-top: 30px;
-        font-family: 'JetBrains Mono', monospace;
-        letter-spacing: 0.05em;
+        font-family: 'Inter', sans-serif;
+        letter-spacing: 0.02em;
       }
       
       .title-card .divider {
@@ -231,14 +231,6 @@ export class ImageProcessorService {
         letter-spacing: 0.02em;
       }
       
-      .fade-in {
-        animation: fadeIn 0.5s ease-in-out;
-      }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
     </style>
   `;
   }
@@ -287,7 +279,7 @@ export class ImageProcessorService {
   private createTitleSlide(title: string, year: number | null, theme: ThemeColors): CarouselSlide {
     const html = `
       ${this.generateCardStyles(theme)}
-      <div class="carousel-card title-card fade-in">
+      <div class="carousel-card title-card">
         <h1>${this.escapeHtml(title)}</h1>
         <div class="divider"></div>
         ${year ? `<div class="year">Year ${year}</div>` : ''}
@@ -339,7 +331,7 @@ export class ImageProcessorService {
 
       const html = `
         ${this.generateCardStyles(theme)}
-        <div class="carousel-card content-card fade-in">
+        <div class="carousel-card content-card">
           <div class="content">
             ${contentHtml}
           </div>
@@ -426,7 +418,7 @@ export class ImageProcessorService {
   private createBrandingSlide(theme: ThemeColors): CarouselSlide {
     const html = `
       ${this.generateCardStyles(theme)}
-      <div class="carousel-card branding-card fade-in">
+      <div class="carousel-card branding-card">
         <h1>Created with</h1>
         <h2>Futures of Hope</h2>
         <p class="subtitle">AI-Powered Speculative Fiction</p>
@@ -440,21 +432,6 @@ export class ImageProcessorService {
     };
   }
 
-  /**
-   * Get the total number of slides that will be generated for a story
-   */
-  calculateSlideCount(story: ContentApiData): number {
-    const hasOriginalImage = !!story.image_original_url;
-    const paragraphs = (story.content || '')
-      .split('\n\n')
-      .filter(p => p.trim())
-      .filter(p => !p.includes('**Title:'));
-    
-    const contentSlides = Math.ceil(paragraphs.length / 2); // 2 paragraphs per slide
-    
-    // Original image (if exists) + title slide + content slides + branding slide
-    return (hasOriginalImage ? 1 : 0) + 1 + contentSlides + 1;
-  }
 
   /**
    * Get Instagram-optimized caption with content analysis

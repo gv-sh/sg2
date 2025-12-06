@@ -1,36 +1,41 @@
 {
   "categories": [
     {
-      "name": "Story Settings",
-      "description": "Basic story parameters that define the type and length of the narrative"
+      "name": "Narrative Style",
+      "description": "Narrative Style defines how your story is told. Is it linear or fragmented, personal or omniscient, poetic or analytical? Choose the voice, structure, and tone that shape how your future world is experienced—through characters, events, or atmosphere. The way the story unfolds is as important as the world itself."
     },
     {
-      "name": "Character & Setting",
-      "description": "Character types and world settings for the story"
+      "name": "Politics",
+      "description": "Politics is about how people make decisions and lead their communities. Explore who makes the rules, how problems are solved, and what kind of leaders or systems your future world might have. Will people vote, share power, or be controlled by machines? What does fairness look like in your world?"
     },
     {
-      "name": "Theme & Mood",
-      "description": "Emotional tone and thematic elements"
+      "name": "Economics",
+      "description": "Economics is about how your world handles resources, work, and value. Choose from different systems—capitalist, socialist, post-scarcity—and shape how wealth is shared, who owns what, and how people live. Explore labor, currency, and innovation to decide what drives your future economy and who it truly serves."
     },
     {
-      "name": "World Building",
-      "description": "Technical and environmental aspects of the story world"
+      "name": "Society",
+      "description": "Society explores the values, relationships, and systems that shape everyday life in your future world. From social classes and gender roles to education, healthcare, and morality, each parameter reveals how people live, connect, and find meaning. Will your society be structured or fluid, nurturing or oppressive? Define how communities function, what they value, and how they respond to change, care, and difference."
     },
     {
-      "name": "Science Fiction",
-      "description": "Stories set in the future with advanced technology"
+      "name": "Technology",
+      "description": "Technology explores how your future world uses, regulates, and relates to innovation. From energy and communication to AI, cybernetics, and genetic editing, this category examines how deeply technology is integrated into life. Will your society embrace post-scarcity abundance, explore space, or manipulate time itself? Decide how fast technology advances, who benefits from it, and what ethical lines are crossed—or erased—in your imagined future."
     },
     {
-      "name": "Fantasy",
-      "description": "Stories with magic and mythical creatures"
+      "name": "Environment",
+      "description": "Environment explores the natural systems that shape life in your future world. From temperature and atmosphere to biodiversity, disasters, and urbanization, this category lets you define how the planet looks, feels, and responds. Will it be fertile or barren, harmonious or unstable? Choose how air, water, light, and living systems evolve—whether healed, transformed, or pushed to the edge."
+    },
+    {
+      "name": "Legal",
+      "description": "Legal defines how order, justice, and rights function in your world. Explore the sources of law, systems of punishment, freedoms, and enforcement. Will your society prioritize fairness, control, or survival? From genetic regulations to AI governance, transparency to corruption—decide how laws are made, upheld, and challenged in your future."
     }
   ],
   "parameters": [
     {
+      "id": "politics-centralization",
       "name": "Centralization",
       "description": "Centralization is about where power lives. In some futures, one group or leader makes all the decisions. In others, power is shared across many places and people. Explore how your world is organized—does it have a strong center, or do communities decide for themselves? Who controls what, and why?",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_values": [
         {
           "id": "ca01-pol-01-val01",
@@ -58,7 +63,7 @@
       "name": "Legitimacy Source",
       "description": "Legitimacy Source is about why people accept someone as a leader or believe a system is fair. Is it because of tradition, religion, elections, or technology? Explore what gives power its meaning in your future world. Who do people trust—and what makes that trust strong or weak?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -67,9 +72,9 @@
     },
     {
       "name": "Power Distribution",
-      "description": "Legitimacy Source explores where people believe authority comes from. Is power trusted because it’s unified and strong at the center, or because it’s shared and rooted in local voices?",
+      "description": "Legitimacy Source explores where people believe authority comes from. Is power trusted because it's unified and strong at the center, or because it's shared and rooted in local voices?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -80,7 +85,7 @@
       "name": "Economic Ideology",
       "description": "Economic Ideology is about the system your world uses to manage money, work, and resources. Will it follow capitalism, where markets lead? Socialism, where resources are shared? A mixed system with elements of both? Or a post-scarcity future where no one needs to compete? Choose how your future economy works.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_values": [
         {
           "id": "ca01-pol-04-val01",
@@ -104,7 +109,7 @@
       "name": "Social Values",
       "description": "Social Values reflect what a society believes is important. Are your future communities rooted in long-held traditions, or do they embrace new, progressive ideas? ",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -113,9 +118,9 @@
     },
     {
       "name": "Authority",
-      "description": "Authority is about how much control leaders or systems have over people’s lives. Does your future world prioritize strict rules and order, or personal freedom and choice? Use the scale to explore how power is used—through control, trust, or something in between.",
+      "description": "Authority is about how much control leaders or systems have over people's lives. Does your future world prioritize strict rules and order, or personal freedom and choice? Use the scale to explore how power is used—through control, trust, or something in between.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -126,7 +131,7 @@
       "name": "Civil Liberties",
       "description": "Civil Liberties are the freedoms people have in everyday life. Does your future society allow open expression and movement, or tightly control behavior and speech? Use the scale to explore a world where rights are fully protected—or severely limited.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -137,7 +142,7 @@
       "name": "Diplomatic Stance",
       "description": "Diplomatic Stance shows how your society relates to others. Is it open and cooperative, or defensive and hostile? Use the scale to decide if your future world builds alliances, seeks peace, or chooses isolation and conflict. How does your society handle difference, negotiation, and global connection?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -148,7 +153,7 @@
       "name": "Civic Engagement",
       "description": "Civic Engagement reflects how actively people participate in shaping their society. Are they disengaged and apathetic, moderately involved, actively organizing, or pushing for radical change? Choose from apathetic, moderate, activist, or revolutionary to define how the people in your future world engage with politics and power.",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "politics",
       "parameter_values": [
         {
           "id": "ca01-pol-10-val01",
@@ -172,7 +177,7 @@
       "name": "Resource Availability",
       "description": "Resource Availability defines how much your world has to work with. Are resources extremely scarce, just enough, or overflowing? Choose from scarcity to abundance to imagine how people live—do they compete for survival, manage carefully, or enjoy endless supply? How does resource access shape daily life in your future?",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-01-val01",
@@ -198,9 +203,9 @@
     },
     {
       "name": "Resource Renewability",
-      "description": "Resource Renewability defines how your world’s resources behave over time. Are they limited and depleting, slowly replenished, naturally renewable, or self-sustaining? Choose how your future manages energy, materials, and ecosystems—does it rely on extraction, careful balance, or advanced systems that regenerate resources endlessly?",
+      "description": "Resource Renewability defines how your world's resources behave over time. Are they limited and depleting, slowly replenished, naturally renewable, or self-sustaining? Choose how your future manages energy, materials, and ecosystems—does it rely on extraction, careful balance, or advanced systems that regenerate resources endlessly?",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-02-val01",
@@ -224,7 +229,7 @@
       "name": "Resource Accesibility",
       "description": "Resource Accessibility determines who can use the resources in your world. Are they open to all, regulated fairly, restricted to a few, or controlled by powerful monopolies? Decide how access shapes equity, power, and survival in your future society.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-03-val01",
@@ -248,7 +253,7 @@
       "name": "Ownership Models",
       "description": "Ownership Models define who controls land, resources, and production in your world. Is property privately held, shared cooperatively, managed by the state, or owned communally? Choose the model that shapes power, responsibility, and access in your future economy.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-05-val01",
@@ -272,7 +277,7 @@
       "name": "Innovation Rate",
       "description": "Innovation Rate shows how quickly new ideas, tools, and technologies emerge in your world. Is progress stagnant, steady, or accelerating rapidly? Choose the pace of change—does your future evolve slowly, or leap forward with exponential breakthroughs?",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-06-val01",
@@ -300,7 +305,7 @@
       "name": "Market Structure",
       "description": "Market Structure explores how trade and economic activity are organized. Is your future economy decentralized, with many small players, or centralized under powerful institutions or platforms? Use the scale to decide who sets the rules, who benefits, and how goods and services move in your imagined world.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -311,7 +316,7 @@
       "name": "Infrastructure",
       "description": "Infrastructure defines the physical and digital backbone of your world. Is it underdeveloped, improving, fully advanced, or hyper-connected with seamless global systems? Choose how transportation, communication, and energy networks shape daily life, opportunity, and access in your future society.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-08-val01",
@@ -335,7 +340,7 @@
       "name": "Equity",
       "description": "Equity measures how fairly resources, opportunities, and wealth are shared in your world. Is your society just and inclusive, or marked by deep inequality? Use the scale to decide whether your future supports fairness—or reinforces imbalance. Who thrives, who struggles, and why?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -346,7 +351,7 @@
       "name": "Trade Openness",
       "description": "Trade Openness defines how your world connects with others through exchange. Is it isolated, protective of local goods, open to free trade, or fully globalized? Choose how borders, goods, and relationships shape your future economy.",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-10-val01",
@@ -370,7 +375,7 @@
       "name": "Currency Type",
       "description": "Currency Type determines how value is exchanged in your world. Is it based on gold or resources, government-issued money, digital crypto, or simple bartering? Choose the system that powers trade and defines worth in your future economy.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-11-val01",
@@ -398,7 +403,7 @@
       "name": "Monetory Control",
       "description": "Monetary Control explores who manages money in your future world. Is it tightly controlled by central banks, or distributed across decentralized systems like crypto? Use the scale to shape how financial power is held and exercised.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -409,7 +414,7 @@
       "name": "Economic Ideology",
       "description": "Economic Ideology defines the core beliefs behind how your world runs its economy. Is it driven by markets, collective ownership, strict hierarchy, or total freedom from structure? Choose from capitalism, socialism, communism, feudalism, or anarchism to shape how work, wealth, and power are organized in your future society.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_values": [
         {
           "id": "ca02-eco-13-val01",
@@ -435,9 +440,9 @@
     },
     {
       "name": "Regulations",
-      "description": "Regulations define how much control your world’s economy is under. Is it laissez-faire with minimal rules, or tightly managed by authorities? Use the scale to explore how laws, oversight, and intervention shape economic activity, fairness, and freedom in your imagined future.",
+      "description": "Regulations define how much control your world's economy is under. Is it laissez-faire with minimal rules, or tightly managed by authorities? Use the scale to explore how laws, oversight, and intervention shape economic activity, fairness, and freedom in your imagined future.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "economics",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -448,7 +453,7 @@
       "name": "Environmental Policy",
       "description": "Environmental Policy reflects how your world treats nature. Is it exploitative, focused on extraction and profit, or restorative, aiming to heal and sustain ecosystems? Use the scale to decide whether your future depletes the Earth—or protects and regenerates it.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -459,7 +464,7 @@
       "name": "Social Hierarchy",
       "description": "Social Hierarchy defines how status and power are structured in your world. Choose from egalitarian to caste-based, tribal to tech-driven systems—what determines a person’s place, and how fixed or flexible is it?",
       "type": "select",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-01-val01",
@@ -507,7 +512,7 @@
       "name": "Social Classes",
       "description": "Social Classes measure how divided your society is. Use the scale to decide if your world has little class difference—or sharp, deep divisions that shape every aspect of life.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -518,7 +523,7 @@
       "name": "Community Bonds",
       "description": "Community Bonds describe how people relate to each other in your world. Are they independent, part of tight-knit clans, collective communities, or corporate structures? Choose the kind of social ties that hold your future society together.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-03-val01",
@@ -544,9 +549,9 @@
     },
     {
       "name": "Cultural Norms",
-      "description": "Cultural Norms shape everyday behavior, beliefs, and traditions. Use the scale to decide if your society holds onto conservative values or embraces radical change and experimentation. What’s normal—and what’s challenged—in your imagined world?",
+      "description": "Cultural Norms shape everyday behavior, beliefs, and traditions. Use the scale to decide if your society holds onto conservative values or embraces radical change and experimentation. What's normal—and what's challenged—in your imagined world?",
       "type": "range",
-      "category_name": "Theme & Mood",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -557,7 +562,7 @@
       "name": "Gender Roles",
       "description": "Gender Roles define how your society understands and expects people to behave based on gender. Use the scale to explore a world where roles are completely flexible—or strictly enforced by tradition, law, or culture.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -568,7 +573,7 @@
       "name": "Family Unit",
       "description": "Family Unit explores how people form households and raise the next generation. Is your society built around nuclear families, extended kin, polyamorous bonds, communal living, or solitary life? Choose the structure that shapes relationships in your future world.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-06-val01",
@@ -596,7 +601,7 @@
       "name": "Education Access",
       "description": "Education Access determines who gets to learn in your future world. Use the scale to explore a society where education is a privilege for a few—or a right for all.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -607,7 +612,7 @@
       "name": "Educational Content",
       "description": "Educational Content explores what kind of knowledge is taught. Is your society focused on control and indoctrination, or on critical thinking and enlightenment? Use the scale to shape how minds are formed in your future world.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -618,7 +623,7 @@
       "name": "Knowledge Storage",
       "description": "Knowledge Storage defines how your society preserves and passes on information. Is it stored through oral tradition, written texts, digital systems, holograms, or even encoded in DNA? Choose how memory and knowledge endure in your future world.",
       "type": "select",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-09-val01",
@@ -646,7 +651,7 @@
       "name": "Innovation",
       "description": "Innovation reflects how your society views new ideas and change. Is innovation feared and forbidden, carefully controlled, actively supported, celebrated like a religion—or so powerful it's disruptive? Choose how your world handles progress.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-10-val01",
@@ -674,7 +679,7 @@
       "name": "Aspirations",
       "description": "Aspirations reveal what drives people in your world. Are their goals grounded in practicality and survival, or guided by dreams, values, and big ideas? Use the scale to shape what your society hopes for.",
       "type": "range",
-      "category_name": "Theme & Mood",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -685,7 +690,7 @@
       "name": "Rebellion",
       "description": "Rebellion explores how people respond to injustice or control. Is resistance expressed through peaceful protest, or through radical, revolutionary action? Use the scale to define how change is demanded in your future world.",
       "type": "range",
-      "category_name": "Theme & Mood",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -696,7 +701,7 @@
       "name": "Work-Life Balance",
       "description": "Work-Life Balance defines how your society organizes time between labor and living. Is life dominated by work, carefully balanced, centered on leisure, fluid and self-directed—or does the concept not exist at all? Choose how people live and work in your future world.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-13-val01",
@@ -724,7 +729,7 @@
       "name": "Healthcare Access",
       "description": "Healthcare Access determines who receives care and how. Is it a universal right, a private service, based on caste, charity, or limited by rationing? Choose how health and well-being are valued in your future society.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-14-val01",
@@ -752,7 +757,7 @@
       "name": "Life Expectancy",
       "description": "Life Expectancy defines the typical lifespan in your future society. Is life brief, naturally long, scientifically extended, or has death been eliminated altogether? Choose how time shapes identity, ambition, and meaning in your world.",
       "type": "select",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-15-val01",
@@ -780,7 +785,7 @@
       "name": "Mental Health",
       "description": "Mental Health explores how your society understands and supports emotional well-being. Is it hidden and stigmatized, or openly embraced and cared for? Use the scale to shape how mental health is treated in your future world.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -791,7 +796,7 @@
       "name": "Censorship",
       "description": "Censorship defines how much information people can access or share. Is your society open and free, or tightly controlled and monitored? Use the scale to decide how truth, expression, and knowledge flow in your future world.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -802,7 +807,7 @@
       "name": "Public Spaces",
       "description": "Public Spaces shape how people gather, interact, and belong. Are they tightly controlled, freely open, owned by corporations, shared communally, or entirely virtual? Choose the spaces that define daily life and connection in your future world.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-18-val01",
@@ -828,9 +833,9 @@
     },
     {
       "name": "Moral Basis",
-      "description": "Moral Basis explores where your society’s sense of right and wrong comes from. Is it based on fixed, universal truths—or shaped by personal, cultural, or situational perspectives? Use the scale to define how ethics are understood in your future world.",
+      "description": "Moral Basis explores where your society's sense of right and wrong comes from. Is it based on fixed, universal truths—or shaped by personal, cultural, or situational perspectives? Use the scale to define how ethics are understood in your future world.",
       "type": "range",
-      "category_name": "Theme & Mood",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -841,7 +846,7 @@
       "name": "Altruism",
       "description": "Altruism reflects how people treat one another in your world. Are actions driven by self-interest, or by care and generosity? Use the scale to explore whether your society values personal gain or collective well-being.",
       "type": "range",
-      "category_name": "Theme & Mood",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -852,7 +857,7 @@
       "name": "Reigious Tolerance",
       "description": "Religious Tolerance shows how your society handles different beliefs. Is it hostile toward other faiths, or open and inclusive? Use the scale to decide whether religion divides or unites people in your future world.",
       "type": "range",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -863,7 +868,7 @@
       "name": "Religion's Role",
       "description": "Religion's Role defines how much influence faith has in your society. Is it separate from daily life, quietly present, guiding culture, deeply embedded in governance, or completely controlling? Choose how belief shapes power, identity, and everyday experience in your future world.",
       "type": "radio",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-22-val01",
@@ -891,7 +896,7 @@
       "name": "Divine Focus",
       "description": "Divine Focus explores what your society believes about the divine. Is it atheistic with no gods, animistic with spirits in nature, polytheistic with many gods, monotheistic with one, or pantheistic where everything is divine? Choose the worldview that shapes faith and meaning in your imagined future.",
       "type": "select",
-      "category_name": "Character & Setting",
+      "category_id": "society",
       "parameter_values": [
         {
           "id": "ca03-soc-23-val01",
@@ -919,7 +924,7 @@
       "name": "Technology Adoption",
       "description": "Technology Adoption defines the level of technological development in your world. Is it rooted in pre-industrial tools, driven by digital systems, or operating beyond scarcity through quantum or post-singularity breakthroughs? Choose the stage that shapes daily life, progress, and power in your future society.",
       "type": "select",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-01-val01",
@@ -955,7 +960,7 @@
       "name": "Energy Sources",
       "description": "Energy Sources determine how your world is powered. Are you relying on fossil fuels, harnessing the sun, splitting atoms, or tapping into advanced sources like fusion or zero-point energy? Choose the technologies that fuel your society—and shape its impact on the planet and beyond.",
       "type": "radio",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-02-val01",
@@ -991,7 +996,7 @@
       "name": "AI Integration",
       "description": "AI Integration explores how artificial intelligence functions in your world. Is there no AI, or is it narrow and task-based, fully autonomous, or beyond human comprehension? Choose the level—from assistive tools to sentient, superintelligent, or even godlike entities—and define how AI shapes life, labor, and decision-making in your future society.",
       "type": "select",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-03-val01",
@@ -1031,7 +1036,7 @@
       "name": "Cybernetic Mods",
       "description": "Cybernetic Mods explore how humans integrate with machines. From no enhancements to wearables, implants, neural links, or full cyborg bodies—choose how technology reshapes the body, identity, and daily life in your future world.",
       "type": "radio",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-04-val01",
@@ -1059,7 +1064,7 @@
       "name": "Genetic Editing",
       "description": "Genetic Editing defines how your society alters life at the genetic level. Is it banned, used for healing, enhancing traits, creating new species, reviving extinct ones, or unlocking post-human evolution? Choose how far life is rewritten.",
       "type": "radio",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-05-val01",
@@ -1091,7 +1096,7 @@
       "name": "Communication",
       "description": "Communication explores how people connect and share information. Is it through spoken word, writing, digital devices, direct neural links, or instant quantum networks? Choose the method that defines interaction, connection, and understanding in your future world.",
       "type": "select",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-06-val01",
@@ -1119,7 +1124,7 @@
       "name": "AI Rights",
       "description": "AI Rights define how artificial intelligences are treated in your world. Are they tools with no rights, granted limited protections, full citizenship, or even sovereign status? Choose how your society recognizes (or denies) AI autonomy and personhood.",
       "type": "radio",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-07-val01",
@@ -1143,7 +1148,7 @@
       "name": "Data Privacy",
       "description": "Data Privacy explores how personal information is handled in your world. Is there no privacy, corporate surveillance, government regulation, voluntary sharing, full protection, or decentralized control? Choose how much people know—and how much is known about them.",
       "type": "select",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-08-val01",
@@ -1175,7 +1180,7 @@
       "name": "Space Colonization",
       "description": "Space Colonization defines how far your society has expanded beyond Earth. Are there no off-world settlements, or thriving colonies in orbit, on the Moon, Mars, or across the galaxy? Choose how your world reaches—and reshapes—the cosmos.",
       "type": "radio",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-09-val01",
@@ -1203,7 +1208,7 @@
       "name": "Time Manipulation",
       "description": "Time Manipulation explores how your society interacts with time. Is it untouched, predicted through data, slowed or sped up, traveled across, or even erased? Choose how time is perceived, controlled, or rewritten in your future world.",
       "type": "radio",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_values": [
         {
           "id": "ca04-tec-10-val01",
@@ -1235,7 +1240,7 @@
       "name": "Transportation",
       "description": "Transportation defines how people and goods move in your world. Is travel slow and limited, or instant across vast distances? Use the scale to shape how mobility transforms space, time, and connection in your future society.",
       "type": "range",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1246,7 +1251,7 @@
       "name": "Post-Scarcity",
       "description": "Post-Scarcity measures how technology meets human needs. Is your society focused on basic survival, or does it enjoy effortless abundance through advanced systems? Use the scale to define whether technology liberates people—or still leaves them struggling.",
       "type": "range",
-      "category_name": "Science Fiction",
+      "category_id": "technology",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1257,7 +1262,7 @@
       "name": "Voting Rights",
       "description": "Voting Rights determine who gets to participate in making decisions. In your future world, are voting rights restricted to a few, open to everyone, or even required by law? Choose between restricted, limited, universal, or compulsory voting—and explore how access to power shapes fairness, inclusion, and representation in your society.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "restricted",
@@ -1281,7 +1286,7 @@
       "name": "Labor Organisation",
       "description": "Labor Organization explores how work is structured in your future world. Is labor done by individuals and communities, or fully automated by machines and AI? Use the scale to imagine economies powered by human effort, intelligent systems, or a mix of both. Who—or what—does the work in your society?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1292,7 +1297,7 @@
       "name": "Temperature Range",
       "description": "Temperature Range defines how consistent or extreme your world’s climate is. Use the scale to imagine a stable, liveable environment—or one marked by wild, unpredictable shifts that challenge survival and adaptation.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1303,7 +1308,7 @@
       "name": "Atmosphere",
       "description": "Atmosphere defines your world’s air—breathable, thin, toxic, or dense. Choose how it supports or threatens life.\n",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_values": [
         {
           "id": "breathable",
@@ -1327,7 +1332,7 @@
       "name": "Biodiversity",
       "description": "Biodiversity measures the variety of life in your world. Is it low, rich with species, or transformed into something post-natural and unfamiliar?\n",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_values": [
         {
           "id": "low",
@@ -1355,7 +1360,7 @@
       "name": "Flora",
       "description": "Flora explores how much plant life exists in your world. Use the scale to define a landscape that’s sparse—or lush and overflowing.\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1366,7 +1371,7 @@
       "name": "Fauna",
       "description": "Fauna defines the nature of animal life in your world. Use the scale to explore a spectrum from tame and domesticated to wild and predatory.\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1377,7 +1382,7 @@
       "name": "Symbiosis",
       "description": "Symbiosis explores how species relate to each other. Is life mostly independent, or deeply interdependent and cooperative across plants, animals, humans, and ecosystems?\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1388,7 +1393,7 @@
       "name": "Disaster Types",
       "description": "Disaster Types define the kinds of natural forces your world faces. Choose from earthquakes, tsunamis, hurricanes, or floods—each shaping how societies prepare, adapt, or collapse.\n",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_values": [
         {
           "id": "earthquakes",
@@ -1412,7 +1417,7 @@
       "name": "Disaster Frequency",
       "description": "Disaster Frequency shows how often catastrophic events occur in your world. Are they rare, constant, or endlessly repeating in a strange timeloop? Choose your planet’s rhythm of disruption.\n",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_values": [
         {
           "id": "rare",
@@ -1440,7 +1445,7 @@
       "name": "Disaster Severity",
       "description": "Disaster Severity defines how intense natural events are in your world. Are they mild and manageable—or cataclysmic forces that reshape entire landscapes and societies?\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1451,7 +1456,7 @@
       "name": "Urbanisation",
       "description": "Urbanisation explores how human settlements evolve. Are cities growing organically within nature, or built as fully artificial environments? Use the scale to shape your world’s living spaces.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1462,7 +1467,7 @@
       "name": "Deforestation",
       "description": "Deforestation measures how your world treats its forests. Are they heavily exploited and cleared, or protected and actively restored? Use the scale to shape your planet’s ecological balance.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1473,7 +1478,7 @@
       "name": "Air Purity",
       "description": "Air Purity defines the quality of the air people breathe. Is it clean and refreshing, or polluted and suffocating? Use the scale to shape your world’s breathability.\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1484,7 +1489,7 @@
       "name": "Water Clarity",
       "description": "Water Clarity explores how clean and visible your world’s water is. Is it crystal-clear and life-sustaining, or dark, polluted, and impenetrable? Use the scale to decide.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1495,7 +1500,7 @@
       "name": "Soil Fertility",
       "description": "Soil Fertility determines how well the land supports life. Is it barren and infertile, or rich and overabundant? Use the scale to shape your world’s ability to grow and sustain.\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1506,7 +1511,7 @@
       "name": "Light Quality",
       "description": "Light Quality defines the atmosphere of your world through illumination. Is it harsh and blinding, soft and balanced, or dim and murky? Use the scale to shape visibility, mood, and growth.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1515,9 +1520,9 @@
     },
     {
       "name": "Source of Law",
-      "description": "Source of Law defines where your world’s rules come from—sacred beliefs, traditions, governments, past rulings, corporations, or AI. Who writes the laws, and why?\n",
+      "description": "Source of Law defines where your world's rules come from—sacred beliefs, traditions, governments, past rulings, corporations, or AI. Who writes the laws, and why?\n",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "divine",
@@ -1547,9 +1552,9 @@
     },
     {
       "name": "Legal Philosophy",
-      "description": "Legal Philosophy defines the guiding principles behind justice in your world. Is it about stability, punishment, healing, efficiency, freedom—or strict control? Choose how laws reflect your society’s values.",
+      "description": "Legal Philosophy defines the guiding principles behind justice in your world. Is it about stability, punishment, healing, efficiency, freedom—or strict control? Choose how laws reflect your society's values.",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "stable",
@@ -1581,7 +1586,7 @@
       "name": "Transparency",
       "description": "Transparency explores how visible and understandable your legal system is. Is it opaque and hidden, or fully open—even omniscient—where nothing is private or unknown?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1592,7 +1597,7 @@
       "name": "Moral Basis",
       "description": "Moral Basis defines what guides your legal system’s sense of right and wrong. Is it rooted in rigid beliefs, or shaped by practical needs and outcomes?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1603,7 +1608,7 @@
       "name": "Penalties",
       "description": "Penalties describe how your society punishes wrongdoing. Are people fined, physically punished, imprisoned, exiled, rehabilitated—or subjected to extreme measures like mind-wiping or genetic reprogramming? Choose how justice is enforced.",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "fines",
@@ -1639,7 +1644,7 @@
       "name": "Trials",
       "description": "Trials determine how justice is decided in your world. Is it swift mob judgment, a jury, a lone judge, AI-driven, or settled by public vote?",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "mob-justice",
@@ -1667,7 +1672,7 @@
       "name": "Prisons",
       "description": "Prisons define how your society treats those who break the law. Are they spaces for healing and reform—or harsh, torturous environments of punishment and control?",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1678,7 +1683,7 @@
       "name": "Contracts",
       "description": "Contracts define how agreements work in your world. Are they casual and based on trust, or strictly binding with formal enforcement? Choose how people make and keep promises.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1689,7 +1694,7 @@
       "name": "Dispute Resolution",
       "description": "Dispute Resolution defines how conflicts are settled. Are disagreements resolved through violence and force, or through reasoned, fair processes? Use the scale to shape justice in your world.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1698,9 +1703,9 @@
     },
     {
       "name": "Enforcement Bodies",
-      "description": "Enforcement Bodies define who upholds the law in your world. Is there no formal force, or are laws enforced by communities, police, corporations, or autonomous AI systems? Choose your society’s guardians—or oppressors.",
+      "description": "Enforcement Bodies define who upholds the law in your world. Is there no formal force, or are laws enforced by communities, police, corporations, or autonomous AI systems? Choose your society's guardians—or oppressors.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "none",
@@ -1730,9 +1735,9 @@
     },
     {
       "name": "Surveillance",
-      "description": "Surveillance defines how closely your society watches its people. Is privacy respected, or is every action tracked by omnipresent systems? Use the scale to decide what’s seen—and what stays hidden.",
+      "description": "Surveillance defines how closely your society watches its people. Is privacy respected, or is every action tracked by omnipresent systems? Use the scale to decide what's seen—and what stays hidden.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1741,9 +1746,9 @@
     },
     {
       "name": "Corruption",
-      "description": "Corruption measures how much dishonesty and abuse of power exist in your legal system. Is it widespread and unchecked, or nearly nonexistent and deeply accountable? Choose your world’s integrity.",
+      "description": "Corruption measures how much dishonesty and abuse of power exist in your legal system. Is it widespread and unchecked, or nearly nonexistent and deeply accountable? Choose your world's integrity.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1752,9 +1757,9 @@
     },
     {
       "name": "Use of Force",
-      "description": "Use of Force defines how your society applies power to maintain order. Is it careful and restrained, or harsh and brutal? Use the scale to shape authority’s reach.",
+      "description": "Use of Force defines how your society applies power to maintain order. Is it careful and restrained, or harsh and brutal? Use the scale to shape authority's reach.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1763,9 +1768,9 @@
     },
     {
       "name": "Freedom of Speech",
-      "description": "Freedom of Speech defines how openly people can express themselves. Is speech tightly controlled, or fully protected—even when it challenges power? Use the scale to shape your world’s voice.",
+      "description": "Freedom of Speech defines how openly people can express themselves. Is speech tightly controlled, or fully protected—even when it challenges power? Use the scale to shape your world's voice.",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1776,7 +1781,7 @@
       "name": "Movement",
       "description": "Movement defines how freely people travel in your world. Is it restricted, tracked, open to all, or guided by intelligent systems? Choose how borders, mobility, and control shape daily life.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "restricted",
@@ -1800,7 +1805,7 @@
       "name": "Assembly",
       "description": "Assembly defines how people gather in your society. Are public gatherings banned, allowed freely, closely monitored, or only permitted in virtual spaces? Choose how collective action is enabled—or controlled.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "banned",
@@ -1824,7 +1829,7 @@
       "name": "AI Governance",
       "description": "AI Governance defines the role of artificial intelligence in political decision-making. Is there no involvement, limited advice, shared power, or full AI control? Choose how much influence machines have in your world.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "none",
@@ -1848,7 +1853,7 @@
       "name": "Genetic Laws",
       "description": "Genetic Laws define how your society governs genetic modification. Is editing banned, tightly regulated, used for eugenics, open to designing new species, or extended to post-human rights? Choose how life is legally reshaped.",
       "type": "select",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_values": [
         {
           "id": "banned-editing",
@@ -1876,7 +1881,7 @@
       "name": "Sovereignty",
       "description": "Sovereignty defines how power and identity are tied to place. Is your world governed by fixed territories and borders, or is it fluid, decentralized, and borderless? Use the scale to shape control and belonging.\n",
       "type": "range",
-      "category_name": "World Building",
+      "category_id": "legal",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1887,7 +1892,7 @@
       "name": "Ethos",
       "description": "Ethos defines the overall spirit of your world. Is it hopeful and harmonious, or oppressive and broken? Use the scale to shape your society’s guiding mood and values.",
       "type": "range",
-      "category_name": "Story Settings",
+      "category_id": "narrative-style",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1898,7 +1903,7 @@
       "name": "Point of View",
       "description": "Point of View determines who tells the story. Is it a personal first-person voice, an immersive second-person perspective, or a broader third-person view? Choose how your world is seen.",
       "type": "radio",
-      "category_name": "Story Settings",
+      "category_id": "narrative-style",
       "parameter_values": [
         {
           "id": "first-person",
@@ -1918,7 +1923,7 @@
       "name": "Plot Structure",
       "description": "Plot Structure defines how your story unfolds. Is it minimal, with simple events and few turns, or complex, with layered narratives, twists, and intersecting arcs? Use the scale to shape your world’s storytelling depth.",
       "type": "range",
-      "category_name": "Story Settings",
+      "category_id": "narrative-style",
       "parameter_config": {
         "min": -100,
         "max": 100,
@@ -1929,7 +1934,7 @@
       "name": "Message",
       "description": "Message defines what your story tries to say. Is it built around a clear idea, a moral lesson, layered subtext, open ambiguity, or a universal truth? Choose how meaning is delivered—or discovered—in your narrative.",
       "type": "radio",
-      "category_name": "Story Settings",
+      "category_id": "narrative-style",
       "parameter_values": [
         {
           "id": "singular-idea",
@@ -1953,7 +1958,7 @@
       "name": "Tone & Mood",
       "description": "Tone, Mood & Style shape the emotional atmosphere of your story. Is it cheerful and light, eerie and mysterious, or reflective and bittersweet? Choose from moods like suspenseful, humorous, calm, or defiant to set the emotional undercurrent of your narrative and guide how readers feel within your imagined world.\n",
       "type": "select",
-      "category_name": "Story Settings",
+      "category_id": "narrative-style",
       "parameter_values": [
         {
           "id": "cheerful",
@@ -1997,7 +2002,7 @@
       "name": "Style",
       "description": "Style defines how your story is written. Is it minimalist and spare, rich and poetic, casual and colloquial, clear and direct, or deeply evocative and atmospheric? Choose the voice that best brings your world to life.\n",
       "type": "radio",
-      "category_name": "Story Settings",
+      "category_id": "narrative-style",
       "parameter_values": [
         {
           "id": "minimalist",
@@ -2025,7 +2030,7 @@
       "name": "Seasonality",
       "description": "Seasonality explores how your world experiences changes over time. Are there stable seasons, extreme shifts, chaotic patterns, or none at all? Choose how nature’s rhythms—or their absence—shape life, behavior, and adaptation in your future environment.",
       "type": "radio",
-      "category_name": "World Building",
+      "category_id": "environment",
       "parameter_values": [
         {
           "id": "stable",

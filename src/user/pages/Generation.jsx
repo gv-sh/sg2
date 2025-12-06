@@ -11,18 +11,20 @@ import { Alert, AlertDescription } from '../../shared/components/ui/alert.tsx';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 // Separate view components
-const GeneratingView = ({ loading, error, showRecoveryBanner, onGenerationComplete, handleBackToLibrary }) => (
+const GeneratingView = ({ loading, error, showRecoveryBanner, onGenerationComplete, handleBackToLibrary, story, onInstagramShareComplete }) => (
   <>
     <GenerationControls
-      activeStory={null}
+      activeStory={story}
       onBackToLibrary={handleBackToLibrary}
-      storyTitle="Generating..."
+      storyTitle={story ? story.title : "Generating..."}
     />
     <StoryGenerator
       loading={loading}
       error={error}
       showRecoveryBanner={showRecoveryBanner}
       onGenerationComplete={onGenerationComplete}
+      story={story}
+      onInstagramShareComplete={onInstagramShareComplete}
     />
   </>
 );
@@ -169,6 +171,12 @@ const Generation = ({
     // The navigate happens in the useEffect above when loading completes
   };
 
+  // Handle Instagram share completion
+  const handleInstagramShareComplete = (shareResult) => {
+    console.log('Instagram share completed in generation view:', shareResult);
+    // You could show a toast notification here or update the story metadata
+  };
+
   // Determine which view to show
   const determineViewMode = () => {
     if (viewMode === 'generating' || generationInProgress || location.pathname === '/generating') {
@@ -197,6 +205,8 @@ const Generation = ({
           showRecoveryBanner={showRecoveryBanner}
           onGenerationComplete={onGenerationComplete}
           handleBackToLibrary={handleBackToLibrary}
+          story={activeStory}
+          onInstagramShareComplete={handleInstagramShareComplete}
         />
       </div>
     );

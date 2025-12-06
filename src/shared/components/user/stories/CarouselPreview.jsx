@@ -596,8 +596,8 @@ const CarouselPreview = ({
       case 'preview':
         return (
           <>
-            <Eye className="h-4 w-4 mr-2" />
-            View Preview
+            <Instagram className="h-4 w-4 mr-2" />
+            Preview Instagram Post
           </>
         );
       case 'error':
@@ -610,8 +610,8 @@ const CarouselPreview = ({
       default:
         return (
           <>
-            <Eye className="h-4 w-4 mr-2" />
-            Generate Preview
+            <Instagram className="h-4 w-4 mr-2" />
+            Share to Instagram
           </>
         );
     }

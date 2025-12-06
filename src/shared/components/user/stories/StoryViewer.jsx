@@ -13,8 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import ReactDOM from 'react-dom/client';
-import CarouselPreview from './CarouselPreview.jsx';
-import InstagramHandleDialog from './InstagramHandleDialog.jsx';
 
 // Format date helper function (moved outside component for reuse in PDF generation)
 const formatDate = (dateString) => {
@@ -34,10 +32,6 @@ const StoryViewer = ({
   loading
 }) => {
   const navigate = useNavigate();
-  
-  // Instagram sharing state
-  const [showHandleDialog, setShowHandleDialog] = useState(false);
-  const [instagramPostId, setInstagramPostId] = useState(null);
   
   // Handle regenerate button click
   const handleRegenerateClick = () => {
@@ -147,19 +141,6 @@ const StoryViewer = ({
     }
   };
 
-  // Handle Instagram share completion
-  const handleInstagramShareComplete = (shareResult) => {
-    console.log('Instagram share completed:', shareResult);
-    setInstagramPostId(shareResult.postId);
-    setShowHandleDialog(true);
-  };
-
-  // Handle Instagram handle dialog completion
-  const handleHandleComplete = (result) => {
-    console.log('Instagram handle added:', result);
-    setShowHandleDialog(false);
-    setInstagramPostId(null);
-  };
   
   return (
     <div className="w-full max-w-screen-2xl mx-auto h-full flex flex-col" id={'jsx-template'}>
@@ -268,14 +249,6 @@ const StoryViewer = ({
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
-
-            {/* Instagram Carousel Preview - only show for stories that haven't been shared */}
-            <CarouselPreview 
-              story={story}
-              onShareComplete={handleInstagramShareComplete}
-              disabled={loading}
-              size="sm"
-            />
           </div>
           
           {/* Collection info with date moved here */}
@@ -287,14 +260,6 @@ const StoryViewer = ({
           </div>
         </div>
       </footer>
-
-      {/* Instagram Handle Dialog */}
-      <InstagramHandleDialog
-        isOpen={showHandleDialog}
-        onClose={() => setShowHandleDialog(false)}
-        postId={instagramPostId}
-        onComplete={handleHandleComplete}
-      />
     </div>
   );
 };

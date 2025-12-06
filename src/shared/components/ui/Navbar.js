@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from './navigation-menu.js';
+import { cn } from '../../lib/utils.js';
 
 const routes = [
   { path: '/admin/categories', label: 'Categories' },
@@ -14,31 +14,30 @@ function Navbar() {
   const location = useLocation();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="flex h-16 items-center justify-between py-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center">
-          <Link to="/admin" className="text-xl font-bold">
-            FOH Behind the Scenes
-          </Link>
-        </div>
-
-        <div className="flex items-center">
-          <NavigationMenu>
-            <NavigationMenuList>
-              {routes.map(({ path, label }) => (
-                <NavigationMenuItem key={path}>
-                  <NavigationMenuLink 
-                    as={Link} 
-                    to={path} 
-                    active={location.pathname === path}
-                  >
-                    {label}
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center justify-between px-6 w-full">
+        <Link to="/admin" className="font-medium text-lg text-primary">
+          FOH Behind the Scenes
+        </Link>
+        
+        <nav className="flex items-center space-x-4">
+          {routes.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={cn(
+                "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                "hover:bg-accent hover:text-accent-foreground",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                location.pathname === path 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground"
+              )}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );

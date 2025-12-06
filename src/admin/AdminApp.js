@@ -19,7 +19,7 @@ function AdminApp() {
       <div className="flex min-h-screen flex-col">
         <Navbar />
         
-        <main className="flex-1 bg-background">
+        <main className="flex-1 pt-14 bg-background">
           <Layout>
             <Routes>
               <Route path="categories" element={<Categories />} />

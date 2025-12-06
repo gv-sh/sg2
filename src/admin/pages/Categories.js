@@ -96,11 +96,11 @@ function Categories() {
           </CardHeader>
           <CardContent>
             <div className="border rounded-lg overflow-hidden">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow className="bg-muted/50">
                     <TableHead className="w-[220px] text-left">Category</TableHead>
-                    <TableHead className="text-left">Description</TableHead>
+                    <TableHead className="text-left w-[400px]">Description</TableHead>
                     <TableHead className="w-[100px] text-center">Parameters</TableHead>
                     <TableHead className="w-[140px] text-center">Actions</TableHead>
                   </TableRow>
@@ -126,7 +126,7 @@ function Categories() {
                             </code>
                           </div>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap text-left">
+                        <TableCell className="whitespace-nowrap text-left max-w-[400px]">
                           <span className="text-sm text-muted-foreground truncate block">
                             {category.description || "—"}
                           </span>

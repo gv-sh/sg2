@@ -1,11 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -14,13 +15,23 @@
 
 /* Animation support classes */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 .animate-fadeIn {
@@ -40,7 +51,7 @@
     --card: 0 0% 100%;
     --card-foreground: 0 0% 0%;
 
-    --popover: 0 0% 100%;
+    --popover: 43 88% 55%;
     --popover-foreground: 0 0% 0%;
 
     --primary: 206 100% 45%;
@@ -52,7 +63,7 @@
     --muted: 210 20% 94%;
     --muted-foreground: 215 15% 52%;
 
-    --accent: 263 84% 59%;
+    --accent: 15 73% 57%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 55%;
@@ -72,10 +83,10 @@
     --card: 0 0% 7%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 10%;
+    --popover: 206 100% 45%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 206 100% 45%;
+    --primary: 43 88% 55%;
     --primary-foreground: 0 0% 0%;
 
     --secondary: 165 100% 42%;
@@ -84,7 +95,7 @@
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 263 84% 59%;
+    --accent: 15 73% 57%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 65% 58%;
@@ -107,7 +118,12 @@
   }
 
   /* Typography */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold text-foreground;
   }
 
@@ -193,6 +209,7 @@
 }
 
 @layer utilities {
+
   /* Animation classes */
   .animate-in {
     animation-duration: 0.3s;
@@ -217,14 +234,12 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.3) 25%,
-      rgba(255, 255, 255, 0.5) 50%,
-      rgba(255, 255, 255, 0.3) 75%,
-      rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 25%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.3) 75%,
+        rgba(255, 255, 255, 0) 100%);
     background-size: 200% 100%;
     background-position: -100% 0;
     background-repeat: no-repeat;
@@ -239,6 +254,7 @@
   0% {
     background-color: hsl(var(--primary) / 0.2);
   }
+
   100% {
     background-color: transparent;
   }
@@ -248,6 +264,7 @@
   0% {
     background-position: -100% 0;
   }
+
   100% {
     background-position: 200% 0;
   }

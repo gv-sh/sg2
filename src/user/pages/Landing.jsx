@@ -18,7 +18,7 @@ const Landing = ({ onClearSession }) => {
       onClearSession();
     }
   }, [removeAllParameters, onClearSession]);
-  
+
   return (
     <div className="flex items-center justify-center h-full relative">
       {/* Background particle system */}
@@ -26,13 +26,14 @@ const Landing = ({ onClearSession }) => {
       <Shaders />
       {/* Foreground content */}
       <div className="content__inner absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white">
-      <div className="max-w-4xl mx-auto px-8">
-          <h1 className="flex flex-wrap justify-center gap-4 text-display text-primary mb-8 text-center">
+        <div className="max-w-4xl mx-auto px-[8rem]">
+          <h1 className="flex flex-wrap justify-center gap-4 text-[5rem] text-display text-primary mb-8 text-center">
             {["What", "kind", "of", "futures", "do", "you", "envision?"].map((word, i) => (
               <span key={i}>
+
                 {word === "futures" ? (
                   <Link
-                    to="/library" 
+                    to="/library"
                     className="
                       group relative inline-block italic cursor-pointer
                       transition-all duration-500 ease-out
@@ -61,12 +62,13 @@ const Landing = ({ onClearSession }) => {
                   word
                 )}
               </span>
+
             ))}
           </h1>
 
-  
-          <p className="text-body-large text-foreground/80 mb-8 font-normal hover:bg-background/70 transition-colors">
-            Explore speculative futures, challenge assumptions, and shape worlds that 
+
+          <p className="text-xl text-foreground/80 mb-8 font-normal hover:bg-background/70 transition-colors">
+            Explore speculative futures, challenge assumptions, and shape worlds that
             reflect the values you believe in.
           </p>
           <Link
@@ -86,9 +88,9 @@ const Landing = ({ onClearSession }) => {
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </div>
-      
+
       </div>
-      
+
     </div>
   );
 };

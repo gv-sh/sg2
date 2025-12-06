@@ -1,5 +1,5 @@
 // src/pages/Generation.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import StoryLibrary from '../../shared/components/user/stories/StoryLibrary';
 import StoryViewer from '../../shared/components/user/stories/StoryViewer';
@@ -36,7 +36,8 @@ const StoryView = ({
   handleBackToLibrary, 
   regenerateStory,
   handleCreateNew, 
-  loading 
+  loading,
+  instagramData
 }) => (
   <>
     <GenerationControls
@@ -51,6 +52,7 @@ const StoryView = ({
       onRegenerateStory={() => regenerateStory(activeStory)}
       onCreateNew={handleCreateNew}
       loading={loading}
+      instagramData={instagramData}
     />
   </>
 );
@@ -85,6 +87,10 @@ const Generation = ({
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const storyId = searchParams.get('id');
+  
+  // State to track Instagram sharing data and completion
+  const [instagramData, setInstagramData] = useState(null);
+  const [instagramCompleted, setInstagramCompleted] = useState(false);
 
   const {
     loading,
@@ -104,12 +110,16 @@ const Generation = ({
 
   const handleCreateNew = () => {
     setSelectedParameters([]);
+    setInstagramData(null);
+    setInstagramCompleted(false); // Reset for new generation
     navigate('/parameters');
   };
   
   const handleBackToLibrary = () => {
     setActiveStory(null);
     setGeneratedContent(null);
+    setInstagramData(null);
+    setInstagramCompleted(false); // Reset Instagram completion state
     // Clear URL parameters to prevent re-loading the story
     navigate('/library', { replace: true });
   };
@@ -123,6 +133,10 @@ const Generation = ({
           const story = stories.find(s => s.id === storyId);
           if (story) {
             setActiveStory(story);
+            // Check for Instagram data in story metadata
+            if (story.metadata?.instagram) {
+              setInstagramData(story.metadata.instagram);
+            }
           } else {
             // If story not found in array, try to fetch it directly by ID
             console.log('Story not found in array, attempting direct fetch for ID:', storyId);
@@ -130,6 +144,10 @@ const Generation = ({
               const fetchedStory = await fetchStoryById(storyId);
               setActiveStory(fetchedStory);
               console.log('Successfully fetched story by ID:', fetchedStory);
+              // Check for Instagram data in fetched story metadata
+              if (fetchedStory.metadata?.instagram) {
+                setInstagramData(fetchedStory.metadata.instagram);
+              }
             } catch (error) {
               console.error('Failed to fetch story by ID:', error);
             }
@@ -139,6 +157,8 @@ const Generation = ({
         // Ensure we're in library mode when on library path
         if (activeStory) {
           setActiveStory(null);
+          setInstagramData(null); // Clear Instagram data when going back to library
+          setInstagramCompleted(false); // Reset Instagram completion state
         }
       }
     };
@@ -148,10 +168,15 @@ const Generation = ({
     }
   }, [viewMode, location.pathname, storyId, stories, activeStory, setActiveStory]);
 
-  // Watch for generation completion
+  // Watch for generation completion - only navigate after Instagram is done
   useEffect(() => {
-    // If we just completed generation and have an active story but still on generating route
-    if (!loading && activeStory && (location.pathname === '/generating' || viewMode === 'generating')) {
+    // Only navigate if:
+    // 1. Story generation is complete (!loading && activeStory)
+    // 2. We're still on the generating page
+    // 3. Instagram flow is fully completed (instagramCompleted)
+    if (!loading && activeStory && instagramCompleted && (location.pathname === '/generating' || viewMode === 'generating')) {
+      console.log('Both story and Instagram completed, navigating to story view');
+      
       // Check if we're regenerating a story
       const regeneratingStoryId = sessionStorage.getItem('specgen-regenerating-story-id');
       
@@ -160,10 +185,10 @@ const Generation = ({
         sessionStorage.removeItem('specgen-regenerating-story-id');
       }
       
-      // Navigate to story page instead of library
+      // Navigate to story page with all data ready
       navigate(`/story?id=${activeStory.id}`);
     }
-  }, [loading, activeStory, location.pathname, navigate, viewMode]);
+  }, [loading, activeStory, instagramCompleted, location.pathname, navigate, viewMode]);
 
   // Handle generation completion
   const onGenerationComplete = () => {
@@ -174,7 +199,13 @@ const Generation = ({
   // Handle Instagram share completion
   const handleInstagramShareComplete = (shareResult) => {
     console.log('Instagram share completed in generation view:', shareResult);
-    // You could show a toast notification here or update the story metadata
+    setInstagramData(shareResult);
+    
+    // Mark Instagram flow as completed (this includes handle submission/skip or rate limiting)
+    if (shareResult.handleSubmitted !== undefined || shareResult.instagramData || shareResult.rateLimited) {
+      setInstagramCompleted(true);
+      console.log('Instagram flow fully completed, ready for navigation');
+    }
   };
 
   // Determine which view to show
@@ -273,6 +304,7 @@ const Generation = ({
           regenerateStory={regenerateStory}
           handleCreateNew={handleCreateNew}
           loading={loading}
+          instagramData={instagramData || activeStory?.metadata?.instagram}
         />
       </div>
     );

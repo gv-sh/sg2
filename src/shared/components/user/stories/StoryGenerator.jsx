@@ -1,6 +1,6 @@
 // src/components/stories/StoryGenerator.jsx
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, AlertTriangle, Instagram, FileText, Image, Share2, CheckCircle } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Instagram } from 'lucide-react';
 import { Alert, AlertDescription } from '../../ui/alert.tsx';
 import InstagramHandleDialog from './InstagramHandleDialog.jsx';
 import axios from 'axios';
@@ -26,12 +26,12 @@ const StoryGenerator = ({
   const [instagramError, setInstagramError] = useState(null);
   const [imageProgress, setImageProgress] = useState('');
 
-  // Define steps for visual indicator
+  // Define steps for simple visual indicator
   const steps = [
-    { id: 'story', label: 'Story Generation', icon: FileText },
-    { id: 'images', label: 'Creating Images', icon: Image },
-    { id: 'posting', label: 'Posting to Instagram', icon: Share2 },
-    { id: 'complete', label: 'Complete', icon: CheckCircle }
+    { id: 'story', label: 'Story Generation' },
+    { id: 'images', label: 'Creating Images' },
+    { id: 'posting', label: 'Posting to Instagram' },
+    { id: 'complete', label: 'Complete' }
   ];
 
   // Automatic Instagram posting when story is ready
@@ -85,6 +85,27 @@ const StoryGenerator = ({
       setStatusMessage('Posted to Instagram successfully!');
       setInstagramPostId(shareResponse.data.data.postId);
 
+      // Store Instagram sharing results in story metadata
+      if (story && onInstagramShareComplete) {
+        const instagramResult = {
+          shared: true,
+          postId: shareResponse.data.data.postId,
+          carouselUrl: shareResponse.data.data.carouselUrl || null,
+          slideCount: shareResponse.data.data.slideCount || 1,
+          sharedAt: new Date().toISOString(),
+          platform: 'instagram'
+        };
+        
+        // Update story metadata to include Instagram sharing info
+        story.metadata = {
+          ...story.metadata,
+          instagram: instagramResult
+        };
+
+        // Notify parent about Instagram completion
+        onInstagramShareComplete(instagramResult);
+      }
+
       // Show handle dialog after a brief delay
       setTimeout(() => {
         setShowHandleDialog(true);
@@ -92,17 +113,45 @@ const StoryGenerator = ({
 
     } catch (error) {
       console.error('Instagram posting error:', error);
-      setInstagramError(error.message);
+      
+      // Check for rate limiting and provide appropriate messaging
+      let errorMessage = error.message || 'Instagram posting failed';
+      let userMessage = '';
+      let isRateLimited = false;
+      
+      if (error.response?.status === 429 || error.message?.includes('rate limit') || error.message?.includes('request limit')) {
+        isRateLimited = true;
+        userMessage = 'Instagram posting limit reached. Your story is ready, but Instagram posting will need to wait. You can share manually.';
+        errorMessage = 'Rate Limited';
+      } else if (error.response?.data?.errorType === 'RATE_LIMITED') {
+        isRateLimited = true;
+        userMessage = error.response.data.userMessage || 'Instagram posting limit reached. Please try again later.';
+        errorMessage = 'Rate Limited';
+      } else if (error.response?.data?.errorType === 'AUTH_ERROR') {
+        userMessage = 'Instagram authentication issue. Please contact support.';
+        errorMessage = 'Authentication Error';
+      }
+      
+      setInstagramError(userMessage || errorMessage);
       setInstagramState('error');
       setPhase('complete');
       setCurrentStep(3);
-      setStatusMessage('Instagram posting failed');
+      setStatusMessage(isRateLimited ? 'Story ready - Instagram posting limited' : 'Instagram posting failed');
       setProgress(100);
       
-      // Still call completion to show the story
+      // For rate limiting, complete the flow normally but with messaging
+      // For other errors, show error state
       setTimeout(() => {
+        if (isRateLimited && onInstagramShareComplete) {
+          // For rate limits, still call completion but mark as failed
+          onInstagramShareComplete({
+            rateLimited: true,
+            error: userMessage,
+            handleSubmitted: false
+          });
+        }
         if (onGenerationComplete) onGenerationComplete();
-      }, 2000);
+      }, isRateLimited ? 1000 : 2000);
     }
   };
 
@@ -143,11 +192,25 @@ const StoryGenerator = ({
     console.log('Instagram handle completed:', result);
     setShowHandleDialog(false);
     
+    // Update story metadata with handle information
+    if (story && story.metadata?.instagram) {
+      story.metadata.instagram = {
+        ...story.metadata.instagram,
+        handleSubmitted: !result.skipped,
+        handle: result.handle || null,
+        commentId: result.commentId || null,
+        handleSubmittedAt: result.skipped ? null : new Date().toISOString()
+      };
+    }
+    
     // Notify parent and navigate to story view
     if (onInstagramShareComplete) {
       onInstagramShareComplete({
         postId: instagramPostId,
-        handleSubmitted: true
+        handleSubmitted: !result.skipped,
+        handle: result.handle || null,
+        commentId: result.commentId || null,
+        instagramData: story?.metadata?.instagram
       });
     }
     
@@ -173,12 +236,11 @@ const StoryGenerator = ({
     }
   };
 
-  // Step indicator component
+  // Simple step indicator component
   const StepIndicator = () => (
-    <div className="max-w-2xl mx-auto mb-8">
-      <div className="flex items-center justify-between">
+    <div className="max-w-md mx-auto mb-8">
+      <div className="flex items-center justify-center space-x-2">
         {steps.map((step, index) => {
-          const Icon = step.icon;
           let status = 'pending'; // pending, active, completed, error
           
           if (index < currentStep) {
@@ -189,57 +251,43 @@ const StoryGenerator = ({
 
           return (
             <div key={step.id} className="flex items-center">
-              {/* Step Circle with LED */}
-              <div className="flex flex-col items-center">
-                <div className={`
-                  relative w-12 h-12 rounded-full border-2 flex items-center justify-center
-                  ${status === 'completed' 
-                    ? 'bg-green-500 border-green-500 text-white' 
-                    : status === 'active' 
-                    ? 'bg-blue-500 border-blue-500 text-white animate-pulse' 
-                    : status === 'error'
-                    ? 'bg-red-500 border-red-500 text-white'
-                    : 'bg-gray-200 border-gray-300 text-gray-500'
-                  }
-                `}>
-                  <Icon className="h-5 w-5" />
-                  
-                  {/* LED indicator */}
-                  <div className={`
-                    absolute -top-1 -right-1 w-3 h-3 rounded-full
-                    ${status === 'completed' 
-                      ? 'bg-green-400 shadow-lg shadow-green-400/50' 
-                      : status === 'active' 
-                      ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50 animate-pulse' 
-                      : status === 'error'
-                      ? 'bg-red-400 shadow-lg shadow-red-400/50'
-                      : 'bg-gray-300'
-                    }
-                  `} />
-                </div>
-                
-                {/* Step Label */}
-                <div className={`
-                  mt-2 text-xs text-center font-medium
-                  ${status === 'active' ? 'text-blue-600' : 
-                    status === 'completed' ? 'text-green-600' :
-                    status === 'error' ? 'text-red-600' : 'text-gray-500'
-                  }
-                `}>
-                  {step.label}
-                </div>
-              </div>
+              {/* Simple progress dot */}
+              <div className={`
+                w-3 h-3 rounded-full transition-colors
+                ${status === 'completed' 
+                  ? 'bg-green-500' 
+                  : status === 'active' 
+                  ? 'bg-blue-500 animate-pulse' 
+                  : status === 'error'
+                  ? 'bg-red-500'
+                  : 'bg-gray-300'
+                }
+              `} />
               
-              {/* Connector Line */}
+              {/* Connector line */}
               {index < steps.length - 1 && (
                 <div className={`
-                  flex-1 h-0.5 mx-4
+                  w-8 h-px mx-2
                   ${index < currentStep ? 'bg-green-500' : 'bg-gray-300'}
                 `} />
               )}
             </div>
           );
         })}
+      </div>
+      
+      {/* Current step label */}
+      <div className="text-center mt-3">
+        <div className={`
+          text-sm font-medium
+          ${currentStep < steps.length ? (
+            instagramState === 'error' && steps[currentStep]?.id === 'posting' 
+              ? 'text-red-600' 
+              : 'text-blue-600'
+          ) : 'text-green-600'}
+        `}>
+          {currentStep < steps.length ? steps[currentStep].label : 'Complete'}
+        </div>
       </div>
     </div>
   );

@@ -245,6 +245,14 @@ export class InstagramService {
     if (!response.ok) {
       const error = await response.json();
       console.error('[Instagram Service] Media container error:', error);
+      
+      // Check for rate limiting
+      if (error.error?.code === 4) {
+        throw new Error(`RATE_LIMITED: Instagram media upload limit reached. ${error.error?.message || 'Try again later.'}`);
+      } else if (error.error?.type === 'OAuthException') {
+        throw new Error(`AUTH_ERROR: Instagram authentication issue. ${error.error?.message || 'Check credentials.'}`);
+      }
+      
       throw new Error(`Failed to create media container: ${error.error?.message || response.statusText}`);
     }
 
@@ -311,6 +319,16 @@ export class InstagramService {
     if (!response.ok) {
       const error = await response.json();
       console.error(`[Instagram Service] Publish error:`, error);
+      
+      // Check for rate limiting specifically
+      if (error.error?.code === 4 && error.error?.error_subcode === 2207051) {
+        throw new Error(`RATE_LIMITED: Instagram posting limit reached. ${error.error?.error_user_msg || 'Try again later.'}`);
+      } else if (error.error?.code === 4) {
+        throw new Error(`RATE_LIMITED: Instagram API rate limit exceeded. ${error.error?.message || 'Try again later.'}`);
+      } else if (error.error?.type === 'OAuthException') {
+        throw new Error(`AUTH_ERROR: Instagram authentication issue. ${error.error?.message || 'Check credentials.'}`);
+      }
+      
       throw new Error(`Failed to publish carousel: ${error.error?.message || response.statusText}`);
     }
 

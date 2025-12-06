@@ -7,7 +7,9 @@ import {
   Share,
   RefreshCw,
   PlusCircle,
-  Printer
+  Printer,
+  Instagram,
+  ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
@@ -29,7 +31,8 @@ const StoryViewer = ({
   story, 
   onRegenerateStory, 
   onCreateNew, 
-  loading
+  loading,
+  instagramData
 }) => {
   const navigate = useNavigate();
   
@@ -120,6 +123,13 @@ const StoryViewer = ({
   // Get the image source
   const imageSource = getStoryImage(story);
   
+  // Generate Instagram post URL if we have post ID
+  const getInstagramPostUrl = (postId) => {
+    if (!postId) return null;
+    // Instagram post URL format: https://www.instagram.com/p/{media-id}/
+    return `https://www.instagram.com/p/${postId}/`;
+  };
+  
 
   // Handle share button click
   const handleShare = async () => {
@@ -206,6 +216,100 @@ const StoryViewer = ({
         </div>
       </div>
       
+      {/* Instagram Status Section */}
+      {(instagramData?.shared || instagramData?.rateLimited) && (
+        <div className="max-w-3xl mx-auto mt-6 mb-4">
+          <div className={`rounded-lg p-4 border ${
+            instagramData?.shared 
+              ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800'
+              : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800'
+          }`}>
+            <div className="flex items-start space-x-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                instagramData?.shared 
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                  : 'bg-gradient-to-r from-amber-500 to-orange-500'
+              }`}>
+                <Instagram className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {instagramData?.shared ? 'Posted to Instagram' : 'Instagram Posting Limited'}
+                  </h3>
+                  {instagramData?.sharedAt && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(instagramData.sharedAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+                
+                {instagramData?.rateLimited ? (
+                  <div className="space-y-2">
+                    <div className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                      {instagramData.error || 'Instagram posting limit reached. Your story is ready but posting will need to wait.'}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          // Manual sharing with text
+                          const shareText = `Check out my story: "${story.title}" - Set in year ${story.year}\n\n${story.content.substring(0, 200)}...\n\nGenerated with Futures of Hope`;
+                          if (navigator.share) {
+                            navigator.share({ title: story.title, text: shareText });
+                          } else {
+                            navigator.clipboard.writeText(shareText);
+                            alert('Story text copied to clipboard!');
+                          }
+                        }}
+                        className="h-7 text-xs"
+                      >
+                        <Share className="h-3 w-3 mr-1" />
+                        Share Manually
+                      </Button>
+                      <span className="text-xs text-amber-600 dark:text-amber-400">
+                        Try again later for Instagram posting
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-4 text-xs text-gray-600 dark:text-gray-300">
+                      <span>📸 {instagramData.slideCount || 1} slide{(instagramData.slideCount || 1) > 1 ? 's' : ''}</span>
+                      {instagramData.handleSubmitted && instagramData.handle && (
+                        <span>👤 @{instagramData.handle}</span>
+                      )}
+                    </div>
+                    
+                    {instagramData.postId && (
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            // Use carouselUrl if available, otherwise generate from postId
+                            const url = instagramData.carouselUrl || getInstagramPostUrl(instagramData.postId);
+                            window.open(url, '_blank');
+                          }}
+                          className="h-7 text-xs"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          View on Instagram
+                        </Button>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                          ID: {instagramData.postId}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Footer with actions */}
       <footer className="py-6 border-t mt-auto">
         <div className="flex items-center justify-start max-w-3xl mx-auto space-x-8">
@@ -241,14 +345,32 @@ const StoryViewer = ({
               Print
             </Button>
             
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleShare}
-            >
-              <Share className="h-4 w-4 mr-2" />
-              Share
-            </Button>
+            {/* Only show regular Share button if not shared to Instagram */}
+            {!instagramData?.shared && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleShare}
+              >
+                <Share className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            )}
+            
+            {/* Show Instagram share status in footer */}
+            {instagramData?.shared && (
+              <div className="flex items-center text-sm text-green-600 dark:text-green-400">
+                <Instagram className="h-4 w-4 mr-2" />
+                <span>Shared to Instagram</span>
+              </div>
+            )}
+            
+            {instagramData?.rateLimited && (
+              <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
+                <Instagram className="h-4 w-4 mr-2" />
+                <span>Instagram posting limited</span>
+              </div>
+            )}
           </div>
           
           {/* Collection info with date moved here */}

@@ -422,7 +422,7 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       message: 'Instagram carousel post created successfully',
       data: {
         postId: carouselPost.id,
-        carouselUrl: `https://instagram.com/p/${carouselPost.id}`,
+        carouselUrl: `https://www.instagram.com/p/${carouselPost.id}/`,
         slideCount: mediaUrls.length
       },
       meta: {
@@ -434,8 +434,19 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       return next(boom.badRequest('Validation failed', error.errors));
     }
     
-    // Handle Instagram-specific errors
-    if (error.message?.includes('Instagram')) {
+    // Handle Instagram-specific errors with better messaging
+    if (error.message?.startsWith('RATE_LIMITED:')) {
+      return next(boom.tooManyRequests(error.message.replace('RATE_LIMITED: ', ''), {
+        errorType: 'RATE_LIMITED',
+        retryAfter: '1 hour',
+        userMessage: 'Instagram posting limit reached. Please wait before posting again.'
+      }));
+    } else if (error.message?.startsWith('AUTH_ERROR:')) {
+      return next(boom.unauthorized(error.message.replace('AUTH_ERROR: ', ''), {
+        errorType: 'AUTH_ERROR',
+        userMessage: 'Instagram authentication issue. Please contact support.'
+      }));
+    } else if (error.message?.includes('Instagram')) {
       return next(boom.badGateway('Instagram API error', error));
     }
     

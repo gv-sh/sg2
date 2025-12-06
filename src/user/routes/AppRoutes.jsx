@@ -108,7 +108,7 @@ const AppRoutes = ({
         <Route path="/parameters" element={
           <ResponsiveLayout>
             {/* Category Selection Column */}
-            <Column span={4} mobileOrder={1} tabletSpan={2} position="left">
+            <Column span={4} mobileOrder={1} tabletSpan={2} position="left" data-tour="categories-panel">
               <Suspense fallback={<LoadingSpinner />}>
                 <Categories
                   selectedCategory={selectedCategory}
@@ -118,7 +118,7 @@ const AppRoutes = ({
             </Column>
 
             {/* Parameter List Column */}
-            <Column span={4} mobileOrder={3} tabletSpan={2} position="middle">
+            <Column span={4} mobileOrder={3} tabletSpan={2} position="middle" data-tour="parameters-panel">
               <Suspense fallback={<LoadingSpinner />}>
                 <Parameters
                   selectedCategory={selectedCategory}
@@ -130,7 +130,7 @@ const AppRoutes = ({
             </Column>
 
             {/* Selected Parameters Column */}
-            <Column span={8} mobileOrder={2} tabletSpan={4} position="right">
+            <Column span={8} mobileOrder={2} tabletSpan={4} position="right" data-tour="selected-parameters-panel">
               <Suspense fallback={<LoadingSpinner />}>
                 <SelectedParameters
                   parameters={selectedParameters}

@@ -1,5 +1,6 @@
 // src/user/UserApp.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { isMobileDevice } from './utils/deviceUtils.js';
 
 // Layout Components
@@ -18,6 +19,7 @@ function UserApp() {
 
 // App Content Component with shared state
 function AppContent() {
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedParameters, setSelectedParameters] = useState([]);
@@ -29,6 +31,12 @@ function AppContent() {
     const mobile = isMobileDevice();
     setIsMobile(mobile);
   }, []);
+
+  // Enhanced tour handler that navigates to parameters page first
+  const handleShowTour = () => {
+    navigate('/parameters');
+    setShowTour(true);
+  };
 
   if (isMobile) {
     return (
@@ -42,7 +50,7 @@ function AppContent() {
   }
 
   return (
-    <MainLayout onShowTour={() => setShowTour(true)}>
+    <MainLayout onShowTour={handleShowTour}>
       <AppRoutes 
         showTour={showTour}
         setShowTour={setShowTour}

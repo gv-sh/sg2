@@ -23,7 +23,8 @@ export const Column = ({
   children, 
   className = '',
   mobileOrder,
-  position // 'left', 'middle', 'right'
+  position, // 'left', 'middle', 'right'
+  ...props
 }) => {
   const { isMobile } = useScreenSize();
   
@@ -54,6 +55,7 @@ export const Column = ({
         isMobile && mobileOrder !== undefined ? `order-${mobileOrder}` : "",
         className
       )}
+      {...props}
     >
       <div className="h-full pl-4 pr-4 overflow-hidden">
         {children}

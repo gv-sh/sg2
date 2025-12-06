@@ -1,55 +1,63 @@
 // src/components/GuidedTour.jsx
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, X, BookOpen, Sparkles, Dices, ZoomIn, Settings2, Layers, Boxes } from 'lucide-react';
+import TourHighlight from './TourHighlight.jsx';
 
 const GuidedTour = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   
   
-  // Define tour steps with icons
+  // Define tour steps with icons and targets
   const steps = [
     {
       title: "Welcome",
       content: "A space where your choices shape the future. Select world building parameters and the AI will weave them into a speculative story inspired by the world you imagine.",
       position: "center",
-      icon: <Sparkles className="h-4 w-4 text-primary" />
+      icon: <Sparkles className="h-4 w-4 text-primary" />,
+      target: null // No highlight for welcome step
     },
     {
       title: "Browse Categories",
       content: "Start by selecting a category from the left panel. Each category contains unique parameters to build your story.",
       position: "left",
-      icon: <BookOpen className="h-4 w-4 text-primary" />
+      icon: <BookOpen className="h-4 w-4 text-primary" />,
+      target: '[data-tour="categories-panel"]' // Left panel
     },
     {
       title: "Explore Parameters",
       content: "After choosing a category, explore through the parameters in the middle panel and add the ones you'd like to incorporate into your story.",
       position: "center-left",
-      icon: <Layers className="h-4 w-4 text-primary" />
+      icon: <Layers className="h-4 w-4 text-primary" />,
+      target: '[data-tour="parameters-panel"]' // Middle panel
     },
     {
       title: "Multiple Categories",
       content: "You can select parameters from multiple different categories. Simply click on another category to explore its parameters.",
       position: "left",
-      icon: <Boxes className="h-4 w-4 text-primary" />
+      icon: <Boxes className="h-4 w-4 text-primary" />,
+      target: '[data-tour="categories-panel"]' // Left panel again
     },
     {
       title: "Configure Parameters",
       content: "Adjust your selected parameters in the right panel to fine-tune how your story will be crafted.",
       position: "center-right",
-      icon: <Settings2 className="h-4 w-4 text-primary" />
+      icon: <Settings2 className="h-4 w-4 text-primary" />,
+      target: '[data-tour="selected-parameters-panel"]' // Right panel
     },
     {
       title: "Randomize Options",
       content: "Can't decide? Use the randomize buttons to quickly generate parameter values.",
       position: "right",
-      icon: <Dices className="h-4 w-4 text-primary" />
+      icon: <Dices className="h-4 w-4 text-primary" />,
+      target: '[data-tour="selected-parameters-panel"]' // Right panel
     },
     {
       title: "Generate Content",
       content: "Choose the year you want your story to take place in, then click Generate to create a story and visual based on your selected parameters.",
       position: "center",
-      icon: <ZoomIn className="h-4 w-4 text-primary" />
+      icon: <ZoomIn className="h-4 w-4 text-primary" />,
+      target: '[data-tour="generate-button"]' // Generate button specifically
     }
   ];
   
@@ -83,8 +91,16 @@ const GuidedTour = ({ onClose }) => {
   
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4" style={{zIndex: 9999}}>
-      <div className="bg-card rounded-lg border border-border shadow-2xl w-full max-w-md p-6 opacity-100 transition-all duration-300 transform scale-100">
+    <>
+      {/* Tour highlight overlay */}
+      <TourHighlight 
+        target={steps[currentStep].target} 
+        isVisible={isVisible}
+      />
+      
+      {/* Tour modal */}
+      <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4" style={{zIndex: 9999}}>
+        <div className="bg-card rounded-lg border border-border shadow-2xl w-full max-w-md p-6 opacity-100 transition-all duration-300 transform scale-100">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
             {steps[currentStep].icon}
@@ -125,8 +141,9 @@ const GuidedTour = ({ onClose }) => {
             )}
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

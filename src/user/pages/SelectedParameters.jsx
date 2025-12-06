@@ -340,6 +340,7 @@ const SelectedParameters = ({
             size="sm"
             disabled={parameters.length === 0}
             className="w-1/4 bg-primary hover:bg-primary/90 text-primary-foreground ml-4"
+            data-tour="generate-button"
           >
             <Play className="h-3 w-3 mr-1" />
             Generate Content

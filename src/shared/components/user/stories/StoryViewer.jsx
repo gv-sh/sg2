@@ -69,6 +69,7 @@ const StoryViewer = ({
   instagramData
 }) => {
   const navigate = useNavigate();
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false);
 
   // Handle regenerate button click
   const handleRegenerateClick = () => {
@@ -156,6 +157,42 @@ const StoryViewer = ({
 
   // Get the image source
   const imageSource = getStoryImage(story);
+
+  // Wrapper function for download with loading state
+  const handleDownload = async () => {
+    try {
+      setIsPdfGenerating(true);
+      await downloadStyledPDF({
+        story: { title: story.title, year: story.year, createdAt: story.createdAt },
+        imageSource: imageSource,
+        contentParagraphs: contentParagraphs,
+        instagramData: instagramData
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsPdfGenerating(false);
+    }
+  };
+
+  // Wrapper function for print with loading state
+  const handlePrint = async () => {
+    try {
+      setIsPdfGenerating(true);
+      await printStyledPDF({
+        story: { title: story.title, year: story.year, createdAt: story.createdAt },
+        imageSource: imageSource,
+        contentParagraphs: contentParagraphs,
+        instagramData: instagramData
+      });
+    } catch (error) {
+      console.error('Print failed:', error);
+      alert('Failed to generate PDF for printing. Please try again.');
+    } finally {
+      setIsPdfGenerating(false);
+    }
+  };
 
 
   // Handle share button click
@@ -366,35 +403,28 @@ const StoryViewer = ({
 
             <Button
               variant="outline"
-              //size="md"
-              // onClick={handleDownload}
-              onClick={() =>
-                downloadStyledPDF({
-                  story: { title: story.title, year: story.year, createdAt: story.createdAt },
-                  imageSource: imageSource,
-                  contentParagraphs: contentParagraphs,
-                  instagramData: instagramData
-                })
-              }
+              onClick={handleDownload}
+              disabled={isPdfGenerating}
             >
-              <Download className="h-4 w-4 mr-2" />
-              Download
+              {isPdfGenerating ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              {isPdfGenerating ? 'Preparing...' : 'Download'}
             </Button>
 
             <Button
               variant="outline"
-              //size="md"
-              onClick={() =>
-                printStyledPDF({
-                  story: { title: story.title, year: story.year, createdAt: story.createdAt },
-                  imageSource: imageSource,
-                  contentParagraphs: contentParagraphs,
-                  instagramData: instagramData
-                })
-              }
+              onClick={handlePrint}
+              disabled={isPdfGenerating}
             >
-              <Printer className="h-4 w-4 mr-2" />
-              Print
+              {isPdfGenerating ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Printer className="h-4 w-4 mr-2" />
+              )}
+              {isPdfGenerating ? 'Preparing...' : 'Print'}
             </Button>
 
 
@@ -450,12 +480,52 @@ const preload = src =>
   new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = resolve;
-    img.onerror = reject;
+    img.onload = () => {
+      console.log('Preload - Image loaded successfully:', src?.substring(0, 50) + '...');
+      resolve();
+    };
+    img.onerror = (error) => {
+      console.error('Preload - Image failed to load:', src?.substring(0, 50) + '...', error);
+      reject(error);
+    };
     img.src = src;
   });
 
+// Wait for all images in a container to load
+const waitForAllImages = (container) => {
+  const images = container.querySelectorAll('img');
+  console.log(`waitForAllImages - Found ${images.length} images to load`);
+  
+  const imagePromises = Array.from(images).map((img, index) => {
+    return new Promise((resolve) => {
+      if (img.complete && img.naturalHeight !== 0) {
+        console.log(`waitForAllImages - Image ${index} already loaded`);
+        resolve();
+      } else {
+        img.onload = () => {
+          console.log(`waitForAllImages - Image ${index} loaded successfully`);
+          resolve();
+        };
+        img.onerror = () => {
+          console.error(`waitForAllImages - Image ${index} failed to load, continuing anyway`);
+          resolve(); // Resolve even on error to not block the process
+        };
+        // Fallback timeout for stuck images
+        setTimeout(() => {
+          console.warn(`waitForAllImages - Image ${index} load timeout, continuing anyway`);
+          resolve();
+        }, 5000);
+      }
+    });
+  });
+
+  return Promise.all(imagePromises);
+};
+
 const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData, returnInstance = false }) => {
+  const startTime = performance.now();
+  console.log('PDF Generation - Starting PDF generation process...');
+  
   // 4R postcard = ~152 x 102 mm, landscape
   const pdf = new jsPDF('l', 'mm', [152, 102]);
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -646,10 +716,20 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
   const root = ReactDOM.createRoot(container);
   root.render(jsxContent);
 
-  // Wait longer to ensure QR code and all images are loaded properly
-  console.log('PDF Generation - Waiting for rendering to complete...');
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  // Wait for React to render and all assets to load
+  console.log('PDF Generation - Waiting for React rendering...');
+  await new Promise((resolve) => setTimeout(resolve, 100)); // Brief wait for React render
 
+  console.log('PDF Generation - Waiting for all images to load...');
+  await waitForAllImages(container);
+
+  // Additional small buffer to ensure everything is stable
+  console.log('PDF Generation - Final stability wait...');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  console.log('PDF Generation - Starting html2canvas capture...');
+  const canvasStartTime = performance.now();
+  
   const canvas = await html2canvas(container, {
     scale: 2,
     useCORS: true,
@@ -657,6 +737,9 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
     backgroundColor: '#ffffff',
     windowWidth: container.scrollWidth,
   });
+
+  const canvasEndTime = performance.now();
+  console.log(`PDF Generation - html2canvas completed in ${Math.round(canvasEndTime - canvasStartTime)}ms`);
 
   const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
@@ -667,6 +750,9 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
 
   root.unmount();
   document.body.removeChild(container);
+
+  const endTime = performance.now();
+  console.log(`PDF Generation - Total process completed in ${Math.round(endTime - startTime)}ms`);
 
   const safeTitle = story.title.replace(/\s+/g, '_').toLowerCase();
 

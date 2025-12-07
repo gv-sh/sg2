@@ -153,7 +153,7 @@ const StoryViewer = ({
 
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto h-full flex flex-col" id={'jsx-template'}>
+    <div className="2xl:w-1/2 xl:w-1/2 max-w-screen-2xl mx-auto h-full flex flex-col" id={'jsx-template'}>
       {/* Header */}
       <header className="py-6 border-b">
         <div className="flex items-center justify-between">
@@ -166,7 +166,7 @@ const StoryViewer = ({
           </div>
 
           <div className="flex space-x-2">
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={handleRegenerateClick}
@@ -174,15 +174,15 @@ const StoryViewer = ({
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Regenerate
-            </Button>
-            <Button
+            </Button> */}
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={onCreateNew}
             >
               <PlusCircle className="h-4 w-4 mr-2" />
               Create New Story
-            </Button>
+            </Button> */}
           </div>
         </div>
       </header>
@@ -218,7 +218,7 @@ const StoryViewer = ({
 
       {/* Instagram Status Section */}
       {(instagramData?.shared || instagramData?.rateLimited || instagramData?.instagramFailed) && (
-        <div className="max-w-3xl mx-auto mt-6 mb-4">
+        <div className="w-full mx-auto mt-6 mb-4">
           <div className={`rounded-lg p-4 border ${instagramData?.shared
             ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800'
             : instagramData?.instagramFailed
@@ -327,10 +327,19 @@ const StoryViewer = ({
       {/* Footer with actions */}
       <footer className="py-6 border-t mt-auto">
         <div className="flex items-center justify-start max-w-3xl mx-auto space-x-8">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 mb-4">
             <Button
               variant="outline"
-              size="sm"
+              //size="lg"
+              onClick={onCreateNew}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create New Story
+            </Button>
+
+            <Button
+              variant="outline"
+              //size="md"
               // onClick={handleDownload}
               onClick={() =>
                 downloadStyledPDF({
@@ -346,7 +355,7 @@ const StoryViewer = ({
 
             <Button
               variant="outline"
-              size="sm"
+              //size="md"
               onClick={() =>
                 printStyledPDF({
                   story: { title: story.title, year: story.year, createdAt: story.createdAt },
@@ -359,11 +368,13 @@ const StoryViewer = ({
               Print
             </Button>
 
+
+
             {/* Only show regular Share button if not shared to Instagram */}
             {!instagramData?.shared && (
               <Button
                 variant="outline"
-                size="sm"
+                //size="lg"
                 onClick={handleShare}
               >
                 <Share className="h-4 w-4 mr-2" />
@@ -389,13 +400,14 @@ const StoryViewer = ({
               </div>
             )}
           </div>
-
-          {/* Collection info with date moved here */}
-          <div className="text-sm text-muted-foreground ml-auto">
-            <div className="flex items-center">
-              <Calendar className="h-3.5 w-3.5 mr-1.5" />
-              <span>{formatDate(story.createdAt)}</span>
-            </div>
+        </div>
+        {/* Collection info with date moved here */}
+        <div className="text-sm text-muted-foreground ml-auto">
+          <div className="flex items-center">
+            <Calendar className="h-3.5 w-3.5 mr-1.5" />
+            <span className="mr-1">Created on</span>
+            <span className="mr-1">{formatDate(story.createdAt)}</span>
+            <span>· Futures of Hope</span>
           </div>
         </div>
       </footer>

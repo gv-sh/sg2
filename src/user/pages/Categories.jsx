@@ -18,7 +18,7 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
         const allCategories = response.data || [];
         setCategories(allCategories);
         setError(null);
-        
+
         // Auto-select first category if none selected
         if (allCategories.length > 0 && !selectedCategory) {
           onCategorySelect(allCategories[0]);
@@ -66,13 +66,16 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-left">
-        <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Categories</h3>
+        <h3 className="text-sm font-medium pt-3 pb-2">Categories</h3>
+        <p className="text-xs text-muted-foreground border-b !mt-1 pb-2">
+          What kind of world do you want to build?
+        </p>
       </div>
-      
+
       <div className="space-y-1">
         {categories.map(category => {
           const isSelected = selectedCategory?.id === category.id;
-          
+
           return (
             <button
               key={category.id}
@@ -80,7 +83,7 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
                 "w-full p-2 text-left rounded-md transition-colors",
                 "flex items-center justify-between",
                 isSelected
-                  ? "bg-primary text-accent-foreground border border-primary" 
+                  ? "bg-primary text-accent-foreground border border-primary"
                   : "border"
               )}
               onClick={() => handleCategorySelect(category)}
@@ -89,7 +92,7 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
               <div className="flex items-center">
                 <span className="text-sm">{category.name}</span>
               </div>
-              
+
               {/* Show parameter count badge */}
               <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
                 {category.parameter_count || 0}

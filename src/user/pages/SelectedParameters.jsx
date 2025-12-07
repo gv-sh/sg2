@@ -268,7 +268,7 @@ const SelectedParameters = ({
 
   const handleGenerate = () => {
     if (onNavigateToGenerate) {
-      onNavigateToGenerate();
+      onNavigateToGenerate(storyYear);
     }
   };
 

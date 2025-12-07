@@ -230,6 +230,7 @@ export const useGeneration = (
       setGenerationInProgress(false);
       sessionStorage.removeItem('specgen-auto-generate');
       sessionStorage.removeItem('specgen-generating');
+      sessionStorage.removeItem('specgen-story-year');
       return newStoryId;
     }
   }, [storyYear, storyTitle, selectedParameters, setGenerationInProgress, loading, stories]);

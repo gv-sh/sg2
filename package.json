@@ -82,6 +82,7 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
+    "sharp": "^0.34.5",
     "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

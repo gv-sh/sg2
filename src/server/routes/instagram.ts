@@ -5,6 +5,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import boom from '@hapi/boom';
 import { z } from 'zod';
+import sharp from 'sharp'; // Re-enabled with Node.js v20.19.5
 
 import { dataService } from '../services.js';
 import InstagramService from '../services/instagram.js';
@@ -568,15 +569,47 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
       return next(boom.notFound(`Story with ID ${storyId} not found`));
     }
 
+    console.log(`DEBUG: imageIndex=${imageIndex}, story.image_blob length=${story.image_blob?.length || 'null'}`);
+    
     // If requesting original image (index 0 and story has image)
     if (imageIndex === 0 && story.image_blob) {
+      console.log(`Processing original image for story ${storyId} to square format`);
+      
+      // Check if we have a cached square version
+      let squareImageBuffer = await getCachedSquareImage(storyId);
+      
+      if (!squareImageBuffer) {
+        console.log(`No cached square image found, processing original image`);
+        
+        // Process the original image to square format using simple center cropping
+        try {
+          squareImageBuffer = await processImageToSquare(story.image_blob, story);
+          
+          // Cache the processed square image
+          await cacheSquareImage(storyId, squareImageBuffer);
+        } catch (error) {
+          console.error(`Failed to process original image to square for story ${storyId}:`, error);
+          
+          // Instead of serving non-square image (which Instagram rejects),
+          // return an error that will force the client to handle appropriately
+          return next(boom.internal(
+            `Unable to process image to square format for Instagram: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            { storyId, originalSize: story.image_blob?.length }
+          ));
+        }
+      }
+      
+      // Serve the square processed image
       res.set({
-        'Content-Type': `image/${story.image_format || 'png'}`,
-        'Content-Length': story.image_size_bytes?.toString() || '0',
-        'Cache-Control': 'public, max-age=86400' // 24 hours cache
+        'Content-Type': 'image/png', // Square images are always PNG
+        'Content-Length': squareImageBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=86400', // 24 hours cache
+        'Access-Control-Allow-Origin': '*', // Allow Instagram to fetch
+        'Access-Control-Allow-Methods': 'GET',
+        'Access-Control-Allow-Headers': 'Content-Type'
       });
       
-      return res.end(story.image_blob);
+      return res.end(squareImageBuffer);
     }
 
     // Try to get pre-generated image first (for Instagram sharing)
@@ -823,9 +856,262 @@ router.post('/cache/cleanup', asyncErrorHandler(async (req: Request, res: Respon
   }
 }));
 
+/**
+ * Convert any image to 1080x1080 square format using Sharp (preferred method)
+ * Fast, efficient server-side image processing
+ */
+async function processImageToSquareWithSharp(imageBuffer: Buffer): Promise<Buffer> {
+  try {
+    console.log('processImageToSquareWithSharp - Processing image to 1080x1080 square format using Sharp');
+    console.log('processImageToSquareWithSharp - Original image size:', imageBuffer.length, 'bytes');
+    
+    // Get image metadata to determine cropping strategy
+    const image = sharp(imageBuffer);
+    const metadata = await image.metadata();
+    
+    console.log('processImageToSquareWithSharp - Original dimensions:', metadata.width, 'x', metadata.height);
+    
+    if (!metadata.width || !metadata.height) {
+      throw new Error('Unable to read image dimensions');
+    }
+    
+    let processedImage = image;
+    
+    // Determine crop area for center cropping
+    if (metadata.width > metadata.height) {
+      // Landscape: crop from sides
+      const cropWidth = metadata.height; // Make it square
+      const cropX = Math.floor((metadata.width - metadata.height) / 2); // Center horizontally
+      
+      console.log('processImageToSquareWithSharp - Landscape crop:', cropX, 0, cropWidth, metadata.height);
+      processedImage = image.extract({
+        left: cropX,
+        top: 0,
+        width: cropWidth,
+        height: metadata.height
+      });
+      
+    } else if (metadata.height > metadata.width) {
+      // Portrait: crop from top/bottom
+      const cropHeight = metadata.width; // Make it square
+      const cropY = Math.floor((metadata.height - metadata.width) / 2); // Center vertically
+      
+      console.log('processImageToSquareWithSharp - Portrait crop:', 0, cropY, metadata.width, cropHeight);
+      processedImage = image.extract({
+        left: 0,
+        top: cropY,
+        width: metadata.width,
+        height: cropHeight
+      });
+      
+    } else {
+      // Already square, no cropping needed
+      console.log('processImageToSquareWithSharp - Image already square, no cropping needed');
+    }
+    
+    // Resize to exactly 1080x1080 and convert to PNG
+    const squareBuffer = await processedImage
+      .resize(1080, 1080, {
+        kernel: sharp.kernel.lanczos3,
+        fastShrinkOnLoad: true
+      })
+      .png({
+        quality: 95,
+        compressionLevel: 6
+      })
+      .toBuffer();
+    
+    console.log(`processImageToSquareWithSharp - Successfully processed to 1080x1080 square, size: ${squareBuffer.length} bytes`);
+    return squareBuffer;
+    
+  } catch (error) {
+    console.error('processImageToSquareWithSharp - Failed to process image:', error);
+    throw new Error(`Sharp image processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Convert any image to 1080x1080 square format for Instagram carousel consistency
+ * Uses Canvas API through Puppeteer as fallback when Sharp fails
+ */
+async function processImageToSquareWithPuppeteer(imageBuffer: Buffer, story?: any): Promise<Buffer> {
+  try {
+    console.log('processImageToSquare - Processing image to 1080x1080 square format using simple center cropping');
+    console.log('processImageToSquare - Original image size:', imageBuffer.length, 'bytes');
+    
+    // For very large images, optimize the base64 conversion to avoid memory issues
+    let base64Image: string;
+    if (imageBuffer.length > 5000000) { // > 5MB
+      console.log('processImageToSquare - Large image detected, using chunked base64 conversion');
+      // Process in chunks to avoid memory spikes
+      const chunks: string[] = [];
+      const chunkSize = 1024 * 1024; // 1MB chunks
+      for (let i = 0; i < imageBuffer.length; i += chunkSize) {
+        const chunk = imageBuffer.slice(i, i + chunkSize);
+        chunks.push(chunk.toString('base64'));
+      }
+      base64Image = `data:image/png;base64,${chunks.join('')}`;
+    } else {
+      base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+    }
+    
+    // Create HTML page with simple Canvas center cropping
+    const canvasHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 0; background: white; }
+          canvas { display: block; }
+        </style>
+      </head>
+      <body>
+        <canvas id="canvas" width="1080" height="1080"></canvas>
+        <script>
+          const canvas = document.getElementById('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Enable high quality rendering
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          
+          img.onload = function() {
+            console.log('Canvas: Image loaded, original dimensions:', img.width, 'x', img.height);
+            
+            // Simple center cropping logic
+            let sourceX = 0, sourceY = 0, sourceWidth = img.width, sourceHeight = img.height;
+            
+            if (img.width > img.height) {
+              // Landscape: crop from sides
+              sourceWidth = img.height; // Make it square
+              sourceX = (img.width - img.height) / 2; // Center horizontally
+            } else if (img.height > img.width) {
+              // Portrait: crop from top/bottom
+              sourceHeight = img.width; // Make it square
+              sourceY = (img.height - img.width) / 2; // Center vertically
+            }
+            // If already square, no cropping needed
+            
+            console.log('Canvas: Cropping from:', sourceX, sourceY, 'size:', sourceWidth, 'x', sourceHeight);
+            
+            // Draw the cropped square portion scaled to 1080x1080
+            ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, 1080, 1080);
+            
+            // Get canvas data as base64 PNG
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
+            console.log('Canvas: Generated square image, data URL length:', dataUrl.length);
+            
+            // Store result for extraction
+            window.canvasResult = dataUrl;
+            window.processingComplete = true;
+          };
+          
+          img.onerror = function(error) {
+            console.error('Canvas: Image failed to load:', error);
+            window.processingError = 'Failed to load image';
+            window.processingComplete = true;
+          };
+          
+          // Load the image
+          img.src = '${base64Image}';
+        </script>
+      </body>
+      </html>
+    `;
+    
+    // Use Puppeteer to process the image
+    const page = await browserManager.getPage();
+    
+    try {
+      console.log('processImageToSquare - Setting page content...');
+      // Set page content and wait for processing with extended timeout
+      await page.setContent(canvasHtml, { 
+        waitUntil: 'networkidle0',
+        timeout: 30000 // 30 seconds for large images
+      });
+      
+      console.log('processImageToSquare - Waiting for Canvas processing...');
+      // Wait for Canvas processing to complete with extended timeout
+      await page.waitForFunction(() => (window as any).processingComplete, { 
+        timeout: 30000 // 30 seconds for large image processing
+      });
+      
+      // Check if processing succeeded
+      const processingError = await page.evaluate(() => (window as any).processingError);
+      if (processingError) {
+        throw new Error(`Canvas processing failed: ${processingError}`);
+      }
+      
+      // Extract the processed image data
+      const canvasDataUrl = await page.evaluate(() => (window as any).canvasResult);
+      if (!canvasDataUrl || !canvasDataUrl.startsWith('data:image/png;base64,')) {
+        throw new Error('Failed to generate valid canvas data URL');
+      }
+      
+      // Convert base64 back to buffer
+      const base64Data = canvasDataUrl.replace('data:image/png;base64,', '');
+      const squareImageBuffer = Buffer.from(base64Data, 'base64');
+      
+      console.log(`processImageToSquare - Successfully processed to 1080x1080 square, size: ${squareImageBuffer.length} bytes`);
+      return squareImageBuffer;
+      
+    } finally {
+      // Always release the page
+      await browserManager.releasePage(page);
+    }
+    
+  } catch (error) {
+    console.error('processImageToSquare - Failed to process image:', error);
+    
+    // For large images that timeout, try a simpler approach or return a rejection
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('processImageToSquare - Timeout occurred, image too large for Canvas processing');
+      console.log('processImageToSquare - Consider implementing server-side image resizing as fallback');
+    }
+    
+    // Instead of falling back to original non-square image (which Instagram rejects),
+    // we should either process successfully or fail the request
+    console.log('processImageToSquare - Rejecting request rather than serving non-square image');
+    throw new Error(`Image processing failed: ${error instanceof Error ? error.message : 'Unknown error'}. Cannot serve non-square image to Instagram.`);
+  }
+}
+
+/**
+ * Main image processing function with fallback chain
+ * Tries Sharp first, falls back to Puppeteer Canvas, then errors
+ */
+async function processImageToSquare(imageBuffer: Buffer, story?: any): Promise<Buffer> {
+  try {
+    // Try Sharp first (preferred method)
+    console.log('processImageToSquare - Attempting Sharp processing...');
+    return await processImageToSquareWithSharp(imageBuffer);
+    
+  } catch (sharpError) {
+    console.warn('processImageToSquare - Sharp processing failed, falling back to Puppeteer:', sharpError instanceof Error ? sharpError.message : 'Unknown error');
+    
+    try {
+      // Fallback to Puppeteer Canvas
+      console.log('processImageToSquare - Attempting Puppeteer Canvas processing...');
+      return await processImageToSquareWithPuppeteer(imageBuffer, story);
+      
+    } catch (puppeteerError) {
+      console.error('processImageToSquare - Both Sharp and Puppeteer processing failed');
+      console.error('Sharp error:', sharpError instanceof Error ? sharpError.message : 'Unknown error');
+      console.error('Puppeteer error:', puppeteerError instanceof Error ? puppeteerError.message : 'Unknown error');
+      
+      // Both methods failed, cannot serve non-square image to Instagram
+      throw new Error(`Image processing failed: Sharp (${sharpError instanceof Error ? sharpError.message : 'Unknown error'}) and Puppeteer (${puppeteerError instanceof Error ? puppeteerError.message : 'Unknown error'}). Cannot serve non-square image to Instagram.`);
+    }
+  }
+}
+
 // Simple in-memory cache for carousel data (in production, use Redis)
 const carouselDataCache = new Map<string, { carouselData: any, caption: string, timestamp: number }>();
 const preGeneratedImagesCache = new Map<string, { images: { buffer: Buffer; index: number }[], timestamp: number }>();
+const squareImageCache = new Map<string, { buffer: Buffer, timestamp: number }>();
 
 async function cacheCarouselData(storyId: string, carouselData: any, caption: string): Promise<void> {
   // In a production app, you might want to cache this data in Redis
@@ -884,6 +1170,33 @@ async function getPreGeneratedImage(storyId: string, imageIndex: number): Promis
   
   const image = cached.images.find(img => img.index === imageIndex);
   return image ? image.buffer : null;
+}
+
+async function cacheSquareImage(storyId: string, squareImageBuffer: Buffer): Promise<void> {
+  squareImageCache.set(storyId, {
+    buffer: squareImageBuffer,
+    timestamp: Date.now()
+  });
+  console.log(`Cached square image for story ${storyId}, size: ${squareImageBuffer.length} bytes`);
+}
+
+async function getCachedSquareImage(storyId: string): Promise<Buffer | null> {
+  const cached = squareImageCache.get(storyId);
+  
+  if (!cached) {
+    return null;
+  }
+  
+  // Check if cache is older than 1 hour
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  if (cached.timestamp < oneHourAgo) {
+    squareImageCache.delete(storyId);
+    console.log(`Square image cache expired for story ${storyId}`);
+    return null;
+  }
+  
+  console.log(`Retrieved cached square image for story ${storyId}`);
+  return cached.buffer;
 }
 
 // Fallback image generation for when HTML rendering fails

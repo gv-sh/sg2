@@ -48,6 +48,7 @@ const AppRoutes = ({
     setSelectedCategory([]);
     sessionStorage.removeItem('specgen-parameters');
     sessionStorage.removeItem('specgen-auto-generate');
+    sessionStorage.removeItem('specgen-story-year');
   };
 
   const handleParameterSelect = (parameter) => {
@@ -80,12 +81,16 @@ const AppRoutes = ({
   };
 
   // Navigation handlers
-  const handleNavigateToGenerate = () => {
+  const handleNavigateToGenerate = (storyYear) => {
     // Store generation request details in session storage to handle page refreshes
     if (selectedParameters.length > 0) {
       // Save the current parameters for potential recovery
       sessionStorage.setItem('specgen-parameters', JSON.stringify(selectedParameters));
       sessionStorage.setItem('specgen-auto-generate', 'true');
+      // Store the story year for use during generation
+      if (storyYear) {
+        sessionStorage.setItem('specgen-story-year', storyYear.toString());
+      }
       setGenerationInProgress(true);
     }
     navigate('/generating');

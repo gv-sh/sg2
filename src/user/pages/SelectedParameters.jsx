@@ -259,8 +259,8 @@ const SelectedParameters = ({
   onNavigateToGenerate,
 }) => {
   const [storyYear, setStoryYear] = useState(() => {
-    // Generate a random year between 2026 and 2126
-    return Math.floor(Math.random() * (2126 - 2026 + 1)) + 2026;
+    // Generate a random year between 2025 and 2100
+    return Math.floor(Math.random() * (2100 - 2025 + 1)) + 2025;
   });
 
 
@@ -334,16 +334,16 @@ const SelectedParameters = ({
           {/* Slider + min/max under it */}
           <div className="flex-1">
             <Slider
-              min={2026}
-              max={2126}
+              min={2025}
+              max={2100}
               step={1}
               value={storyYear}
               onValueChange={(value) => setStoryYear(value)}
               className="w-full accent-primary"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>2026</span>
-              <span>2126</span>
+              <span>2025</span>
+              <span>2100</span>
             </div>
           </div>
 

@@ -155,7 +155,7 @@ Avoid using complex academic words or foreign concepts. Write like you're tellin
 
   // Business Logic Configuration
   business: {
-    years: { min: 1900, max: 3000 },
+    years: { min: 2025, max: 2100 },
     pagination: { defaultLimit: 20, maxLimit: 100, minLimit: 1 },
     content: { defaultType: 'fiction', idRandomMultiplier: 1000 }
   },
@@ -199,7 +199,7 @@ Avoid using complex academic words or foreign concepts. Write like you're tellin
     maxSettingsKeys: 100,
     maxPageSize: 100,
     defaultPageSize: 20,
-    yearRange: { min: 1900, max: 3000 }
+    yearRange: { min: 2025, max: 2100 }
   }
 };
 

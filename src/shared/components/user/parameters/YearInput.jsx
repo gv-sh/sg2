@@ -4,9 +4,9 @@ import { Button } from '../../ui/button.tsx';
 import { Calendar, Dices } from 'lucide-react';
 
 const YearInput = ({ value, onChange }) => {
-  // Default year range from 2050 to 2150
-  const minYear = 2050;
-  const maxYear = 2150;
+  // Default year range from 2025 to 2100
+  const minYear = 2025;
+  const maxYear = 2100;
   
   // Generate random year in range
   const generateRandomYear = () => {
@@ -54,7 +54,7 @@ const YearInput = ({ value, onChange }) => {
           onChange={handleYearChange}
           min={minYear}
           max={maxYear}
-          placeholder="Enter year (2050-2150)"
+          placeholder="Enter year (2025-2100)"
           className="w-full h-9 rounded-md border bg-transparent px-3 py-1 text-sm"
         />
         <div className="text-xs text-muted-foreground mt-1">

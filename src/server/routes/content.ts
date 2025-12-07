@@ -223,7 +223,7 @@ router.post('/generate', async (req: TypedRequestBody<GenerationRequestSchema>, 
       image_original_url: savedContent.image_blob ? `/api/images/${savedContent.id}/original` : undefined,
       image_thumbnail_url: savedContent.image_blob ? `/api/images/${savedContent.id}/thumbnail` : undefined,
       parameters: savedContent.prompt_data,
-      year: savedContent.metadata?.year || validatedData.year,
+      year: validatedData.year || savedContent.metadata?.year,
       metadata: savedContent.metadata || undefined,
       created_at: savedContent.created_at instanceof Date ? savedContent.created_at.toISOString() : savedContent.created_at
     };

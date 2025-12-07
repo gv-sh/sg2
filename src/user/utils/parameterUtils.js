@@ -38,6 +38,6 @@ export const randomizeParameterValue = (parameter) => {
 /**
  * Generate a random year between min and max
  */
-export const generateRandomYear = (min = 2050, max = 2150) => {
+export const generateRandomYear = (min = 2025, max = 2100) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };

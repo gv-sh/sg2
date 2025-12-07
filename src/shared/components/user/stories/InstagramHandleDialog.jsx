@@ -9,11 +9,11 @@ import { AtSign, Loader2, Check, X, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '../../ui/alert.tsx';
 import axios from 'axios';
 
-const InstagramHandleDialog = ({ 
-  isOpen, 
-  onClose, 
-  postId, 
-  onComplete 
+const InstagramHandleDialog = ({
+  isOpen,
+  onClose,
+  postId,
+  onComplete
 }) => {
   const [handle, setHandle] = useState('');
   const [submitState, setSubmitState] = useState('ready'); // ready, submitting, success, error
@@ -23,7 +23,7 @@ const InstagramHandleDialog = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!handle.trim() || submitState === 'submitting') return;
 
     try {
@@ -32,7 +32,7 @@ const InstagramHandleDialog = ({
 
       // Clean handle - remove @ if user added it, we'll add it in the API
       const cleanHandle = handle.trim().replace(/^@/, '');
-      
+
       if (cleanHandle.length === 0) {
         throw new Error('Please enter a valid Instagram handle');
       }
@@ -45,7 +45,7 @@ const InstagramHandleDialog = ({
 
       if (response.data.success) {
         setSubmitState('success');
-        
+
         // Wait a moment to show success, then call completion callback
         setTimeout(() => {
           if (onComplete) {
@@ -81,9 +81,9 @@ const InstagramHandleDialog = ({
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
               <AtSign className="h-4 w-4 text-white" />
             </div>
-            <h3 className="text-lg font-semibold">Connect on Instagram</h3>
+            <h3 className="text-lg font-semibold">Add your Instagram handle</h3>
           </div>
-          
+
           {submitState !== 'submitting' && (
             <Button
               variant="ghost"
@@ -98,8 +98,8 @@ const InstagramHandleDialog = ({
 
         <div className="space-y-4">
           <div className="text-sm text-muted-foreground">
-            <p className="mb-2">Your story has been shared as an Instagram carousel! 🎉</p>
-            <p>Add your Instagram handle as a comment so people can connect with you.</p>
+            <p className="mb-2">This story has been shared as an Instagram Post</p>
+            <p>You can choose to add your Instagram handle as the author—or stay anonymous.</p>
           </div>
 
           {submitState === 'success' ? (
@@ -109,7 +109,7 @@ const InstagramHandleDialog = ({
               </div>
               <div className="text-green-600 font-medium">Comment added successfully!</div>
               <div className="text-sm text-muted-foreground mt-1">
-                Your handle has been posted as a reply to the carousel.
+                Your handle has been added as the first comment on the post.
               </div>
             </div>
           ) : (
@@ -176,7 +176,7 @@ const InstagramHandleDialog = ({
               </div>
 
               <div className="text-xs text-muted-foreground text-center">
-                This will post a comment: "Connect with me: @your_username"
+                This will post a comment: "A possible future imagined by: @your_username"
               </div>
             </form>
           )}

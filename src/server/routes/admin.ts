@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { dataService } from '../services.js';
 import ImageProcessorService from '../services/imageProcessor.js';
+import InstagramService from '../services/instagram.js';
 import config from '../config.js';
 import {
   categorySchema,
@@ -1040,6 +1041,118 @@ router.post('/instagram/preview', async (req: TypedRequestBody<{ storyId: string
   } catch (error: any) {
     console.error('Failed to generate Instagram preview:', error);
     next(boom.internal('Failed to generate Instagram preview', error));
+  }
+});
+
+// ==================== INSTAGRAM STATUS ROUTES ====================
+
+/**
+ * @swagger
+ * /api/admin/instagram/status:
+ *   get:
+ *     summary: Check Instagram credentials status
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Instagram credentials status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     valid:
+ *                       type: boolean
+ *                     status:
+ *                       type: string
+ *                       enum: [valid, invalid, error]
+ *                     facebookPageId:
+ *                       type: string
+ *                     instagramUsername:
+ *                       type: string
+ *                     lastChecked:
+ *                       type: string
+ *                       format: date-time
+ *                     errorMessage:
+ *                       type: string
+ */
+router.get('/instagram/status', async (req: Request, res: Response<ApiResponse>, next: NextFunction) => {
+  let instagramService: InstagramService | null = null;
+  
+  try {
+    // Initialize Instagram service
+    try {
+      instagramService = new InstagramService();
+    } catch (error: any) {
+      return res.json({
+        success: true,
+        message: 'Instagram credentials status retrieved',
+        data: {
+          valid: false,
+          status: 'invalid',
+          facebookPageId: null,
+          instagramUsername: null,
+          lastChecked: new Date().toISOString(),
+          errorMessage: error.message || 'Instagram service initialization failed'
+        },
+        meta: {
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+    
+    // Ensure Instagram service was initialized successfully
+    if (!instagramService) {
+      return res.json({
+        success: true,
+        message: 'Instagram credentials status retrieved',
+        data: {
+          valid: false,
+          status: 'error',
+          facebookPageId: null,
+          instagramUsername: null,
+          lastChecked: new Date().toISOString(),
+          errorMessage: 'Instagram service could not be initialized'
+        },
+        meta: {
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+    
+    // Validate credentials using detailed method
+    const validationStatus = await instagramService.validateCredentialsDetailed();
+    
+    return res.json({
+      success: true,
+      message: 'Instagram credentials status retrieved',
+      data: validationStatus,
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    console.error('Failed to check Instagram credentials status:', error);
+    
+    return res.json({
+      success: true,
+      message: 'Instagram credentials status retrieved',
+      data: {
+        valid: false,
+        status: 'error',
+        facebookPageId: process.env.FACEBOOK_PAGE_ID || null,
+        instagramUsername: null,
+        lastChecked: new Date().toISOString(),
+        errorMessage: error.message || 'Unknown error occurred while checking credentials'
+      },
+      meta: {
+        timestamp: new Date().toISOString()
+      }
+    });
   }
 });
 

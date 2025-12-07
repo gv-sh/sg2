@@ -26,6 +26,16 @@ interface CommentRequest {
   message: string;
 }
 
+interface ValidationStatus {
+  valid: boolean;
+  status: 'valid' | 'invalid' | 'error';
+  facebookPageId: string | null;
+  instagramUsername: string | null;
+  instagramAccountId: string | null;
+  lastChecked: string;
+  errorMessage: string | null;
+}
+
 export class InstagramService {
   private accessToken: string;
   private appId: string;
@@ -197,6 +207,133 @@ export class InstagramService {
     } catch (error) {
       console.error('Instagram credentials validation failed:', error);
       return false;
+    }
+  }
+
+  /**
+   * Check credentials and return detailed status information
+   */
+  async validateCredentialsDetailed(): Promise<ValidationStatus> {
+    const timestamp = new Date().toISOString();
+    
+    try {
+      // Step 1: Get Facebook Page information using Facebook Graph API
+      console.log('[Instagram Service] Validating Facebook Page access...');
+      const pageResponse = await fetch(
+        `https://graph.facebook.com/v18.0/${this.facebookPageId}?fields=id,name,instagram_business_account&access_token=${this.accessToken}`
+      );
+
+      const pageResult = await pageResponse.json();
+      console.log('[Instagram Service] Facebook Page validation response:', pageResult);
+      
+      if (!pageResponse.ok || pageResult.error) {
+        console.error('[Instagram Service] Facebook Page validation failed:', pageResult.error);
+        const errorCode = pageResult.error?.code;
+        const errorMessage = pageResult.error?.message;
+        
+        let errorMsg = `Facebook API error: ${errorMessage || 'Unknown error'}`;
+        
+        if (errorCode === 190) {
+          errorMsg = 'Instagram access token is invalid or expired. Please refresh your token.';
+        } else if (errorCode === 200) {
+          errorMsg = 'Instagram permissions error. Please ensure your app has content_management permissions.';
+        } else if (errorCode === 100) {
+          errorMsg = 'Invalid Facebook Page ID. Please check your FACEBOOK_PAGE_ID configuration.';
+        }
+        
+        return {
+          valid: false,
+          status: 'invalid',
+          facebookPageId: this.facebookPageId,
+          instagramUsername: null,
+          instagramAccountId: null,
+          lastChecked: timestamp,
+          errorMessage: errorMsg
+        };
+      }
+
+      if (!pageResult.instagram_business_account) {
+        return {
+          valid: false,
+          status: 'invalid',
+          facebookPageId: this.facebookPageId,
+          instagramUsername: null,
+          instagramAccountId: null,
+          lastChecked: timestamp,
+          errorMessage: 'No Instagram Business Account linked to this Facebook Page. Please link an Instagram Business Account to your Facebook Page.'
+        };
+      }
+
+      // Step 2: Validate Instagram Business Account access
+      console.log('[Instagram Service] Validating Instagram Business Account access...');
+      const igAccountId = pageResult.instagram_business_account.id;
+      const igResponse = await fetch(
+        `https://graph.facebook.com/v18.0/${igAccountId}?fields=id,username&access_token=${this.accessToken}`
+      );
+
+      const igResult = await igResponse.json();
+      console.log('[Instagram Service] Instagram Business Account validation response:', igResult);
+      
+      if (igResponse.ok && igResult.id) {
+        console.log('[Instagram Service] Credentials valid for Instagram Business Account:', igResult.username || igResult.id);
+        this.instagramBusinessAccountId = igResult.id; // Store for media operations
+        
+        return {
+          valid: true,
+          status: 'valid',
+          facebookPageId: this.facebookPageId,
+          instagramUsername: igResult.username || null,
+          instagramAccountId: igResult.id,
+          lastChecked: timestamp,
+          errorMessage: null
+        };
+      }
+      
+      console.error('[Instagram Service] Invalid Instagram Business Account:', igResult);
+      
+      if (igResult.error) {
+        const errorCode = igResult.error.code;
+        const errorMessage = igResult.error.message;
+        
+        let errorMsg = `Instagram Business Account error: ${errorMessage}`;
+        
+        if (errorCode === 190) {
+          errorMsg = 'Instagram access token expired. Please refresh your Instagram access token.';
+        } else if (errorCode === 200) {
+          errorMsg = 'Insufficient permissions for Instagram Business Account. Please ensure your app has instagram_content_publish permissions.';
+        }
+        
+        return {
+          valid: false,
+          status: 'invalid',
+          facebookPageId: this.facebookPageId,
+          instagramUsername: null,
+          instagramAccountId: igAccountId,
+          lastChecked: timestamp,
+          errorMessage: errorMsg
+        };
+      }
+      
+      return {
+        valid: false,
+        status: 'invalid',
+        facebookPageId: this.facebookPageId,
+        instagramUsername: null,
+        instagramAccountId: igAccountId,
+        lastChecked: timestamp,
+        errorMessage: 'Instagram Business Account validation failed. Please check your account setup.'
+      };
+    } catch (error: any) {
+      console.error('Instagram credentials validation failed:', error);
+      return {
+        valid: false,
+        status: 'error',
+        facebookPageId: this.facebookPageId,
+        instagramUsername: null,
+        instagramAccountId: null,
+        lastChecked: timestamp,
+        errorMessage: error.message || 'Unknown error occurred during validation'
+      };
     }
   }
 

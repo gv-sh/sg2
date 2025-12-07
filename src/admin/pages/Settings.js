@@ -36,6 +36,8 @@ function Settings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(false);
   const [availableModels, setAvailableModels] = useState({ fiction: [], image: [] });
+  const [instagramStatus, setInstagramStatus] = useState(null);
+  const [isCheckingInstagram, setIsCheckingInstagram] = useState(false);
   const toast = useToast();
 
   // Unflatten settings from backend format
@@ -101,10 +103,32 @@ function Settings() {
     }
   }, []);
 
+  const checkInstagramStatus = useCallback(async () => {
+    try {
+      setIsCheckingInstagram(true);
+      const response = await axios.get(`${config.API_URL}/api/admin/instagram/status`);
+      setInstagramStatus(response.data?.data || null);
+    } catch (error) {
+      console.error('Failed to check Instagram status:', error);
+      setInstagramStatus({
+        valid: false,
+        status: 'error',
+        facebookPageId: null,
+        instagramUsername: null,
+        lastChecked: new Date().toISOString(),
+        errorMessage: 'Failed to check Instagram credentials status'
+      });
+      toast.error('Failed to check Instagram credentials status.');
+    } finally {
+      setIsCheckingInstagram(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchSettings();
     fetchAvailableModels();
-  }, [fetchSettings, fetchAvailableModels]);
+    checkInstagramStatus();
+  }, [fetchSettings, fetchAvailableModels, checkInstagramStatus]);
 
   const handleSettingsChange = (section, subsection, field, value) => {
     if (subsection) {
@@ -456,6 +480,61 @@ function Settings() {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* Instagram Credentials Status */}
+                <div className="p-4 border rounded-lg bg-muted/50">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-medium">Credentials Status</h3>
+                      <div className="flex items-center space-x-2">
+                        {instagramStatus ? (
+                          instagramStatus.valid ? (
+                            <>
+                              <Badge className="bg-green-100 text-green-800 border-green-200">✅ Connected</Badge>
+                              {instagramStatus.instagramUsername && (
+                                <span className="text-xs text-muted-foreground">@{instagramStatus.instagramUsername}</span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <Badge className="bg-red-100 text-red-800 border-red-200">❌ Invalid</Badge>
+                              <span className="text-xs text-red-600">{instagramStatus.errorMessage}</span>
+                            </>
+                          )
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-800 border-gray-200">⏳ Checking...</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {instagramStatus ? (
+                          `Last checked: ${new Date(instagramStatus.lastChecked).toLocaleString()}`
+                        ) : (
+                          'Checking credentials...'
+                        )}
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={checkInstagramStatus} 
+                      size="sm"
+                      variant="outline"
+                      disabled={isCheckingInstagram}
+                    >
+                      {isCheckingInstagram ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary mr-2"></div>
+                          Checking...
+                        </>
+                      ) : (
+                        '🔄 Check Now'
+                      )}
+                    </Button>
+                  </div>
+                  {instagramStatus && instagramStatus.facebookPageId && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Facebook Page ID: {instagramStatus.facebookPageId}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">

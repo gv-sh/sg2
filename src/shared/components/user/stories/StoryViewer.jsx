@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import ReactDOM from 'react-dom/client';
+import QRCode from 'qrcode';
 
 // Format date helper function (moved outside component for reuse in PDF generation)
 const formatDate = (dateString) => {
@@ -25,6 +26,39 @@ const formatDate = (dateString) => {
     day: 'numeric'
   };
   return date.toLocaleDateString('en-US', options);
+};
+
+// Generate QR code as data URL
+const generateQRCode = async (url) => {
+  if (!url) {
+    console.log('generateQRCode - No URL provided');
+    return null;
+  }
+  
+  console.log('generateQRCode - Generating QR code for URL:', url);
+  
+  try {
+    const qrDataUrl = await QRCode.toDataURL(url, {
+      width: 200,
+      margin: 1,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    });
+    console.log('generateQRCode - QR code generated successfully, length:', qrDataUrl?.length);
+    return qrDataUrl;
+  } catch (error) {
+    console.error('generateQRCode - Failed to generate QR code:', error);
+    return null;
+  }
+};
+
+// Generate Instagram post URL if we have post ID
+const getInstagramPostUrl = (postId) => {
+  if (!postId) return null;
+  // Instagram post URL format: https://www.instagram.com/p/{media-id}/
+  return `https://www.instagram.com/p/${postId}/`;
 };
 
 const StoryViewer = ({
@@ -122,13 +156,6 @@ const StoryViewer = ({
 
   // Get the image source
   const imageSource = getStoryImage(story);
-
-  // Generate Instagram post URL if we have post ID
-  const getInstagramPostUrl = (postId) => {
-    if (!postId) return null;
-    // Instagram post URL format: https://www.instagram.com/p/{media-id}/
-    return `https://www.instagram.com/p/${postId}/`;
-  };
 
 
   // Handle share button click
@@ -345,7 +372,8 @@ const StoryViewer = ({
                 downloadStyledPDF({
                   story: { title: story.title, year: story.year, createdAt: story.createdAt },
                   imageSource: imageSource,
-                  contentParagraphs: contentParagraphs
+                  contentParagraphs: contentParagraphs,
+                  instagramData: instagramData
                 })
               }
             >
@@ -360,7 +388,8 @@ const StoryViewer = ({
                 printStyledPDF({
                   story: { title: story.title, year: story.year, createdAt: story.createdAt },
                   imageSource: imageSource,
-                  contentParagraphs: contentParagraphs
+                  contentParagraphs: contentParagraphs,
+                  instagramData: instagramData
                 })
               }
             >
@@ -426,7 +455,7 @@ const preload = src =>
     img.src = src;
   });
 
-const downloadStyledPDF = async ({ story, imageSource, returnInstance = false }) => {
+const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData, returnInstance = false }) => {
   // 4R postcard = ~152 x 102 mm, landscape
   const pdf = new jsPDF('l', 'mm', [152, 102]);
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -444,6 +473,21 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
   document.body.appendChild(container);
 
   if (imageSource) await preload(imageSource);
+
+  // Debug logging for Instagram data
+  console.log('PDF Generation - Instagram data:', instagramData);
+  console.log('PDF Generation - Has postId:', !!instagramData?.postId);
+
+  // Generate QR code for Instagram post if available
+  let qrCodeDataUrl = null;
+  if (instagramData?.postId) {
+    const instagramUrl = instagramData.carouselUrl || getInstagramPostUrl(instagramData.postId);
+    console.log('PDF Generation - Instagram URL:', instagramUrl);
+    qrCodeDataUrl = await generateQRCode(instagramUrl);
+    console.log('PDF Generation - QR code generated:', !!qrCodeDataUrl);
+  } else {
+    console.log('PDF Generation - No Instagram postId found, skipping QR code');
+  }
 
   const jsxContent = (
     <div
@@ -487,46 +531,55 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
         }}
       >
 
-        <div
-          style={{
-            width: '0.8in',
-            height: '1.15in',
-            border: '1px solid #000000ff',
-            zIndex: '10',
-            position: 'absolute',
-            top: '2.90in',
-            left: '0.2in',
-            backgroundColor: '#ffffff',
-
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '0.01in',
-          }}
-        >
-          <img
-            //src={qrImageSrc} // your QR image or canvas png - Place QR here
-            //alt="QR code"
+        {qrCodeDataUrl && (
+          <div
             style={{
-              width: '0.75in',
-              height: '0.75in',
+              width: '0.8in',
+              height: '1.15in',
+              border: '1px solid #000000ff',
+              zIndex: '10',
+              position: 'absolute',
+              top: '2.90in',
+              left: '0.2in',
               backgroundColor: '#ffffff',
-              boxSizing: 'border-box',
-            }}
-          />
 
-          <p
-            style={{
-              margin: '0 0 0 0',
-              fontSize: '11px',
-              lineHeight: '1.0',
-              textAlign: 'left',
-              fontWeight: 300,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '0.01in',
             }}
           >
-            scan to read<br />the future
-          </p>
-        </div>
+            <img
+              src={qrCodeDataUrl}
+              alt="QR code for Instagram post"
+              style={{
+                width: '0.75in',
+                height: '0.75in',
+                backgroundColor: '#ffffff',
+                boxSizing: 'border-box',
+              }}
+              onLoad={() => console.log('PDF Generation - QR code image loaded successfully')}
+              onError={(e) => console.error('PDF Generation - QR code image failed to load:', e)}
+            />
+
+            <p
+              style={{
+                margin: '0 0 0 0',
+                fontSize: '11px',
+                lineHeight: '1.0',
+                textAlign: 'left',
+                fontWeight: 300,
+              }}
+            >
+              scan to read<br />the future
+            </p>
+          </div>
+        )}
+        {!qrCodeDataUrl && instagramData?.postId && (
+          <div style={{ display: 'none' }}>
+            {console.log('PDF Generation - QR code should render but qrCodeDataUrl is null')}
+          </div>
+        )}
 
         <div
           style={{
@@ -593,7 +646,9 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
   const root = ReactDOM.createRoot(container);
   root.render(jsxContent);
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Wait longer to ensure QR code and all images are loaded properly
+  console.log('PDF Generation - Waiting for rendering to complete...');
+  await new Promise((resolve) => setTimeout(resolve, 1500));
 
   const canvas = await html2canvas(container, {
     scale: 2,
@@ -623,11 +678,12 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
 };
 
 
-const printStyledPDF = async ({ story, imageSource, contentParagraphs }) => {
+const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData }) => {
   const pdf = await downloadStyledPDF({
     story,
     imageSource,
     contentParagraphs,
+    instagramData,
     returnInstance: true // enable PDF return instead of save
   });
 

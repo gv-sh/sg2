@@ -356,7 +356,7 @@ const StoryViewer = ({
                     <div className="flex items-center space-x-4 text-xs text-gray-600 dark:text-gray-300">
                       <span>📸 {instagramData.slideCount || 1} slide{(instagramData.slideCount || 1) > 1 ? 's' : ''}</span>
                       {instagramData.handleSubmitted && instagramData.handle && (
-                        <span>👤 @{instagramData.handle}</span>
+                        <span>👤 {instagramData.handle}</span>
                       )}
                     </div>
 

@@ -247,19 +247,28 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
     });
 
-    // Generate Instagram caption
-    const caption = await imageProcessor.generateInstagramCaption({
-      id: story.id,
-      title: story.title,
-      content: story.fiction_content,
-      type: 'combined',
-      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-      parameters: story.prompt_data,
-      year: story.metadata?.year || null,
-      metadata: story.metadata || undefined,
-      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    // Try to get cached caption first (from preview), otherwise generate new one
+    const cachedData = await getCachedCarouselData(story.id);
+    let caption: string;
+    
+    if (cachedData?.caption) {
+      console.log('Using cached Instagram caption from preview');
+      caption = cachedData.caption;
+    } else {
+      console.log('No cached caption found, generating new Instagram caption');
+      caption = await imageProcessor.generateInstagramCaption({
+        id: story.id,
+        title: story.title,
+        content: story.fiction_content,
+        type: 'combined',
+        image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+        image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+        parameters: story.prompt_data,
+        year: story.metadata?.year || null,
+        metadata: story.metadata || undefined,
+        created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+      });
+    }
 
     // PRE-GENERATE ALL IMAGES BEFORE INSTAGRAM API CALLS
     console.log(`Pre-generating images for Instagram posting...`);

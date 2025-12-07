@@ -188,7 +188,7 @@ const StoryViewer = ({
       </header>
 
       <div className="py-8">
-        <div className="prose prose-lg max-w-3xl mx-auto">
+        <div className="prose prose-lg w-full mx-auto">
           {imageSource && (
             <div className="mb-8 not-prose">
               <img
@@ -326,7 +326,7 @@ const StoryViewer = ({
 
       {/* Footer with actions */}
       <footer className="py-6 border-t mt-auto">
-        <div className="flex items-center justify-start max-w-3xl mx-auto space-x-8">
+        <div className="flex items-center justify-center w-full mx-auto space-x-8">
           <div className="flex items-center space-x-3 mb-4">
             <Button
               variant="outline"
@@ -403,7 +403,7 @@ const StoryViewer = ({
         </div>
         {/* Collection info with date moved here */}
         <div className="text-sm text-muted-foreground ml-auto">
-          <div className="flex items-center">
+          <div className="flex justify-center items-center">
             <Calendar className="h-3.5 w-3.5 mr-1.5" />
             <span className="mr-1">Created on</span>
             <span className="mr-1">{formatDate(story.createdAt)}</span>
@@ -495,7 +495,7 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
             zIndex: '10',
             position: 'absolute',
             top: '2.90in',
-            left: '0.1in',
+            left: '0.2in',
             backgroundColor: '#ffffff',
 
             display: 'flex',
@@ -535,7 +535,7 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
             zIndex: '10',
             position: 'absolute',
             top: '3.45in',
-            left: '1in',
+            left: '1.1in',
 
             display: 'flex',
             flexDirection: 'column',
@@ -577,10 +577,10 @@ const downloadStyledPDF = async ({ story, imageSource, returnInstance = false })
           style={{
             position: 'absolute',
             marginLeft: '0px',
-            marginTop: '16px',
+            marginTop: '14px',
             top: '3.5in',
-            left: '5.2in',
-            height: '0.3in',
+            left: '5.0in',
+            height: '0.33in',
             width: 'auto',
             boxSizing: 'border-box',
 

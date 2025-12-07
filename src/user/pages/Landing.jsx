@@ -26,7 +26,7 @@ const Landing = ({ onClearSession }) => {
       <Shaders />
       {/* Foreground content */}
       <div className="content__inner absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white">
-        <div className="max-w-4xl mx-auto px-[8rem]">
+        <div className="w-full mx-auto 2xl:px-[8rem] px-6">
           <h1 className="flex flex-wrap justify-center gap-4 text-[5rem] text-display text-primary mb-8 text-center">
             {["What", "kind", "of", "futures", "do", "you", "envision?"].map((word, i) => (
               <span key={i}>

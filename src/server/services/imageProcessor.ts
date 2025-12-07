@@ -28,58 +28,59 @@ interface ThemeColors {
 export class ImageProcessorService {
   private readonly themes: Record<string, ThemeColors> = {
     cyberpunk: {
-      primary: '#ff0080',
-      secondary: '#00ffff',
-      accent: '#ffff00',
-      background: '#1a1a1a',
-      text: '#ffffff',
-      textMuted: '#cccccc'
+      primary: '#db2777',    // rose-600 – readable on light bg
+      secondary: '#0891b2',  // cyan-600
+      accent: '#eab308',     // yellow-500
+      background: '#f9fafb', // slate-50 – light neutral
+      text: '#0f172a',       // slate-900
+      textMuted: '#6b7280',  // gray-500
     },
     nature: {
-      primary: '#22c55e',
-      secondary: '#059669',
-      accent: '#fbbf24',
-      background: '#1f2937',
-      text: '#ffffff',
-      textMuted: '#d1d5db'
+      primary: '#15803d',    // green-700
+      secondary: '#047857',  // emerald-700-ish
+      accent: '#b45309',     // amber-700
+      background: '#f5fdf7', // very pale green
+      text: '#0b1120',       // slate-950
+      textMuted: '#64748b',  // slate-500
     },
     space: {
-      primary: '#6366f1',
-      secondary: '#8b5cf6',
-      accent: '#f59e0b',
-      background: '#1e1b4b',
-      text: '#ffffff',
-      textMuted: '#c7d2fe'
+      primary: '#4f46e5',    // indigo-600
+      secondary: '#7c3aed',  // violet-600
+      accent: '#b45309',     // amber-700 for contrast pop
+      background: '#f5f3ff', // indigo/violet-tinted very light
+      text: '#020617',       // slate-950
+      textMuted: '#6b7280',  // gray-500
     },
     dystopian: {
-      primary: '#ef4444',
-      secondary: '#dc2626',
-      accent: '#f97316',
-      background: '#2d1b1b',
-      text: '#ffffff',
-      textMuted: '#fca5a5'
+      primary: '#b91c1c',    // red-700 – dark enough for text
+      secondary: '#c2410c',  // orange-700
+      accent: '#92400e',     // amber-800
+      background: '#fef2f2', // red-50 – still light
+      text: '#111827',       // gray-900
+      textMuted: '#6b7280',  // gray-500
     },
     utopian: {
-      primary: '#3b82f6',
-      secondary: '#1d4ed8',
-      accent: '#06b6d4',
-      background: '#1e3a5f',
-      text: '#ffffff',
-      textMuted: '#93c5fd'
+      primary: '#2563eb',    // blue-600
+      secondary: '#1d4ed8',  // blue-700
+      accent: '#0891b2',     // cyan-600
+      background: '#eff6ff', // blue-50
+      text: '#0f172a',       // slate-900
+      textMuted: '#64748b',  // slate-500
     },
     default: {
-      primary: '#6366f1',
-      secondary: '#4f46e5',
-      accent: '#a78bfa',
-      background: '#1a1a1a',
-      text: '#ffffff',
-      textMuted: '#d1d5db'
-    }
+      primary: '#4f46e5',    // indigo-600
+      secondary: '#2563eb',  // blue-600
+      accent: '#7c3aed',     // violet-600
+      background: '#f9fafb', // slate-50
+      text: '#0f172a',       // slate-900
+      textMuted: '#6b7280',  // gray-500
+    },
   };
+
 
   private getThemeFromContent(title: string, content: string): ThemeColors {
     const text = (title + ' ' + content).toLowerCase();
-    
+
     if (text.includes('cyber') || text.includes('digital') || text.includes('ai') || text.includes('robot')) {
       return this.themes.cyberpunk;
     }
@@ -95,7 +96,7 @@ export class ImageProcessorService {
     if (text.includes('peace') || text.includes('harmony') || text.includes('perfect') || text.includes('paradise')) {
       return this.themes.utopian;
     }
-    
+
     return this.themes.default;
   }
 
@@ -117,7 +118,7 @@ export class ImageProcessorService {
         align-items: center;
         padding: 80px;
         color: ${theme.text};
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: 'Work Sans', sans-serif;
         position: relative;
         overflow: hidden;
         background-size: cover;
@@ -130,8 +131,8 @@ export class ImageProcessorService {
       }
       
       .title-card h1 {
-        font-size: 48px;
-        font-weight: 700;
+        font-size: 96px;
+        font-weight: 500;
         margin: 0 0 30px 0;
         line-height: 1.3;
         letter-spacing: -0.02em;
@@ -140,10 +141,10 @@ export class ImageProcessorService {
       }
       
       .title-card .year {
-        font-size: 36px;
+        font-size: 48px;
         font-weight: 600;
-        color: ${theme.primary};
-        margin-top: 30px;
+        color: ${theme.text};
+        margin-top: 20px;
         font-family: 'Inter', sans-serif;
         letter-spacing: 0.02em;
       }
@@ -156,8 +157,9 @@ export class ImageProcessorService {
       }
       
       .content-card .content {
-        font-size: 28px;
-        line-height: 1.7;
+        font-size: 36px;
+        line-height: 2.0;
+        text-align: left;
         margin: 0;
         font-weight: 400;
         color: ${theme.text};
@@ -166,7 +168,7 @@ export class ImageProcessorService {
       
       .content-card p {
         margin: 0 0 28px 0;
-        text-align: justify;
+        text-align: left;
       }
       
       .content-card p:last-of-type {
@@ -197,20 +199,19 @@ export class ImageProcessorService {
       }
       
       .branding-card h1 {
-        font-size: 48px;
+        font-size: 36px;
         font-weight: 600;
-        margin: 0 0 15px 0;
+        margin: 0 0 30px 0;
         color: ${theme.textMuted};
         letter-spacing: 0.05em;
       }
       
       .branding-card h2 {
-        font-size: 72px;
-        font-weight: 800;
+        font-size: 48px;
+        font-weight: 500;
         margin: 0 0 30px 0;
         color: ${theme.text};
         letter-spacing: -0.02em;
-        text-shadow: 0 4px 30px rgba(0,0,0,0.5);
       }
       
       .branding-card .subtitle {
@@ -298,7 +299,7 @@ export class ImageProcessorService {
    */
   private createContentSlides(content: string, theme: ThemeColors, maxContentSlides?: number): CarouselSlide[] {
     const slides: CarouselSlide[] = [];
-    
+
     // Clean and split content into paragraphs
     const paragraphs = content
       .split('\n\n')
@@ -310,21 +311,21 @@ export class ImageProcessorService {
 
     // Intelligent content chunking based on content length
     const chunks = this.chunkContentIntelligently(paragraphs, maxContentSlides);
-    
+
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
       const slideNumber = i + 1;
-      
+
       // Process content for special formatting
       const contentHtml = chunk
         .map(p => {
           let processedParagraph = this.escapeHtml(p);
-          
+
           // Highlight dialogue or quoted text
           if (p.includes('"') || p.includes("'")) {
             processedParagraph = `<span class="quote-highlight">${processedParagraph}</span>`;
           }
-          
+
           return `<p>${processedParagraph}</p>`;
         })
         .join('');
@@ -356,13 +357,13 @@ export class ImageProcessorService {
     // Reduced character limits to account for visual space with better formatting
     const maxCharsPerSlide = 600; // Optimal for smaller font size and better spacing
     const minCharsPerSlide = 300;
-    
+
     let currentChunk: string[] = [];
     let currentChunkLength = 0;
-    
+
     for (const paragraph of paragraphs) {
       const paragraphLength = paragraph.length;
-      
+
       // If adding this paragraph would exceed max chars and we have minimum content
       if (currentChunkLength + paragraphLength > maxCharsPerSlide && currentChunkLength > minCharsPerSlide) {
         chunks.push([...currentChunk]);
@@ -373,12 +374,12 @@ export class ImageProcessorService {
         currentChunkLength += paragraphLength;
       }
     }
-    
+
     // Add final chunk if it exists
     if (currentChunk.length > 0) {
       chunks.push(currentChunk);
     }
-    
+
     // Ensure no single chunk is too long by splitting large paragraphs
     const processedChunks = chunks.map(chunk => {
       if (chunk.length === 1 && chunk[0].length > maxCharsPerSlide) {
@@ -402,7 +403,7 @@ export class ImageProcessorService {
     const sentences = paragraph.match(/[^\.!?]+[\.!?]+/g) || [paragraph];
     const chunks: string[] = [];
     let currentChunk = '';
-    
+
     for (const sentence of sentences) {
       if (currentChunk.length + sentence.length > maxLength && currentChunk.length > 0) {
         chunks.push(currentChunk.trim());
@@ -411,11 +412,11 @@ export class ImageProcessorService {
         currentChunk += sentence;
       }
     }
-    
+
     if (currentChunk.trim()) {
       chunks.push(currentChunk.trim());
     }
-    
+
     return chunks;
   }
 
@@ -428,7 +429,7 @@ export class ImageProcessorService {
       <div class="carousel-card branding-card">
         <h1>Created with</h1>
         <h2>Futures of Hope</h2>
-        <p class="subtitle">AI-Powered Speculative Fiction</p>
+        <p class="subtitle">Speculative futures from the Global South, <br/> co-imagined by humans and AI.</p>
       </div>
     `;
 
@@ -446,7 +447,7 @@ export class ImageProcessorService {
   async generateInstagramCaption(story: ContentApiData): Promise<string> {
     const analysis = this.analyzeStoryContent(story.title, story.content || '');
     const dynamicHashtags = this.generateDynamicHashtags(analysis);
-    
+
     const baseHashtags = [
       '#FuturesOfHope',
       '#AIFiction',
@@ -456,14 +457,14 @@ export class ImageProcessorService {
       '#AIWriting',
       '#CreativeAI'
     ];
-    
+
     // Create engaging opening based on story themes
     const thematicIntro = this.generateThematicIntro(analysis);
-    
+
     // Try to get custom caption template from settings
     console.log('Generating Instagram caption for story:', story.title);
     let captionTemplate = await this.getInstagramCaptionTemplate();
-    
+
     // If no custom template, use default
     if (!captionTemplate) {
       console.log('Using default Instagram caption template');
@@ -482,13 +483,13 @@ Created with Futures of Hope
 
 {hashtags}
 
-What future do you envision? Share your thoughts below!
+What future do you envision—and what would it take to get there?
 
 #carousel #story #fiction`;
     } else {
       console.log('Using custom Instagram caption template from admin settings');
     }
-    
+
     // Process template variables
     const caption = this.processTemplateVariables(captionTemplate, {
       title: story.title,
@@ -501,7 +502,7 @@ What future do you envision? Share your thoughts below!
 
     return caption;
   }
-  
+
   /**
    * Get Instagram caption template from settings
    */
@@ -510,11 +511,11 @@ What future do you envision? Share your thoughts below!
       // Import database service dynamically to avoid circular dependencies
       const { default: services } = await import('../services.js');
       const db = services.dataService;
-      
+
       console.log('Attempting to get Instagram caption template from settings...');
       const setting = await db.getSetting('instagram.default_caption');
       console.log('Instagram caption setting retrieved:', setting ? 'Found' : 'Not found');
-      
+
       if (setting?.value) {
         console.log('Using custom Instagram caption template from settings');
         return setting.value;
@@ -527,25 +528,25 @@ What future do you envision? Share your thoughts below!
       return null;
     }
   }
-  
+
   /**
    * Process template variables in caption template
    */
   private processTemplateVariables(template: string, variables: Record<string, string>): string {
     let processedTemplate = template;
-    
+
     // Replace each variable in the template
     Object.entries(variables).forEach(([key, value]) => {
       const regex = new RegExp(`\\{${key}\\}`, 'g');
       processedTemplate = processedTemplate.replace(regex, value || '');
     });
-    
+
     // Convert escaped newlines to actual newlines
     processedTemplate = processedTemplate.replace(/\\n/g, '\n');
-    
+
     // Convert unicode characters back to their actual symbols
     processedTemplate = processedTemplate.replace(/\\u2022/g, '•');
-    
+
     return processedTemplate;
   }
 
@@ -560,7 +561,7 @@ What future do you envision? Share your thoughts below!
   } {
     const text = (title + ' ' + content).toLowerCase();
     const words = text.split(/\s+/);
-    
+
     // Detect themes
     const themes: string[] = [];
     if (text.includes('technology') || text.includes('ai') || text.includes('robot') || text.includes('digital')) {
@@ -583,10 +584,10 @@ What future do you envision? Share your thoughts below!
     let mood = 'neutral';
     const positiveWords = ['hope', 'bright', 'peace', 'harmony', 'success', 'beautiful', 'wonderful'];
     const negativeWords = ['dark', 'war', 'destruction', 'fear', 'dystopia', 'collapse', 'danger'];
-    
+
     const positiveCount = positiveWords.filter(word => text.includes(word)).length;
     const negativeCount = negativeWords.filter(word => text.includes(word)).length;
-    
+
     if (positiveCount > negativeCount) mood = 'hopeful';
     else if (negativeCount > positiveCount) mood = 'dark';
 
@@ -610,7 +611,7 @@ What future do you envision? Share your thoughts below!
    */
   private generateDynamicHashtags(analysis: { themes: string[]; mood: string; genre: string }): string[] {
     const hashtags: string[] = [];
-    
+
     // Theme-based hashtags
     analysis.themes.forEach(theme => {
       switch (theme) {
@@ -680,10 +681,10 @@ What future do you envision? Share your thoughts below!
   private escapeHtml(text: string): string {
     const div = { textContent: text } as any;
     return div.innerHTML || text.replace(/&/g, '&amp;')
-                                  .replace(/</g, '&lt;')
-                                  .replace(/>/g, '&gt;')
-                                  .replace(/"/g, '&quot;')
-                                  .replace(/'/g, '&#39;');
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 }
 

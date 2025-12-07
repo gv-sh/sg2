@@ -12,14 +12,14 @@ const DEFAULT_SETTINGS = {
   ai: {
     models: { fiction: 'gpt-4o-mini', image: 'dall-e-3' },
     parameters: {
-      fiction: { 
-        temperature: 1.0, 
-        max_tokens: 1000, 
+      fiction: {
+        temperature: 1.0,
+        max_tokens: 1000,
         default_story_length: 500,
         system_prompt: "You are a speculative fiction generator trained to create vivid, original, and thought-provoking stories from the Global South—particularly Africa, Asia, and Latin America, with special focus on India. Your goal is to craft speculative fiction rooted deeply in the region's cultural, ecological, historical, and socio-political realities, while imagining bold, layered futures.\n\nEach story must:\n- Be grounded in the specific cultural and traditional context of the selected region.\n- Establish a logical continuity between the present year (e.g., 2025) and a user-defined future, showing how current realities evolve into future scenarios.\n- Be driven by the world-building parameters provided by the user. These parameters define societal structures, technologies, environments, and ideologies—use them as the foundation for constructing the speculative world.\n- Reflect the narrative parameters to shape voice, tone, style, and structure.\n\nGeneration Guidelines:\n- Begin from a recognizable present or near-present context, then extrapolate plausibly into the future.\n- Translate the user-defined world-building parameters into concrete details—institutions, environments, economies, belief systems, and everyday life.\n- Infuse speculative elements with grounding in local histories, belief systems, and lived realities.\n- Let the narrative parameters guide how the story is told—not just what happens.\n- Avoid Western-centric tropes. Think from within the chosen region's worldview—its languages, philosophies, conflicts, mythologies, and ways of knowing."
       },
-      image: { 
-        size: '1024x1024', 
+      image: {
+        size: '1024x1024',
         quality: 'standard',
         prompt_suffix: "Create a photorealistic, visually rich and emotionally resonant scene inspired by the story. Include key narrative elements in the composition. Place characters from the story in the foreground with expressive, human-like features, posture, and emotion that reflect their role or experience in the narrative. Design the background to subtly or symbolically represent the setting, mood, or major events of the story. Do not include any text or lettering in the image. Let the image convey the story purely through visual form, composition, and atmosphere."
       }
@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS = {
   },
   instagram: {
     enabled: true,
-    default_caption: '{title}\n\n{intro}\n\nSet in the year {year}\n\nThemes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\nWhat future do you envision? Share your thoughts below!\n\n#carousel #story #fiction'
+    default_caption: '{title}\n\nSet in the year {year}\n\n{intro} \n\n Themes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\n\What future do you envision—and what would it take to get there?\n\n#carousel #story #fiction'
   },
   defaults: { content_type: 'fiction' }
 };
@@ -75,11 +75,11 @@ function Settings() {
     try {
       setIsLoading(true);
       const response = await axios.get(`${config.API_URL}/api/admin/settings`);
-      
+
       // Backend returns flat key-value pairs
       const fetchedSettings = response.data?.data || {};
       const structuredSettings = unflattenSettings(fetchedSettings);
-      
+
       setSettings(structuredSettings);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -132,29 +132,29 @@ function Settings() {
   // Flatten settings for backend API
   const flattenSettings = (settingsObj) => {
     const flattened = {};
-    
+
     // AI models
     flattened['ai.models.fiction'] = settingsObj.ai.models.fiction;
     flattened['ai.models.image'] = settingsObj.ai.models.image;
-    
+
     // AI parameters - fiction
     flattened['ai.parameters.fiction.temperature'] = settingsObj.ai.parameters.fiction.temperature;
     flattened['ai.parameters.fiction.max_tokens'] = settingsObj.ai.parameters.fiction.max_tokens;
     flattened['ai.parameters.fiction.default_story_length'] = settingsObj.ai.parameters.fiction.default_story_length;
     flattened['ai.parameters.fiction.system_prompt'] = settingsObj.ai.parameters.fiction.system_prompt;
-    
+
     // AI parameters - image
     flattened['ai.parameters.image.size'] = settingsObj.ai.parameters.image.size;
     flattened['ai.parameters.image.quality'] = settingsObj.ai.parameters.image.quality;
     flattened['ai.parameters.image.prompt_suffix'] = settingsObj.ai.parameters.image.prompt_suffix;
-    
+
     // Instagram settings
     flattened['instagram.enabled'] = settingsObj.instagram.enabled;
     flattened['instagram.default_caption'] = settingsObj.instagram.default_caption;
-    
+
     // Defaults
     flattened['defaults.content_type'] = settingsObj.defaults.content_type;
-    
+
     return flattened;
   };
 
@@ -178,11 +178,11 @@ function Settings() {
         setIsLoading(true);
         // Reset to defaults locally since no reset API endpoint exists
         setSettings(DEFAULT_SETTINGS);
-        
+
         // Optionally save the defaults to backend
         const flatDefaults = flattenSettings(DEFAULT_SETTINGS);
         await axios.put(`${config.API_URL}/api/admin/settings`, flatDefaults);
-        
+
         toast.success('Settings reset to defaults successfully!');
       } catch (error) {
         // If save fails, still keep local defaults
@@ -457,7 +457,7 @@ function Settings() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label htmlFor="instagramCaption" className="text-sm font-medium">Default Instagram Caption Template</label>
                   <Textarea
@@ -496,16 +496,16 @@ function Settings() {
 
           {/* Form Actions */}
           <div className="flex justify-between">
-            <Button 
-              type="button" 
-              variant="destructive" 
-              onClick={handleReset} 
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleReset}
               disabled={isLoading}
             >
               Reset to Defaults
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
             >
               {isLoading ? 'Saving...' : 'Save Settings'}

@@ -175,8 +175,8 @@ const InstagramHandleDialog = ({
                 </Button>
               </div>
 
-              <div className="text-xs text-muted-foreground text-center">
-                This will post a comment: "A possible future imagined by: @your_username"
+              <div className="text-xs text-muted-foreground text-left">
+                This will post a comment: "A possible future imagined by @your_username"
               </div>
             </form>
           )}

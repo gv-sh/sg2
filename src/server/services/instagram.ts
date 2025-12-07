@@ -10,6 +10,8 @@ interface InstagramMediaContainer {
 
 interface InstagramCarouselPost {
   id: string;
+  permalink?: string;
+  shortcode?: string;
 }
 
 interface InstagramComment {
@@ -41,6 +43,7 @@ export class InstagramService {
   private appId: string;
   private facebookPageId: string;
   private instagramBusinessAccountId: string | null = null;
+  private instagramUsername: string | null = null;
 
   constructor() {
     this.accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
@@ -92,6 +95,35 @@ export class InstagramService {
       await new Promise(resolve => setTimeout(resolve, 5000));
       
       const publishedPost = await this.publishCarousel(carouselContainer.id);
+
+      // Step 4: Fetch the actual permalink for the published post
+      console.log(`[Instagram Service] Fetching permalink for published post...`);
+      try {
+        const permalinkData = await this.fetchMediaPermalink(publishedPost.id);
+        
+        if (permalinkData?.permalink) {
+          publishedPost.permalink = permalinkData.permalink;
+          publishedPost.shortcode = permalinkData.shortcode;
+          console.log(`[Instagram Service] Post permalink: ${permalinkData.permalink}`);
+        } else {
+          console.warn(`[Instagram Service] Failed to fetch permalink for post ${publishedPost.id} - no permalink in response`);
+          // Fallback: Log the issue but don't fail the entire operation
+          console.warn(`[Instagram Service] Post created successfully but URL may be incorrect`);
+        }
+      } catch (permalinkError) {
+        console.error(`[Instagram Service] Error fetching permalink for post ${publishedPost.id}:`, permalinkError);
+        // Fallback: Don't fail the entire operation if permalink fetch fails
+        console.warn(`[Instagram Service] Post created successfully but permalink fetch failed`);
+      }
+
+      // Step 5: Add automatic comment to the post
+      console.log(`[Instagram Service] Adding automatic comment to post...`);
+      const comment = await this.addAutomaticComment(publishedPost.id);
+      if (comment) {
+        console.log(`[Instagram Service] Automatic comment added: ${comment.id}`);
+      } else {
+        console.warn(`[Instagram Service] Failed to add automatic comment, but post was created successfully`);
+      }
 
       return publishedPost;
     } catch (error) {
@@ -185,6 +217,7 @@ export class InstagramService {
       if (igResponse.ok && igResult.id) {
         console.log('[Instagram Service] Credentials valid for Instagram Business Account:', igResult.username || igResult.id);
         this.instagramBusinessAccountId = igResult.id; // Store for media operations
+        this.instagramUsername = igResult.username || null; // Store for comment template
         return true;
       }
       
@@ -472,6 +505,73 @@ export class InstagramService {
     const result = await response.json();
     console.log(`[Instagram Service] Carousel published successfully:`, result);
     return { id: result.id };
+  }
+
+  /**
+   * Add automatic comment to Instagram post using template
+   */
+  async addAutomaticComment(postId: string, template: string = "A possible future imagined by @{username}"): Promise<InstagramComment | null> {
+    try {
+      // Ensure we have the username
+      if (!this.instagramUsername) {
+        console.warn('[Instagram Service] No Instagram username available for comment template');
+        return null;
+      }
+
+      // Process the template
+      const commentText = template.replace('{username}', this.instagramUsername);
+      console.log(`[Instagram Service] Adding automatic comment to post ${postId}: "${commentText}"`);
+
+      const comment = await this.addComment({
+        postId: postId,
+        message: commentText
+      });
+
+      console.log(`[Instagram Service] Automatic comment added successfully: ${comment.id}`);
+      return comment;
+      
+    } catch (error) {
+      console.error(`[Instagram Service] Failed to add automatic comment to post ${postId}:`, error);
+      // Don't fail the entire operation if comment fails
+      return null;
+    }
+  }
+
+  /**
+   * Fetch media permalink and shortcode from Instagram API
+   * This gets the actual Instagram post URL that users can visit
+   */
+  async fetchMediaPermalink(mediaId: string): Promise<{ permalink: string; shortcode: string } | null> {
+    try {
+      console.log(`[Instagram Service] Fetching permalink for media ID: ${mediaId}`);
+      
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${mediaId}?fields=permalink,shortcode&access_token=${this.accessToken}`
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error(`[Instagram Service] Failed to fetch permalink:`, error);
+        return null;
+      }
+
+      const result = await response.json();
+      console.log(`[Instagram Service] Permalink fetched successfully:`, result);
+      
+      if (result.permalink) {
+        return {
+          permalink: result.permalink,
+          shortcode: result.shortcode || null
+        };
+      }
+      
+      console.warn(`[Instagram Service] No permalink found in response for media ${mediaId}`);
+      return null;
+      
+    } catch (error) {
+      console.error(`[Instagram Service] Error fetching permalink for media ${mediaId}:`, error);
+      return null;
+    }
   }
 
   /**

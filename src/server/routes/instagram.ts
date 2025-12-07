@@ -406,6 +406,8 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       instagram: {
         shared: true,
         postId: carouselPost.id,
+        carouselUrl: carouselPost.permalink || null,
+        shortcode: carouselPost.shortcode || null,
         sharedAt: new Date().toISOString(),
         slideCount: mediaUrls.length
       }
@@ -423,8 +425,9 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       message: 'Instagram carousel post created successfully',
       data: {
         postId: carouselPost.id,
-        carouselUrl: `https://www.instagram.com/p/${carouselPost.id}/`,
-        slideCount: mediaUrls.length
+        carouselUrl: carouselPost.permalink || (carouselPost.shortcode ? `https://www.instagram.com/p/${carouselPost.shortcode}/` : null),
+        slideCount: mediaUrls.length,
+        shortcode: carouselPost.shortcode || null
       },
       meta: {
         timestamp: new Date().toISOString()

@@ -79,7 +79,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
               onValueChange={handleValueChange}
               findLabelForValue={findLabelForValue}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full accent-primary">
                 <SelectValue placeholder="Select an option" />
               </SelectTrigger>
               <SelectContent>
@@ -126,7 +126,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
             {parameter.description && (
               <p className="text-xs text-muted-foreground">{parameter.description}</p>
             )}
-            <div className="space-y-2">
+            <div className="grid xl:grid-cols-2 grid-cols-1 gap-2">
               {parameterValues.map((option, index) => {
                 const optionId = option.id || option.label || option || `option-${index}`;
                 const optionLabel = option.label || option;
@@ -140,7 +140,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
                       value={optionId}
                       checked={currentValue === optionId}
                       onChange={() => handleValueChange(optionId)}
-                      className="h-4 w-4"
+                      className="h-4 w-4 accent-primary"
                     />
                     <label
                       htmlFor={`${parameter.id}-${optionId}`}
@@ -167,20 +167,18 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
             {parameter.description && (
               <p className="text-xs text-muted-foreground">{parameter.description}</p>
             )}
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{minLabel || min}</span>
-              <span>{maxLabel || max}</span>
-            </div>
             <Slider
               min={min}
               max={max}
               step={step}
               value={currentValue || min}
               onValueChange={(newValue) => handleValueChange(newValue)}
-              className="w-full"
+              className="w-full pt-2 accent-primary"
             />
-            <div className="text-center">
-              <span className="text-xs text-muted-foreground">Current: {currentValue || min}</span>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{minLabel || min}</span>
+              <span className="text-sm text-primary">{currentValue || min}</span>
+              <span>{maxLabel || max}</span>
             </div>
           </div>
         );
@@ -196,7 +194,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
               value={currentValue || ''}
               onChange={(e) => handleValueChange(e.target.value)}
               placeholder={parameter.description || "Enter text..."}
-              className="w-full"
+              className="w-full accent-primary"
             />
           </div>
         );
@@ -258,7 +256,7 @@ const SelectedParameters = ({
   parameters,
   onRemoveParameter,
   onUpdateParameterValue,
-  onNavigateToGenerate
+  onNavigateToGenerate,
 }) => {
   const [storyYear, setStoryYear] = useState(() => {
     // Generate a random year between 2026 and 2126
@@ -282,10 +280,16 @@ const SelectedParameters = ({
 
         <div className="flex flex-col items-center justify-center h-48 text-center">
           <Sparkles className="h-8 w-8 text-muted-foreground mb-3" />
-          <h4 className="text-sm font-medium mb-1">No Parameters Selected</h4>
-          <p className="text-xs text-muted-foreground">
-            Choose parameters from the middle panel to start building your story.
+          <h4 className="text-sm font-medium mb-2">No Parameters Selected Yet</h4>
+          <p className="text-xs !mt-1 text-muted-foreground">
+            Browse the categories on the left, then add parameters <br />
+            from each category to shape your ideal future.
           </p>
+          <Button
+            //onClick={() => 
+            className="m-2 bg-primary hover:bg-primary/90 text-primary-foreground mt-4">
+            Take a Tour
+          </Button>
         </div>
       </div>
     );
@@ -293,12 +297,27 @@ const SelectedParameters = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex flex-col items-left">
-        <h3 className="text-sm font-medium mb-3 pt-3 border-b pb-3">Selected Parameters</h3>
+
+      <div className="flex flex-col">
+        <h3 className="text-sm font-medium pt-3 pb-2">
+          Selected Parameters
+        </h3>
+
+        <div className="flex items-center justify-between pb-3 mb-3 border-b">
+          <p className="text-xs text-muted-foreground">
+            This is your ideal future taking shape!
+          </p>
+
+          <a
+            className="text-xs italic text-primary hover:underline cursor-pointer"
+          >
+            Feeling a bit lost? Take the guided tour.
+          </a>
+        </div>
       </div>
 
       {/* Selected Parameters - scrollable area */}
-      <div className="space-y-1 flex-1 overflow-y-auto mb-4">
+      <div className="grid 2xl:grid-cols-3 grid-cols-2 flex-1 overflow-y-auto mb-4 gap-4 items-stretch">
         {parameters.map(parameter => (
           <SelectedParameterCard
             key={parameter.id}
@@ -320,7 +339,7 @@ const SelectedParameters = ({
               step={1}
               value={storyYear}
               onValueChange={(value) => setStoryYear(value)}
-              className="w-full"
+              className="w-full accent-primary"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>2026</span>
@@ -343,7 +362,7 @@ const SelectedParameters = ({
             data-tour="generate-button"
           >
             <Play className="h-3 w-3 mr-1" />
-            Generate Content
+            Generate Story
           </Button>
         </div>
       </div>

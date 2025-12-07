@@ -5,11 +5,11 @@ import { cn } from '../../../lib/utils';
 
 const ResponsiveLayout = ({ children, className = '' }) => {
   const { isMobile, isTablet } = useScreenSize();
-  
+
   return (
-    <div 
+    <div
       className={cn(
-        "grid h-full w-full gap-0", 
+        "grid h-full w-full gap-0",
         isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-[16rem_16rem_1fr]",
         className
       )}
@@ -19,35 +19,35 @@ const ResponsiveLayout = ({ children, className = '' }) => {
   );
 };
 
-export const Column = ({ 
-  children, 
+export const Column = ({
+  children,
   className = '',
   mobileOrder,
   position, // 'left', 'middle', 'right'
   ...props
 }) => {
   const { isMobile } = useScreenSize();
-  
+
   // Determine corner rounding based on position
-  const roundedClasses = position === 'left' 
-    ? "rounded-l-md rounded-r-none" 
+  const roundedClasses = position === 'left'
+    ? "rounded-l-md rounded-r-none"
     : position === 'middle'
       ? "rounded-none"
       : position === 'right'
         ? "rounded-l-none rounded-r-md"
         : "rounded-md"; // Default
-  
+
   // Determine border classes based on position
-  const borderClasses = position === 'left' 
-    ? "border" 
+  const borderClasses = position === 'left'
+    ? "border"
     : position === 'middle'
       ? "border-t border-b border-r-0" // No left border for middle column
       : position === 'right'
         ? "border" // Full border for right column
         : "border"; // Default
-  
+
   return (
-    <div 
+    <div
       className={cn(
         "bg-card text-card-foreground h-full overflow-hidden",
         roundedClasses,

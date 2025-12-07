@@ -142,6 +142,7 @@ const AppRoutes = ({
                   onRemoveParameter={handleParameterRemove}
                   onUpdateParameterValue={handleParameterValueUpdate}
                   onNavigateToGenerate={handleNavigateToGenerate}
+                  onShowTour={() => setShowTour(true)}
                 />
               </Suspense>
             </Column>

@@ -257,6 +257,7 @@ const SelectedParameters = ({
   onRemoveParameter,
   onUpdateParameterValue,
   onNavigateToGenerate,
+  onShowTour,
 }) => {
   const [storyYear, setStoryYear] = useState(() => {
     // Generate a random year between 2025 and 2100
@@ -286,7 +287,7 @@ const SelectedParameters = ({
             from each category to shape your ideal future.
           </p>
           <Button
-            //onClick={() => 
+            onClick={onShowTour}
             className="m-2 bg-primary hover:bg-primary/90 text-primary-foreground mt-4">
             Take a Tour
           </Button>
@@ -309,6 +310,7 @@ const SelectedParameters = ({
           </p>
 
           <a
+            onClick={onShowTour}
             className="text-xs italic text-primary hover:underline cursor-pointer"
           >
             Feeling a bit lost? Take the guided tour.

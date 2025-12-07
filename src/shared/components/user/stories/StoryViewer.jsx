@@ -34,9 +34,9 @@ const generateQRCode = async (url) => {
     console.log('generateQRCode - No URL provided');
     return null;
   }
-  
+
   console.log('generateQRCode - Generating QR code for URL:', url);
-  
+
   try {
     const qrDataUrl = await QRCode.toDataURL(url, {
       width: 200,
@@ -495,7 +495,7 @@ const preload = src =>
 const waitForAllImages = (container) => {
   const images = container.querySelectorAll('img');
   console.log(`waitForAllImages - Found ${images.length} images to load`);
-  
+
   const imagePromises = Array.from(images).map((img, index) => {
     return new Promise((resolve) => {
       if (img.complete && img.naturalHeight !== 0) {
@@ -525,7 +525,7 @@ const waitForAllImages = (container) => {
 const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData, returnInstance = false }) => {
   const startTime = performance.now();
   console.log('PDF Generation - Starting PDF generation process...');
-  
+
   // 4R postcard = ~152 x 102 mm, landscape
   const pdf = new jsPDF('l', 'mm', [152, 102]);
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -658,7 +658,8 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
             zIndex: '10',
             position: 'absolute',
             top: '3.45in',
-            left: '1.1in',
+            //left: '1.1in',
+            left: qrCodeDataUrl ? '1.1in' : '0.3in',
 
             display: 'flex',
             flexDirection: 'column',
@@ -729,7 +730,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
 
   console.log('PDF Generation - Starting html2canvas capture...');
   const canvasStartTime = performance.now();
-  
+
   const canvas = await html2canvas(container, {
     scale: 2,
     useCORS: true,

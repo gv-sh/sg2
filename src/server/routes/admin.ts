@@ -858,7 +858,17 @@ router.put('/settings', async (req: TypedRequestBody<Record<string, any>>, res: 
     
     for (const [key, value] of Object.entries(updates)) {
       try {
-        const setting = await dataService.setSetting(key, value);
+        // Auto-detect data type for proper storage and retrieval
+        let dataType: 'string' | 'number' | 'boolean' | 'json' = 'string';
+        if (typeof value === 'number') {
+          dataType = 'number';
+        } else if (typeof value === 'boolean') {
+          dataType = 'boolean';
+        } else if (typeof value === 'object' && value !== null) {
+          dataType = 'json';
+        }
+        
+        const setting = await dataService.setSetting(key, value, dataType);
         results.push(setting);
       } catch (error: any) {
         console.warn(`Failed to update setting ${key}:`, error.message);

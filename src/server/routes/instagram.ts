@@ -352,7 +352,7 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       width: 1080,
       height: 1080,
       quality: 95,
-      format: 'png' as const,
+      format: 'jpeg' as const,
       deviceScaleFactor: 2,
       timeout: 12000 // Reduced timeout for individual images
     };
@@ -799,7 +799,7 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
       width: 1080,
       height: 1080,
       quality: 95,
-      format: 'png' as const,
+      format: 'jpeg' as const,
       deviceScaleFactor: 2
     };
     

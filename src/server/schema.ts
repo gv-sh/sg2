@@ -96,7 +96,48 @@ export const DEFAULT_SETTINGS: DefaultSetting[] = [
   { key: 'default_fiction_length', value: 'medium', data_type: 'string' },
   { key: 'rate_limit_per_minute', value: '10', data_type: 'number' },
   { key: 'maintenance_mode', value: 'false', data_type: 'boolean' },
-  { key: 'instagram.default_caption', value: '{title}\n\n{intro}\n\nSet in the year {year}\n\nThemes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\nWhat future do you envision? Share your thoughts below!\n\n#carousel #story #fiction', data_type: 'string' }
+  { key: 'instagram.default_caption', value: '{title}\n\n{intro}\n\nSet in the year {year}\n\nThemes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\nWhat future do you envision? Share your thoughts below!\n\n#carousel #story #fiction', data_type: 'string' },
+  
+  // Instagram Design Settings
+  { key: 'instagram.design.typography.font_family', value: 'Work Sans', data_type: 'string' },
+  { key: 'instagram.design.typography.title_size', value: '52', data_type: 'number' },
+  { key: 'instagram.design.typography.content_size', value: '24', data_type: 'number' },
+  { key: 'instagram.design.typography.year_size', value: '28', data_type: 'number' },
+  { key: 'instagram.design.typography.branding_title_size', value: '32', data_type: 'number' },
+  { key: 'instagram.design.typography.branding_main_size', value: '56', data_type: 'number' },
+  { key: 'instagram.design.typography.branding_subtitle_size', value: '20', data_type: 'number' },
+  { key: 'instagram.design.typography.title_weight', value: '600', data_type: 'number' },
+  { key: 'instagram.design.typography.content_weight', value: '400', data_type: 'number' },
+  { key: 'instagram.design.typography.letter_spacing_title', value: '-0.025', data_type: 'number' },
+  { key: 'instagram.design.typography.letter_spacing_year', value: '0.05', data_type: 'number' },
+  { key: 'instagram.design.typography.line_height_title', value: '1.1', data_type: 'number' },
+  { key: 'instagram.design.typography.line_height_content', value: '1.6', data_type: 'number' },
+  
+  // Color Palette Settings  
+  { key: 'instagram.design.colors.primary_background', value: '#f8f8f8', data_type: 'string' },
+  { key: 'instagram.design.colors.secondary_background', value: '#f0f0f0', data_type: 'string' },
+  { key: 'instagram.design.colors.content_background', value: '#fdfdfd', data_type: 'string' },
+  { key: 'instagram.design.colors.branding_background', value: '#0a0a0a', data_type: 'string' },
+  { key: 'instagram.design.colors.branding_background_secondary', value: '#1a1a1a', data_type: 'string' },
+  { key: 'instagram.design.colors.primary_text', value: '#0a0a0a', data_type: 'string' },
+  { key: 'instagram.design.colors.content_text', value: '#1a1a1a', data_type: 'string' },
+  { key: 'instagram.design.colors.year_text', value: '#666666', data_type: 'string' },
+  { key: 'instagram.design.colors.branding_text_primary', value: '#ffffff', data_type: 'string' },
+  { key: 'instagram.design.colors.branding_text_secondary', value: '#cccccc', data_type: 'string' },
+  { key: 'instagram.design.colors.branding_text_subtitle', value: '#aaaaaa', data_type: 'string' },
+  { key: 'instagram.design.colors.accent_border', value: '#0a0a0a', data_type: 'string' },
+  
+  // Layout Settings
+  { key: 'instagram.design.layout.card_padding', value: '72', data_type: 'number' },
+  { key: 'instagram.design.layout.content_padding', value: '72', data_type: 'number' },
+  { key: 'instagram.design.layout.border_width', value: '4', data_type: 'number' },
+  { key: 'instagram.design.layout.title_margin_bottom', value: '32', data_type: 'number' },
+  { key: 'instagram.design.layout.year_margin_top', value: '24', data_type: 'number' },
+  { key: 'instagram.design.layout.paragraph_margin_bottom', value: '24', data_type: 'number' },
+  
+  // Preset Management
+  { key: 'instagram.design.active_preset', value: 'moma_classic', data_type: 'string' },
+  { key: 'instagram.design.presets', value: '{"moma_classic": {"name": "MOMA Classic", "description": "Museum-inspired clean design with superior typography"}, "high_contrast": {"name": "High Contrast", "description": "Bold, accessible design with strong visual hierarchy"}, "minimal_mono": {"name": "Minimal Mono", "description": "Minimalist monochromatic design"}}', data_type: 'json' }
 ];
 
 /**

@@ -116,7 +116,7 @@ export class ImageProcessorService {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 80px;
+        padding: 60px 40px;
         color: ${theme.text};
         font-family: 'Work Sans', sans-serif;
         position: relative;
@@ -131,20 +131,20 @@ export class ImageProcessorService {
       }
       
       .title-card h1 {
-        font-size: 96px;
+        font-size: 72px;
         font-weight: 500;
-        margin: 0 0 30px 0;
-        line-height: 1.3;
+        margin: 0 0 24px 0;
+        line-height: 1.2;
         letter-spacing: -0.02em;
         color: ${theme.text};
-        max-width: 90%;
+        max-width: 95%;
       }
       
       .title-card .year {
-        font-size: 48px;
+        font-size: 36px;
         font-weight: 600;
         color: ${theme.text};
-        margin-top: 20px;
+        margin-top: 16px;
         font-family: 'Inter', sans-serif;
         letter-spacing: 0.02em;
       }
@@ -152,14 +152,14 @@ export class ImageProcessorService {
       
       .content-card {
         background: ${theme.background};
-        text-align: left;
-        padding: 80px 80px 120px 80px;
+        text-align: center;
+        padding: 60px 40px;
       }
       
       .content-card .content {
-        font-size: 36px;
-        line-height: 2.0;
-        text-align: left;
+        font-size: 42px;
+        line-height: 1.6;
+        text-align: center;
         margin: 0;
         font-weight: 400;
         color: ${theme.text};
@@ -167,8 +167,8 @@ export class ImageProcessorService {
       
       
       .content-card p {
-        margin: 0 0 28px 0;
-        text-align: left;
+        margin: 0 0 24px 0;
+        text-align: center;
       }
       
       .content-card p:last-of-type {

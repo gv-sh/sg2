@@ -34,6 +34,9 @@ performance-results/
 .env.production.local
 .env.*.local
 *.env
+.env.backup
+*.backup
+.backups/
 
 # Database
 *.db

@@ -7,8 +7,8 @@ import boom from '@hapi/boom';
 import { z } from 'zod';
 
 import { dataService } from '../services.js';
-import ImageProcessorService from '../services/imageProcessor.js';
 import InstagramService from '../services/instagram.js';
+import { getImageGenerator } from '../services/productionImageGenerator.js';
 import config from '../config.js';
 import {
   categorySchema,
@@ -29,7 +29,7 @@ import type {
 const router: express.Router = express.Router();
 
 // Initialize services
-const imageProcessor = new ImageProcessorService();
+const imageGenerator = getImageGenerator();
 
 // Type definitions
 type CategorySchema = z.infer<typeof categorySchema>;
@@ -991,46 +991,124 @@ router.post('/instagram/preview', async (req: TypedRequestBody<{ storyId: string
       return next(boom.notFound(`Story with ID ${storyId} not found`));
     }
     
-    // Generate carousel slides preview
-    const carouselData = await imageProcessor.generateCarouselSlides({
+    // Load Instagram design settings from database
+    const designSettings = await dataService.getSettings();
+    
+    // Extract design settings for Instagram using the same structure as Settings page
+    const instagramDesignSettings = {
+      typography: {
+        font_family: designSettings['instagram.design.typography.font_family'] || 'Work Sans',
+        title_size: designSettings['instagram.design.typography.title_size'] || 72,
+        content_size: designSettings['instagram.design.typography.content_size'] || 42,
+        year_size: designSettings['instagram.design.typography.year_size'] || 36,
+        branding_title_size: designSettings['instagram.design.typography.branding_title_size'] || 36,
+        branding_main_size: designSettings['instagram.design.typography.branding_main_size'] || 48,
+        branding_subtitle_size: designSettings['instagram.design.typography.branding_subtitle_size'] || 28,
+        title_weight: designSettings['instagram.design.typography.title_weight'] || 500,
+        content_weight: designSettings['instagram.design.typography.content_weight'] || 400,
+        letter_spacing_title: designSettings['instagram.design.typography.letter_spacing_title'] || -0.02,
+        letter_spacing_year: designSettings['instagram.design.typography.letter_spacing_year'] || 0.02,
+        line_height_title: designSettings['instagram.design.typography.line_height_title'] || 1.2,
+        line_height_content: designSettings['instagram.design.typography.line_height_content'] || 1.6
+      },
+      colors: {
+        primary_background: designSettings['instagram.design.colors.primary_background'] || '#f8f8f8',
+        secondary_background: designSettings['instagram.design.colors.secondary_background'] || '#f0f0f0',
+        content_background: designSettings['instagram.design.colors.content_background'] || '#fdfdfd',
+        branding_background: designSettings['instagram.design.colors.branding_background'] || '#0a0a0a',
+        branding_background_secondary: designSettings['instagram.design.colors.branding_background_secondary'] || '#1a1a1a',
+        primary_text: designSettings['instagram.design.colors.primary_text'] || '#0a0a0a',
+        content_text: designSettings['instagram.design.colors.content_text'] || '#1a1a1a',
+        year_text: designSettings['instagram.design.colors.year_text'] || '#666666',
+        branding_text_primary: designSettings['instagram.design.colors.branding_text_primary'] || '#ffffff',
+        branding_text_secondary: designSettings['instagram.design.colors.branding_text_secondary'] || '#cccccc',
+        branding_text_subtitle: designSettings['instagram.design.colors.branding_text_subtitle'] || '#aaaaaa',
+        accent_border: designSettings['instagram.design.colors.accent_border'] || '#0a0a0a'
+      },
+      layout: {
+        card_padding: designSettings['instagram.design.layout.card_padding'] || 100,
+        content_padding: designSettings['instagram.design.layout.content_padding'] || 100,
+        border_width: designSettings['instagram.design.layout.border_width'] || 6,
+        title_margin_bottom: designSettings['instagram.design.layout.title_margin_bottom'] || 24,
+        year_margin_top: designSettings['instagram.design.layout.year_margin_top'] || 16,
+        paragraph_margin_bottom: designSettings['instagram.design.layout.paragraph_margin_bottom'] || 24
+      }
+    };
+
+    // Convert story to ContentApiData format for the generator
+    const storyData = {
       id: story.id,
       title: story.title,
       content: story.fiction_content,
-      type: 'combined',
+      type: 'combined' as const,
       image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
       image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
       parameters: story.prompt_data,
       year: story.metadata?.year || null,
       metadata: story.metadata || undefined,
       created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
-    
+    };
+
+    // Generate carousel slides using ProductionImageGenerator with design settings
+    const carouselData = await imageGenerator.generateCarouselSlides(storyData, instagramDesignSettings);
+
     // Generate Instagram caption
-    const caption = await imageProcessor.generateInstagramCaption({
-      id: story.id,
-      title: story.title,
-      content: story.fiction_content,
-      type: 'combined',
-      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-      parameters: story.prompt_data,
-      year: story.metadata?.year || null,
-      metadata: story.metadata || undefined,
-      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    const caption = await imageGenerator.generateInstagramCaption(storyData);
     
-    // Detect theme for color information
-    const content = story.title + ' ' + story.fiction_content;
-    const theme = detectThemeFromContent(content);
+    // Process slides to add previewImage for all slides
+    const slidesWithPreviews = await Promise.all(
+      carouselData.slides.map(async (slide, index) => {
+        if (slide.type === 'original') {
+          if (story.image_blob) {
+            // Use the actual story image for preview
+            return {
+              ...slide,
+              previewImage: `/api/images/${story.id}/original`
+            };
+          } else {
+            // Create a placeholder for stories without images
+            return {
+              ...slide,
+              previewImage: null,
+              previewError: 'No image available for this story'
+            };
+          }
+        } else {
+          // Generate PNG images for other slide types using design settings
+          try {
+            const generatedImage = await imageGenerator.generateImageFromHTMLWithDesign(
+              slide.html,
+              instagramDesignSettings,
+              { width: 1080, height: 1080, format: 'png' }
+            );
+            
+            // Convert to base64 for preview
+            const base64Image = `data:image/png;base64,${generatedImage.buffer.toString('base64')}`;
+            
+            return {
+              ...slide,
+              previewImage: base64Image
+            };
+          } catch (error) {
+            console.error(`Error generating preview for slide ${index + 1}:`, error);
+            return {
+              ...slide,
+              previewError: `Failed to generate preview: ${error instanceof Error ? error.message : 'Unknown error'}`
+            };
+          }
+        }
+      })
+    );
     
     res.json({
       success: true,
       message: 'Instagram preview generated successfully',
       data: {
-        slides: carouselData.slides,
+        slides: slidesWithPreviews,
         caption,
-        slideCount: carouselData.slides.length,
-        theme,
+        slideCount: slidesWithPreviews.length,
+        theme: 'custom', // Always use custom since we're using design settings
+        designSettings: instagramDesignSettings,
         storyId: story.id,
         storyTitle: story.title
       },
@@ -1156,27 +1234,5 @@ router.get('/instagram/status', async (req: Request, res: Response<ApiResponse>,
   }
 });
 
-// Helper function to detect theme from content
-function detectThemeFromContent(content: string): string {
-  const text = content.toLowerCase();
-  
-  if (text.includes('cyber') || text.includes('digital') || text.includes('ai') || text.includes('robot')) {
-    return 'cyberpunk';
-  }
-  if (text.includes('nature') || text.includes('forest') || text.includes('green') || text.includes('earth')) {
-    return 'nature';
-  }
-  if (text.includes('space') || text.includes('star') || text.includes('planet') || text.includes('galaxy')) {
-    return 'space';
-  }
-  if (text.includes('war') || text.includes('dark') || text.includes('destroy') || text.includes('apocalypse')) {
-    return 'dystopian';
-  }
-  if (text.includes('peace') || text.includes('harmony') || text.includes('perfect') || text.includes('paradise')) {
-    return 'utopian';
-  }
-  
-  return 'default';
-}
 
 export default router;

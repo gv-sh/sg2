@@ -6,6 +6,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../shared/component
 import { Button, Input, Textarea, Select } from '../../shared/components/ui/form-controls.js';
 import { Badge } from '../../shared/components/ui/badge.tsx';
 import { useToast } from '../../shared/contexts/ToastContext.jsx';
+import { 
+  Palette, 
+  Type, 
+  Layout as LayoutIcon, 
+  Eye,
+  Sparkles
+} from 'lucide-react';
 
 // Default settings for highlighting
 const DEFAULT_SETTINGS = {
@@ -28,6 +35,45 @@ const DEFAULT_SETTINGS = {
   instagram: {
     enabled: true,
     default_caption: '{title}\n\nSet in the year {year}\n\n{intro} \n\n Themes: {themes}\nMood: {mood}\n\nGenerated with AI • Speculative Fiction • Created with Futures of Hope\n\n{hashtags}\n\n\What future do you envision—and what would it take to get there?\n\n#carousel #story #fiction'
+  },
+  instagramDesign: {
+    typography: {
+      font_family: 'Work Sans',
+      title_size: 52,
+      content_size: 24,
+      year_size: 28,
+      branding_title_size: 32,
+      branding_main_size: 56,
+      branding_subtitle_size: 20,
+      title_weight: 600,
+      content_weight: 400,
+      letter_spacing_title: -0.025,
+      letter_spacing_year: 0.05,
+      line_height_title: 1.1,
+      line_height_content: 1.6
+    },
+    colors: {
+      primary_background: '#f8f8f8',
+      secondary_background: '#f0f0f0',
+      content_background: '#fdfdfd',
+      branding_background: '#0a0a0a',
+      branding_background_secondary: '#1a1a1a',
+      primary_text: '#0a0a0a',
+      content_text: '#1a1a1a',
+      year_text: '#666666',
+      branding_text_primary: '#ffffff',
+      branding_text_secondary: '#cccccc',
+      branding_text_subtitle: '#aaaaaa',
+      accent_border: '#0a0a0a'
+    },
+    layout: {
+      card_padding: 72,
+      content_padding: 72,
+      border_width: 4,
+      title_margin_bottom: 32,
+      year_margin_top: 24,
+      paragraph_margin_bottom: 24
+    }
   },
   defaults: { content_type: 'fiction' }
 };
@@ -65,6 +111,45 @@ function Settings() {
       instagram: {
         enabled: flatSettings['instagram.enabled'] ?? DEFAULT_SETTINGS.instagram.enabled,
         default_caption: flatSettings['instagram.default_caption'] || DEFAULT_SETTINGS.instagram.default_caption
+      },
+      instagramDesign: {
+        typography: {
+          font_family: flatSettings['instagram.design.typography.font_family'] || DEFAULT_SETTINGS.instagramDesign.typography.font_family,
+          title_size: flatSettings['instagram.design.typography.title_size'] ?? DEFAULT_SETTINGS.instagramDesign.typography.title_size,
+          content_size: flatSettings['instagram.design.typography.content_size'] ?? DEFAULT_SETTINGS.instagramDesign.typography.content_size,
+          year_size: flatSettings['instagram.design.typography.year_size'] ?? DEFAULT_SETTINGS.instagramDesign.typography.year_size,
+          branding_title_size: flatSettings['instagram.design.typography.branding_title_size'] ?? DEFAULT_SETTINGS.instagramDesign.typography.branding_title_size,
+          branding_main_size: flatSettings['instagram.design.typography.branding_main_size'] ?? DEFAULT_SETTINGS.instagramDesign.typography.branding_main_size,
+          branding_subtitle_size: flatSettings['instagram.design.typography.branding_subtitle_size'] ?? DEFAULT_SETTINGS.instagramDesign.typography.branding_subtitle_size,
+          title_weight: flatSettings['instagram.design.typography.title_weight'] ?? DEFAULT_SETTINGS.instagramDesign.typography.title_weight,
+          content_weight: flatSettings['instagram.design.typography.content_weight'] ?? DEFAULT_SETTINGS.instagramDesign.typography.content_weight,
+          letter_spacing_title: flatSettings['instagram.design.typography.letter_spacing_title'] ?? DEFAULT_SETTINGS.instagramDesign.typography.letter_spacing_title,
+          letter_spacing_year: flatSettings['instagram.design.typography.letter_spacing_year'] ?? DEFAULT_SETTINGS.instagramDesign.typography.letter_spacing_year,
+          line_height_title: flatSettings['instagram.design.typography.line_height_title'] ?? DEFAULT_SETTINGS.instagramDesign.typography.line_height_title,
+          line_height_content: flatSettings['instagram.design.typography.line_height_content'] ?? DEFAULT_SETTINGS.instagramDesign.typography.line_height_content
+        },
+        colors: {
+          primary_background: flatSettings['instagram.design.colors.primary_background'] || DEFAULT_SETTINGS.instagramDesign.colors.primary_background,
+          secondary_background: flatSettings['instagram.design.colors.secondary_background'] || DEFAULT_SETTINGS.instagramDesign.colors.secondary_background,
+          content_background: flatSettings['instagram.design.colors.content_background'] || DEFAULT_SETTINGS.instagramDesign.colors.content_background,
+          branding_background: flatSettings['instagram.design.colors.branding_background'] || DEFAULT_SETTINGS.instagramDesign.colors.branding_background,
+          branding_background_secondary: flatSettings['instagram.design.colors.branding_background_secondary'] || DEFAULT_SETTINGS.instagramDesign.colors.branding_background_secondary,
+          primary_text: flatSettings['instagram.design.colors.primary_text'] || DEFAULT_SETTINGS.instagramDesign.colors.primary_text,
+          content_text: flatSettings['instagram.design.colors.content_text'] || DEFAULT_SETTINGS.instagramDesign.colors.content_text,
+          year_text: flatSettings['instagram.design.colors.year_text'] || DEFAULT_SETTINGS.instagramDesign.colors.year_text,
+          branding_text_primary: flatSettings['instagram.design.colors.branding_text_primary'] || DEFAULT_SETTINGS.instagramDesign.colors.branding_text_primary,
+          branding_text_secondary: flatSettings['instagram.design.colors.branding_text_secondary'] || DEFAULT_SETTINGS.instagramDesign.colors.branding_text_secondary,
+          branding_text_subtitle: flatSettings['instagram.design.colors.branding_text_subtitle'] || DEFAULT_SETTINGS.instagramDesign.colors.branding_text_subtitle,
+          accent_border: flatSettings['instagram.design.colors.accent_border'] || DEFAULT_SETTINGS.instagramDesign.colors.accent_border
+        },
+        layout: {
+          card_padding: flatSettings['instagram.design.layout.card_padding'] ?? DEFAULT_SETTINGS.instagramDesign.layout.card_padding,
+          content_padding: flatSettings['instagram.design.layout.content_padding'] ?? DEFAULT_SETTINGS.instagramDesign.layout.content_padding,
+          border_width: flatSettings['instagram.design.layout.border_width'] ?? DEFAULT_SETTINGS.instagramDesign.layout.border_width,
+          title_margin_bottom: flatSettings['instagram.design.layout.title_margin_bottom'] ?? DEFAULT_SETTINGS.instagramDesign.layout.title_margin_bottom,
+          year_margin_top: flatSettings['instagram.design.layout.year_margin_top'] ?? DEFAULT_SETTINGS.instagramDesign.layout.year_margin_top,
+          paragraph_margin_bottom: flatSettings['instagram.design.layout.paragraph_margin_bottom'] ?? DEFAULT_SETTINGS.instagramDesign.layout.paragraph_margin_bottom
+        }
       },
       defaults: {
         content_type: flatSettings['defaults.content_type'] || DEFAULT_SETTINGS.defaults.content_type
@@ -175,6 +260,21 @@ function Settings() {
     // Instagram settings
     flattened['instagram.enabled'] = settingsObj.instagram.enabled;
     flattened['instagram.default_caption'] = settingsObj.instagram.default_caption;
+
+    // Instagram Design settings - Typography
+    Object.entries(settingsObj.instagramDesign.typography).forEach(([key, value]) => {
+      flattened[`instagram.design.typography.${key}`] = value;
+    });
+
+    // Instagram Design settings - Colors
+    Object.entries(settingsObj.instagramDesign.colors).forEach(([key, value]) => {
+      flattened[`instagram.design.colors.${key}`] = value;
+    });
+
+    // Instagram Design settings - Layout
+    Object.entries(settingsObj.instagramDesign.layout).forEach(([key, value]) => {
+      flattened[`instagram.design.layout.${key}`] = value;
+    });
 
     // Defaults
     flattened['defaults.content_type'] = settingsObj.defaults.content_type;
@@ -569,6 +669,261 @@ function Settings() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Instagram Design Settings Card */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Palette className="h-5 w-5 mr-2" />
+                Instagram Design Studio
+              </CardTitle>
+              <div className="text-sm text-muted-foreground">
+                Customize typography, colors, and layouts for Instagram carousel posts with MOMA-inspired aesthetics.
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* Typography Settings */}
+                <div className="space-y-4">
+                  <div className="flex items-center mb-3">
+                    <Type className="h-4 w-4 mr-2" />
+                    <h4 className="font-medium">Typography</h4>
+                  </div>
+
+                  {/* Font Family */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Font Family</label>
+                    <Select
+                      value={settings.instagramDesign.typography.font_family}
+                      onChange={(e) => handleSettingsChange('instagramDesign', 'typography', 'font_family', e.target.value)}
+                    >
+                      <option value="Work Sans">Work Sans (Recommended)</option>
+                      <option value="Inter">Inter</option>
+                      <option value="Helvetica Neue">Helvetica Neue</option>
+                      <option value="SF Pro Display">SF Pro Display</option>
+                    </Select>
+                  </div>
+
+                  {/* Font Sizes */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Title Size</label>
+                      <Input
+                        type="number"
+                        value={settings.instagramDesign.typography.title_size}
+                        onChange={(e) => handleSettingsChange('instagramDesign', 'typography', 'title_size', parseInt(e.target.value))}
+                        min="20"
+                        max="100"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Content Size</label>
+                      <Input
+                        type="number"
+                        value={settings.instagramDesign.typography.content_size}
+                        onChange={(e) => handleSettingsChange('instagramDesign', 'typography', 'content_size', parseInt(e.target.value))}
+                        min="12"
+                        max="40"
+                        className="text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Font Weights */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Title Weight</label>
+                      <Select
+                        value={settings.instagramDesign.typography.title_weight.toString()}
+                        onChange={(e) => handleSettingsChange('instagramDesign', 'typography', 'title_weight', parseInt(e.target.value))}
+                      >
+                        <option value="400">400 (Normal)</option>
+                        <option value="500">500 (Medium)</option>
+                        <option value="600">600 (Semibold)</option>
+                        <option value="700">700 (Bold)</option>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Content Weight</label>
+                      <Select
+                        value={settings.instagramDesign.typography.content_weight.toString()}
+                        onChange={(e) => handleSettingsChange('instagramDesign', 'typography', 'content_weight', parseInt(e.target.value))}
+                      >
+                        <option value="300">300 (Light)</option>
+                        <option value="400">400 (Normal)</option>
+                        <option value="500">500 (Medium)</option>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color Palette */}
+                <div className="space-y-4">
+                  <div className="flex items-center mb-3">
+                    <Palette className="h-4 w-4 mr-2" />
+                    <h4 className="font-medium">Color Palette</h4>
+                  </div>
+
+                  {/* Background Colors */}
+                  <div className="space-y-3">
+                    <h5 className="text-sm font-medium">Backgrounds</h5>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-6 h-6 rounded border border-border cursor-pointer"
+                          style={{ backgroundColor: settings.instagramDesign.colors.primary_background }}
+                          onClick={() => document.getElementById('primary-bg-color').click()}
+                        />
+                        <input
+                          id="primary-bg-color"
+                          type="color"
+                          value={settings.instagramDesign.colors.primary_background}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'primary_background', e.target.value)}
+                          className="sr-only"
+                        />
+                        <Input
+                          type="text"
+                          value={settings.instagramDesign.colors.primary_background}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'primary_background', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1 font-mono text-xs"
+                        />
+                        <span className="text-xs text-muted-foreground min-w-0">Primary</span>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-6 h-6 rounded border border-border cursor-pointer"
+                          style={{ backgroundColor: settings.instagramDesign.colors.content_background }}
+                          onClick={() => document.getElementById('content-bg-color').click()}
+                        />
+                        <input
+                          id="content-bg-color"
+                          type="color"
+                          value={settings.instagramDesign.colors.content_background}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'content_background', e.target.value)}
+                          className="sr-only"
+                        />
+                        <Input
+                          type="text"
+                          value={settings.instagramDesign.colors.content_background}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'content_background', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1 font-mono text-xs"
+                        />
+                        <span className="text-xs text-muted-foreground min-w-0">Content</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Text Colors */}
+                  <div className="space-y-3">
+                    <h5 className="text-sm font-medium">Text Colors</h5>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-6 h-6 rounded border border-border cursor-pointer"
+                          style={{ backgroundColor: settings.instagramDesign.colors.primary_text }}
+                          onClick={() => document.getElementById('primary-text-color').click()}
+                        />
+                        <input
+                          id="primary-text-color"
+                          type="color"
+                          value={settings.instagramDesign.colors.primary_text}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'primary_text', e.target.value)}
+                          className="sr-only"
+                        />
+                        <Input
+                          type="text"
+                          value={settings.instagramDesign.colors.primary_text}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'primary_text', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1 font-mono text-xs"
+                        />
+                        <span className="text-xs text-muted-foreground min-w-0">Title</span>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-6 h-6 rounded border border-border cursor-pointer"
+                          style={{ backgroundColor: settings.instagramDesign.colors.content_text }}
+                          onClick={() => document.getElementById('content-text-color').click()}
+                        />
+                        <input
+                          id="content-text-color"
+                          type="color"
+                          value={settings.instagramDesign.colors.content_text}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'content_text', e.target.value)}
+                          className="sr-only"
+                        />
+                        <Input
+                          type="text"
+                          value={settings.instagramDesign.colors.content_text}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'colors', 'content_text', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1 font-mono text-xs"
+                        />
+                        <span className="text-xs text-muted-foreground min-w-0">Body</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Layout Settings */}
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <LayoutIcon className="h-4 w-4 mr-2" />
+                      <h5 className="text-sm font-medium">Layout & Spacing</h5>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Card Padding</label>
+                        <Input
+                          type="number"
+                          value={settings.instagramDesign.layout.card_padding}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'layout', 'card_padding', parseInt(e.target.value))}
+                          min="20"
+                          max="120"
+                          className="text-xs"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Border Width</label>
+                        <Input
+                          type="number"
+                          value={settings.instagramDesign.layout.border_width}
+                          onChange={(e) => handleSettingsChange('instagramDesign', 'layout', 'border_width', parseInt(e.target.value))}
+                          min="0"
+                          max="10"
+                          className="text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Preview Button */}
+              <div className="mt-6 pt-4 border-t flex justify-between items-center">
+                <div className="text-sm text-muted-foreground">
+                  Changes will apply to new Instagram posts. Preview your changes in the Instagram Preview section.
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    // Navigate to Instagram preview to see changes
+                    window.open('/admin/instagram-preview', '_blank');
+                  }}
+                  className="flex items-center"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview Design
+                </Button>
               </div>
             </CardContent>
           </Card>

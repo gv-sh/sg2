@@ -242,12 +242,12 @@ echo -e "${YELLOW}♻️  Restarting application...${NC}"
 run_on_ec2 "
     cd '$APP_DIR'
     
-    # Graceful restart with PM2
+    # Graceful restart with PM2 using ecosystem file
     if npx pm2 describe sg2 > /dev/null 2>&1; then
         npx pm2 restart sg2
     else
-        # Start if not running
-        npx pm2 start src/server/server.ts --name sg2 --interpreter tsx
+        # Start if not running using ecosystem file for proper env loading
+        npx pm2 start ecosystem.config.js
     fi
 "
 
@@ -270,7 +270,7 @@ else
     MAX_ATTEMPTS=6
 
     while [ $HEALTH_CHECK_ATTEMPTS -lt $MAX_ATTEMPTS ]; do
-        HEALTH_STATUS=$(run_on_ec2 "curl -s http://localhost:8000/api/health | jq -r '.status' 2>/dev/null || echo 'failed'")
+        HEALTH_STATUS=$(run_on_ec2 "curl -s http://localhost:8000/api/system/health | jq -r '.data.status' 2>/dev/null || echo 'failed'")
         
         if [ "$HEALTH_STATUS" = "healthy" ]; then
             echo -e "${GREEN}✅ Application is healthy!${NC}"
@@ -295,7 +295,7 @@ if [ "$DRY_RUN" = false ] && [ $HEALTH_CHECK_ATTEMPTS -eq $MAX_ATTEMPTS ]; then
         
         cd '$APP_DIR'
         git stash pop || true
-        npx pm2 restart sg2 || npx pm2 start src/server/server.ts --name sg2 --interpreter tsx
+        npx pm2 restart sg2 || npx pm2 start ecosystem.config.js
     "
     
     echo -e "${RED}❌ Update failed and rolled back. Check logs with: npx pm2 logs sg2${NC}"
@@ -316,7 +316,7 @@ echo -e "${BLUE}📁 Database backup saved as: specgen_backup_$TIMESTAMP.db${NC}
 
 # Optional: Test external connectivity
 echo -e "${YELLOW}🔗 Testing external connectivity...${NC}"
-EXTERNAL_CHECK=$(curl -s "https://$DOMAIN_NAME/api/health" | jq -r '.status' 2>/dev/null || echo 'failed')
+EXTERNAL_CHECK=$(curl -s "https://$DOMAIN_NAME/api/system/health" | jq -r '.data.status' 2>/dev/null || echo 'failed')
 if [ "$EXTERNAL_CHECK" = "healthy" ]; then
     echo -e "${GREEN}✅ External connectivity confirmed!${NC}"
 else

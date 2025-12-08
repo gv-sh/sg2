@@ -287,8 +287,9 @@ run_on_ec2 "
 
 echo -e "${YELLOW}🔧 Configuring environment...${NC}"
 
-# Get OpenAI API key from local environment
+# Get credentials from local environment
 OPENAI_KEY=""
+INSTAGRAM_CONFIG=""
 if [ -f "../specgen/specgen-server/.env" ]; then
     OPENAI_KEY=$(grep "OPENAI_API_KEY=" ../specgen/specgen-server/.env | cut -d'=' -f2- | tr -d '"'"'"'')
     echo -e "${GREEN}✅ Found OpenAI API key in specgen-server/.env${NC}"
@@ -301,6 +302,27 @@ else
     if [ -z "$OPENAI_KEY" ]; then
         echo -e "${RED}❌ OpenAI API key is required!${NC}"
         exit 1
+    fi
+fi
+
+# Extract Instagram configuration if available
+if [ -f ".env" ]; then
+    FACEBOOK_PAGE_ID=$(grep "FACEBOOK_PAGE_ID=" .env | cut -d'=' -f2- | tr -d '"'"'"'')
+    INSTAGRAM_APP_NAME=$(grep "INSTAGRAM_APP_NAME=" .env | cut -d'=' -f2- | tr -d '"'"'"'')
+    INSTAGRAM_APP_ID=$(grep "INSTAGRAM_APP_ID=" .env | cut -d'=' -f2- | tr -d '"'"'"'')
+    INSTAGRAM_APP_SECRET=$(grep "INSTAGRAM_APP_SECRET=" .env | cut -d'=' -f2- | tr -d '"'"'"'')
+    INSTAGRAM_ACCESS_TOKEN=$(grep "INSTAGRAM_ACCESS_TOKEN=" .env | cut -d'=' -f2- | tr -d '"'"'"'')
+    
+    if [ -n "$FACEBOOK_PAGE_ID" ]; then
+        echo -e "${GREEN}✅ Found Instagram configuration in local .env${NC}"
+        INSTAGRAM_CONFIG="
+FACEBOOK_PAGE_ID=$FACEBOOK_PAGE_ID
+INSTAGRAM_APP_NAME=$INSTAGRAM_APP_NAME
+INSTAGRAM_APP_ID=$INSTAGRAM_APP_ID
+INSTAGRAM_APP_SECRET=$INSTAGRAM_APP_SECRET
+INSTAGRAM_ACCESS_TOKEN=$INSTAGRAM_ACCESS_TOKEN"
+    else
+        echo -e "${YELLOW}⚠️  Instagram configuration not found in .env${NC}"
     fi
 fi
 
@@ -321,6 +343,14 @@ EOF
     
     # Add OpenAI key securely
     echo 'OPENAI_API_KEY=$OPENAI_KEY' >> .env
+    
+    # Add Instagram configuration if available
+    if [ -n '$INSTAGRAM_CONFIG' ]; then
+        echo '$INSTAGRAM_CONFIG' >> .env
+        echo 'Instagram configuration added'
+    else
+        echo 'No Instagram configuration available'
+    fi
     
     echo 'Environment configured'
 "
@@ -402,8 +432,8 @@ echo -e "${YELLOW}🚀 Starting application...${NC}"
 run_on_ec2 "
     cd '$APP_DIR'
     
-    # Start with PM2
-    npx pm2 start src/server/server.ts --name sg2 --interpreter tsx
+    # Start with PM2 using ecosystem file for better environment management
+    npx pm2 start ecosystem.config.js
 "
 
 echo -e "${YELLOW}⏳ Waiting for startup...${NC}"
@@ -412,7 +442,7 @@ if [ "$DRY_RUN" = false ]; then
 fi
 
 echo -e "${YELLOW}🧪 Testing deployment...${NC}"
-HEALTH_CHECK=$(run_on_ec2 "curl -s http://localhost:8000/api/health | jq -r '.status' 2>/dev/null || echo 'failed'")
+HEALTH_CHECK=$(run_on_ec2 "curl -s http://localhost:8000/api/system/health | jq -r '.data.status' 2>/dev/null || echo 'failed'")
 
 if [ "$DRY_RUN" = true ] || [ "$HEALTH_CHECK" = "healthy" ]; then
     if [ "$DRY_RUN" = false ]; then
@@ -421,7 +451,7 @@ if [ "$DRY_RUN" = true ] || [ "$HEALTH_CHECK" = "healthy" ]; then
         echo -e "${BLUE}🌐 Access your application:${NC}"
         echo "  Application: https://$DOMAIN_NAME/"
         echo "  API Documentation: https://$DOMAIN_NAME/api-docs"
-        echo "  Health Check: https://$DOMAIN_NAME/api/health"
+        echo "  Health Check: https://$DOMAIN_NAME/api/system/health"
         echo ""
         echo -e "${BLUE}🔒 SSL Certificate:${NC}"
         echo "  - HTTPS enabled and configured"
@@ -462,7 +492,7 @@ else
     echo -e "${BLUE}🌐 Access your application:${NC}"
     echo "  Application: https://$DOMAIN_NAME/"
     echo "  API Documentation: https://$DOMAIN_NAME/api-docs"
-    echo "  Health Check: https://$DOMAIN_NAME/api/health"
+    echo "  Health Check: https://$DOMAIN_NAME/api/system/health"
     
     # Restore environment if requested
     if [ "$RESTORE_ENV" = true ]; then

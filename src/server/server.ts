@@ -33,8 +33,14 @@ const PORT = config.get('server.port');
 
 // ==================== MIDDLEWARE SETUP ====================
 
-// Trust proxy for rate limiting (required when behind ngrok or other proxies)
-app.set('trust proxy', true);
+// Trust proxy configuration - more secure for production
+if (config.get('env') === 'production') {
+  // In production, trust only nginx reverse proxy
+  app.set('trust proxy', 1);
+} else {
+  // In development, allow ngrok and other proxies
+  app.set('trust proxy', true);
+}
 
 // Security middleware
 app.use(helmet({

@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv';
 import type { Config, FeaturesConfig } from '../types/config.js';
 
 // Load environment variables from .env file in project root
-dotenv.config({ path: '../../.env' });
+dotenv.config({ path: './.env' });
 
 const env = process.env.NODE_ENV || 'development';
 

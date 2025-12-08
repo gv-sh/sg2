@@ -433,7 +433,7 @@ run_on_ec2 "
     cd '$APP_DIR'
     
     # Start with PM2 using ecosystem file for better environment management
-    npx pm2 start ecosystem.config.js
+    npx pm2 start ecosystem.config.cjs
 "
 
 echo -e "${YELLOW}⏳ Waiting for startup...${NC}"

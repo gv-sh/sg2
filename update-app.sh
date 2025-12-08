@@ -247,7 +247,7 @@ run_on_ec2 "
         npx pm2 restart sg2
     else
         # Start if not running using ecosystem file for proper env loading
-        npx pm2 start ecosystem.config.js
+        npx pm2 start ecosystem.config.cjs
     fi
 "
 
@@ -295,7 +295,7 @@ if [ "$DRY_RUN" = false ] && [ $HEALTH_CHECK_ATTEMPTS -eq $MAX_ATTEMPTS ]; then
         
         cd '$APP_DIR'
         git stash pop || true
-        npx pm2 restart sg2 || npx pm2 start ecosystem.config.js
+        npx pm2 restart sg2 || npx pm2 start ecosystem.config.cjs
     "
     
     echo -e "${RED}❌ Update failed and rolled back. Check logs with: npx pm2 logs sg2${NC}"

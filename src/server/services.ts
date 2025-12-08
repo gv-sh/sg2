@@ -1182,8 +1182,14 @@ class AIService {
   }
 
   private extractTitle(content: string): string {
-    // Look for formal title patterns
-    const titleMatch = content.match(/\*\*Title:\s*([^*\n]+)\*\*/);
+    // Look for formal title patterns with markdown bold
+    const titleMatchBold = content.match(/\*\*Title:\s*([^*\n]+)\*\*/);
+    if (titleMatchBold) {
+      return this.cleanTitle(titleMatchBold[1]);
+    }
+    
+    // Look for title pattern without markdown bold
+    const titleMatch = content.match(/^Title:\s*(.+)$/m);
     if (titleMatch) {
       return this.cleanTitle(titleMatch[1]);
     }
@@ -1198,6 +1204,8 @@ class AIService {
 
   private cleanTitle(title: string): string {
     return title
+      // Remove title prefix
+      .replace(/^Title:\s*/g, '')
       // Remove markdown headers
       .replace(/^#{1,6}\s+/g, '')
       // Remove bold/italic formatting

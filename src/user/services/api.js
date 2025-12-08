@@ -409,6 +409,12 @@ const generateTitle = (content) => {
       return titleMatch[1].trim();
     }
   }
+  
+  // Look for Title: without markdown formatting
+  const titleMatch = content.match(/^Title:\s*(.+)$/m);
+  if (titleMatch && titleMatch[1]) {
+    return titleMatch[1].trim();
+  }
 
   // Take first sentence or first 40 characters
   const firstSentence = content.split(/[.!?]|\n/)[0].trim();

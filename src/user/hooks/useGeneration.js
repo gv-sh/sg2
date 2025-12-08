@@ -172,6 +172,9 @@ export const useGeneration = (
             if (line.trim().startsWith('**Title:')) {
               extractedTitle = line.trim().replace(/\*\*/g, '').replace('Title:', '').trim();
               break;
+            } else if (line.trim().startsWith('Title:')) {
+              extractedTitle = line.trim().replace('Title:', '').trim();
+              break;
             }
           }
           setStoryTitle(response.title || extractedTitle);

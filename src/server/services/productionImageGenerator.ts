@@ -819,10 +819,13 @@ export class ProductionImageGenerator {
    * Create a title slide with story title and year using design settings
    */
   private createTitleSlide(title: string, year: number | null, settings: InstagramDesignSettings): CarouselSlide {
+    // Clean the title to remove prefixes
+    const cleanTitle = this.cleanStoryTitle(title);
+    
     const html = `
       ${this.generateCarouselCardStyles(settings)}
       <div class="carousel-card title-card">
-        <h1>${this.escapeHtml(title)}</h1>
+        <h1>${this.escapeHtml(cleanTitle)}</h1>
         ${year ? `<div class="year">Year ${year}</div>` : ''}
       </div>
     `;
@@ -1215,6 +1218,18 @@ export class ProductionImageGenerator {
     if (words.includes('innovation')) hashtags.push('#Innovation');
 
     return hashtags.slice(0, 3); // Limit to 3 dynamic hashtags
+  }
+
+  /**
+   * Clean story title by removing prefixes and markdown formatting
+   */
+  private cleanStoryTitle(title: string): string {
+    return title
+      .replace(/^Title:\s*/i, '') // Remove "Title:" prefix (case-insensitive)
+      .replace(/^#{1,6}\s+/g, '') // Remove markdown headers
+      .replace(/^\*+\s*/g, '') // Remove markdown bold
+      .replace(/\*+$/g, '') // Remove trailing asterisks
+      .trim();
   }
 
   /**

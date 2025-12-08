@@ -836,45 +836,34 @@ export class ProductionImageGenerator {
 
   /**
    * Create content slides from story text using design settings
+   * Each slide gets exactly one optimally-sized paragraph
    */
   private createContentSlides(content: string, settings: InstagramDesignSettings, maxContentSlides?: number): CarouselSlide[] {
     const slides: CarouselSlide[] = [];
 
-    // Clean and split content into paragraphs
-    const paragraphs = content
-      .split('\n\n')
-      .filter(p => p.trim())
-      .filter(p => !p.includes('**Title:'))
-      .map(p => p.trim());
+    if (!content || content.trim().length === 0) return slides;
 
-    if (paragraphs.length === 0) return slides;
+    // Split content into optimal paragraphs (one per slide)
+    const maxParagraphs = maxContentSlides || 6;
+    const optimalParagraphs = this.splitIntoOptimalParagraphs(content, maxParagraphs);
 
-    // Intelligent content chunking based on content length
-    const chunks = this.chunkContentIntelligently(paragraphs, maxContentSlides);
-
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
+    for (let i = 0; i < optimalParagraphs.length; i++) {
+      const paragraph = optimalParagraphs[i];
       const slideNumber = i + 1;
 
-      // Process content for special formatting
-      const contentHtml = chunk
-        .map(p => {
-          let processedParagraph = this.escapeHtml(p);
+      // Process paragraph for special formatting
+      let processedParagraph = this.escapeHtml(paragraph);
 
-          // Highlight dialogue or quoted text
-          if (p.includes('"') || p.includes("'")) {
-            processedParagraph = `<span class="quote-highlight">${processedParagraph}</span>`;
-          }
-
-          return `<p>${processedParagraph}</p>`;
-        })
-        .join('');
+      // Highlight dialogue or quoted text (but keep normal font style)
+      if (paragraph.includes('"') || paragraph.includes("'")) {
+        processedParagraph = `<span class="quote-highlight">${processedParagraph}</span>`;
+      }
 
       const html = `
         ${this.generateCarouselCardStyles(settings)}
         <div class="carousel-card content-card">
           <div class="content">
-            ${contentHtml}
+            <p>${processedParagraph}</p>
           </div>
         </div>
       `;
@@ -1037,49 +1026,114 @@ export class ProductionImageGenerator {
   }
 
   /**
-   * Intelligently chunk content based on visual space and readability
+   * Split content into optimal paragraphs for Instagram slides
+   * Each slide gets exactly one paragraph, optimized for readability
    */
-  private chunkContentIntelligently(paragraphs: string[], maxSlides?: number): string[][] {
-    const chunks: string[][] = [];
-    const maxCharsPerSlide = 600; // Optimal for Instagram format
-    const minCharsPerSlide = 300;
+  private splitIntoOptimalParagraphs(content: string, maxParagraphs: number = 6): string[] {
+    const optimalParagraphs: string[] = [];
+    const minChars = 100;
+    const optimalChars = 400;
+    const maxChars = 500;
 
-    let currentChunk: string[] = [];
-    let currentChunkLength = 0;
+    // First split by natural paragraph breaks
+    const naturalParagraphs = content
+      .split('\n\n')
+      .map(p => p.trim())
+      .filter(p => p.length > 0)
+      .filter(p => !p.includes('**Title:'));
 
-    for (const paragraph of paragraphs) {
-      const paragraphLength = paragraph.length;
-
-      // If adding this paragraph would make the chunk too long, start a new chunk
-      if (currentChunk.length > 0 && 
-          currentChunkLength + paragraphLength > maxCharsPerSlide) {
-        
-        // Only create chunk if it meets minimum size or is the last possible chunk
-        if (currentChunkLength >= minCharsPerSlide || 
-            (maxSlides && chunks.length >= maxSlides - 1)) {
-          chunks.push([...currentChunk]);
-          currentChunk = [];
-          currentChunkLength = 0;
-        }
+    for (const paragraph of naturalParagraphs) {
+      if (paragraph.length <= optimalChars) {
+        // Paragraph is already optimal size
+        optimalParagraphs.push(paragraph);
+      } else {
+        // Break long paragraph into smaller chunks
+        const brokenParagraphs = this.breakLongParagraph(paragraph, optimalChars, maxChars);
+        optimalParagraphs.push(...brokenParagraphs);
       }
 
-      // Add paragraph to current chunk
-      currentChunk.push(paragraph);
-      currentChunkLength += paragraphLength;
-
-      // If we've reached max slides, break
-      if (maxSlides && chunks.length >= maxSlides) {
+      // Stop if we've reached max paragraphs
+      if (optimalParagraphs.length >= maxParagraphs) {
         break;
       }
     }
 
-    // Add remaining content as final chunk
-    if (currentChunk.length > 0) {
-      chunks.push(currentChunk);
+    // Ensure we don't exceed max paragraphs
+    return optimalParagraphs.slice(0, maxParagraphs);
+  }
+
+  /**
+   * Break a long paragraph into smaller chunks at natural boundaries
+   */
+  private breakLongParagraph(paragraph: string, targetChars: number, maxChars: number): string[] {
+    const chunks: string[] = [];
+    let remainingText = paragraph;
+
+    while (remainingText.length > targetChars && chunks.length < 3) {
+      let breakPoint = this.findOptimalBreakPoint(remainingText, targetChars, maxChars);
+      
+      if (breakPoint === -1) {
+        // If no good break point found, take what we have
+        chunks.push(remainingText);
+        break;
+      }
+
+      chunks.push(remainingText.substring(0, breakPoint).trim());
+      remainingText = remainingText.substring(breakPoint).trim();
     }
 
-    // Limit to max slides if specified
-    return maxSlides ? chunks.slice(0, maxSlides) : chunks;
+    // Add remaining text if any
+    if (remainingText.length > 0) {
+      chunks.push(remainingText);
+    }
+
+    return chunks;
+  }
+
+  /**
+   * Find optimal break point in text (sentence or clause boundaries)
+   */
+  private findOptimalBreakPoint(text: string, targetChars: number, maxChars: number): number {
+    // Don't break if text is already short enough
+    if (text.length <= maxChars) {
+      return -1;
+    }
+
+    // Look for sentence endings first (. ! ?) near target
+    const sentenceEndings = ['. ', '! ', '? '];
+    for (const ending of sentenceEndings) {
+      const nearTarget = text.lastIndexOf(ending, targetChars);
+      if (nearTarget > targetChars * 0.6) { // At least 60% of target length
+        return nearTarget + ending.length;
+      }
+    }
+
+    // Look for clause breaks (, ; :) near target
+    const clauseBreaks = [', ', '; ', ': '];
+    for (const breakChar of clauseBreaks) {
+      const nearTarget = text.lastIndexOf(breakChar, targetChars);
+      if (nearTarget > targetChars * 0.7) { // At least 70% of target length
+        return nearTarget + breakChar.length;
+      }
+    }
+
+    // Look for word boundaries near target
+    const spaceNearTarget = text.lastIndexOf(' ', targetChars);
+    if (spaceNearTarget > targetChars * 0.8) { // At least 80% of target length
+      return spaceNearTarget + 1;
+    }
+
+    // If all else fails, find the last sentence ending before maxChars
+    for (const ending of sentenceEndings) {
+      const beforeMax = text.lastIndexOf(ending, maxChars);
+      if (beforeMax > 0) {
+        return beforeMax + ending.length;
+      }
+    }
+
+    // Last resort: word boundary before maxChars
+    const lastSpace = text.lastIndexOf(' ', maxChars);
+    return lastSpace > 0 ? lastSpace + 1 : -1;
   }
 
   /**

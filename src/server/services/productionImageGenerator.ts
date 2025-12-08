@@ -993,7 +993,7 @@ export class ProductionImageGenerator {
       }
       
       .quote-highlight {
-        font-style: italic !important;
+        font-style: normal !important;
         color: ${settings.colors.accent_border} !important;
         font-weight: 600 !important;
         position: relative !important;

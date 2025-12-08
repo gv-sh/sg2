@@ -12,6 +12,66 @@ APP_DIR="${APP_DIR:-/home/ubuntu/sg2}"
 DOMAIN_NAME="futuresofhope.org"
 BACKUP_DIR="/home/ubuntu/backups"
 
+# Environment switching functions (embedded from deploy script)
+LOCAL_BACKUP_DIR=".backups"
+ENV_FILE=".env"
+
+get_current_env_mode() {
+    if [ -f "$ENV_FILE" ]; then
+        CURRENT_MODE=$(grep "^DEPLOYMENT_MODE=" "$ENV_FILE" | cut -d'=' -f2)
+        CURRENT_BASE_URL=$(grep "^BASE_URL=" "$ENV_FILE" | cut -d'=' -f2)
+        PRODUCTION_URL=$(grep "^PRODUCTION_URL=" "$ENV_FILE" | cut -d'=' -f2)
+    else
+        CURRENT_MODE="unknown"
+        CURRENT_BASE_URL=""
+        PRODUCTION_URL=""
+    fi
+}
+
+backup_env() {
+    mkdir -p "$LOCAL_BACKUP_DIR"
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    BACKUP_FILE="$LOCAL_BACKUP_DIR/.env.backup.$TIMESTAMP"
+    cp "$ENV_FILE" "$BACKUP_FILE"
+    echo -e "${BLUE}📋 Environment backed up to: $BACKUP_FILE${NC}"
+    echo "$BACKUP_FILE" > "$LOCAL_BACKUP_DIR/.last_backup"
+}
+
+switch_to_production() {
+    if [ -f "$ENV_FILE" ]; then
+        get_current_env_mode
+        if [ "$CURRENT_MODE" != "production" ]; then
+            echo -e "${YELLOW}🔄 Switching to production mode...${NC}"
+            backup_env
+            
+            sed -i.tmp "s|^DEPLOYMENT_MODE=.*|DEPLOYMENT_MODE=production|" "$ENV_FILE"
+            sed -i.tmp "s|^BASE_URL=.*|BASE_URL=$PRODUCTION_URL|" "$ENV_FILE"
+            sed -i.tmp "s|^REACT_APP_API_URL=.*|REACT_APP_API_URL=$PRODUCTION_URL|" "$ENV_FILE"
+            sed -i.tmp "s|^NODE_ENV=.*|NODE_ENV=production|" "$ENV_FILE"
+            sed -i.tmp "s|^PORT=.*|PORT=8000|" "$ENV_FILE"
+            sed -i.tmp "s|^HOST=.*|HOST=0.0.0.0|" "$ENV_FILE"
+            rm -f "${ENV_FILE}.tmp"
+            
+            echo -e "${GREEN}✅ Switched to production mode${NC}"
+        else
+            echo -e "${GREEN}✅ Already in production mode${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️ No .env file found - will create production environment on server${NC}"
+    fi
+}
+
+restore_env() {
+    if [ -f "$LOCAL_BACKUP_DIR/.last_backup" ]; then
+        BACKUP_FILE=$(cat "$LOCAL_BACKUP_DIR/.last_backup")
+        if [ -f "$BACKUP_FILE" ]; then
+            echo -e "${YELLOW}🔄 Restoring original environment...${NC}"
+            cp "$BACKUP_FILE" "$ENV_FILE"
+            echo -e "${GREEN}✅ Environment restored${NC}"
+        fi
+    fi
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -21,6 +81,7 @@ NC='\033[0m' # No Color
 
 # Parse command line arguments
 DRY_RUN=false
+RESTORE_ENV=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -28,16 +89,22 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             shift
             ;;
+        --restore-env)
+            RESTORE_ENV=true
+            shift
+            ;;
         --help|-h)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
             echo "  --dry-run       Show what would be executed without making changes"
+            echo "  --restore-env   Restore original environment after update"
             echo "  --help, -h      Show this help message"
             echo ""
             echo "Examples:"
-            echo "  $0 --dry-run    # Test update without changes"
-            echo "  $0              # Update application"
+            echo "  $0 --dry-run                    # Test update without changes"
+            echo "  $0                              # Update application"
+            echo "  $0 --restore-env               # Update and restore dev environment"
             exit 0
             ;;
         *)
@@ -128,6 +195,19 @@ fi
 echo -e "${BLUE}📡 Target: $EC2_HOST${NC}"
 echo -e "${BLUE}🌐 Domain: $DOMAIN_NAME${NC}"
 
+# Switch to production environment
+if [ "$DRY_RUN" = true ]; then
+    echo -e "${BLUE}[DRY RUN] Would switch to production environment${NC}"
+    get_current_env_mode
+    if [ "$CURRENT_MODE" != "production" ]; then
+        echo -e "${YELLOW}[DRY RUN] Would switch from $CURRENT_MODE to production mode${NC}"
+        echo -e "${YELLOW}[DRY RUN] Would update BASE_URL: $CURRENT_BASE_URL → $PRODUCTION_URL${NC}"
+        echo -e "${YELLOW}[DRY RUN] Would update REACT_APP_API_URL: $CURRENT_BASE_URL → $PRODUCTION_URL${NC}"
+    fi
+else
+    switch_to_production
+fi
+
 # Function to run commands on EC2 (with dry-run support)
 run_on_ec2() {
     local command="$1"
@@ -176,30 +256,8 @@ run_on_ec2 "
 if [ "$SYNC_ENV" = true ]; then
     echo -e "${YELLOW}🔧 Syncing local .env file...${NC}"
     
-    # Create a temporary production .env file locally
-    TEMP_ENV=$(mktemp)
-    
-    # Copy local .env and modify for production
-    cp .env "$TEMP_ENV"
-    
-    # Update production-specific values
-    sed -i.bak 's/NODE_ENV=development/NODE_ENV=production/' "$TEMP_ENV"
-    sed -i.bak 's/PORT=3000/PORT=8000/' "$TEMP_ENV"
-    sed -i.bak 's/HOST=localhost/HOST=0.0.0.0/' "$TEMP_ENV"
-    
-    # Add production-specific environment variables if not present
-    if ! grep -q "API_BASE_URL" "$TEMP_ENV"; then
-        echo "API_BASE_URL=https://$DOMAIN_NAME" >> "$TEMP_ENV"
-    fi
-    if ! grep -q "ALLOWED_ORIGINS" "$TEMP_ENV"; then
-        echo "ALLOWED_ORIGINS=https://$DOMAIN_NAME,https://www.$DOMAIN_NAME" >> "$TEMP_ENV"
-    fi
-    
-    # Copy the updated .env to server
-    copy_to_ec2 "$TEMP_ENV" "$APP_DIR/.env"
-    
-    # Clean up temporary file
-    rm "$TEMP_ENV" "$TEMP_ENV.bak"
+    # Copy the current .env (now in production mode) to server
+    copy_to_ec2 ".env" "$APP_DIR/.env"
     
     echo -e "${GREEN}✅ Environment synced${NC}"
 fi
@@ -263,6 +321,9 @@ if [ "$DRY_RUN" = true ]; then
     echo -e "${YELLOW}  1. Wait for application startup${NC}"
     echo -e "${YELLOW}  2. Check health endpoint 6 times with 5s intervals${NC}"
     echo -e "${YELLOW}  3. Rollback if health checks fail${NC}"
+    if [ "$RESTORE_ENV" = true ]; then
+        echo -e "${YELLOW}  4. Restore original local environment${NC}"
+    fi
     echo -e "${GREEN}✅ Dry run health check simulation completed${NC}"
     HEALTH_STATUS="healthy"  # Simulate success for dry run
 else
@@ -313,6 +374,11 @@ run_on_ec2 "cd '$APP_DIR' && npx pm2 logs sg2 --lines 5"
 echo -e "${GREEN}🎉 Update completed successfully!${NC}"
 echo -e "${GREEN}🌐 Application available at: https://$DOMAIN_NAME${NC}"
 echo -e "${BLUE}📁 Database backup saved as: specgen_backup_$TIMESTAMP.db${NC}"
+
+# Restore environment if requested
+if [ "$RESTORE_ENV" = true ] && [ "$DRY_RUN" = false ]; then
+    restore_env
+fi
 
 # Optional: Test external connectivity
 echo -e "${YELLOW}🔗 Testing external connectivity...${NC}"

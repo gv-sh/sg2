@@ -22,7 +22,7 @@ usage() {
     echo ""
     echo "Modes:"
     echo "  dev        Switch to development mode (ngrok URLs)"
-    echo "  prod       Switch to production mode (v2.futuresofhope.org)"
+    echo "  prod       Switch to production mode (futuresofhope.org)"
     echo "  status     Show current configuration"
     echo "  update-ngrok URL   Update ngrok URL and switch to dev mode"
     echo ""

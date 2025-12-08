@@ -19,18 +19,95 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🔄 SpecGen v2 Quick Update Starting...${NC}"
+# Parse command line arguments
+DRY_RUN=false
 
-# Prompt for EC2 host if not set
-if [ -z "$EC2_HOST" ]; then
-    echo -e "${YELLOW}🔑 Enter your EC2 SSH connection string:${NC}"
-    echo "   (e.g., ubuntu@ec2-xx-xx-xx-xx.region.compute.amazonaws.com)"
-    read -p "EC2 Host: " EC2_HOST
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --dry-run       Show what would be executed without making changes"
+            echo "  --help, -h      Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0 --dry-run    # Test update without changes"
+            echo "  $0              # Update application"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}❌ Unknown option: $1${NC}"
+            exit 1
+            ;;
+    esac
+done
 
-    if [ -z "$EC2_HOST" ]; then
-        echo -e "${RED}❌ EC2 host is required!${NC}"
-        exit 1
+if [ "$DRY_RUN" = true ]; then
+    echo -e "${BLUE}🧪 SpecGen v2 Quick Update [DRY RUN]${NC}"
+    echo -e "${YELLOW}This is a dry run - no changes will be made${NC}"
+else
+    echo -e "${BLUE}🔄 SpecGen v2 Quick Update Starting...${NC}"
+fi
+
+# Auto-detect EC2 host from domain
+auto_detect_ec2_host() {
+    echo -e "${BLUE}🔍 Auto-detecting EC2 host from domain: $DOMAIN_NAME${NC}"
+    
+    # Get IP address of domain
+    DOMAIN_IP=$(dig +short "$DOMAIN_NAME" 2>/dev/null | head -1)
+    
+    # If subdomain doesn't exist, try parent domain
+    if [ -z "$DOMAIN_IP" ]; then
+        PARENT_DOMAIN=$(echo "$DOMAIN_NAME" | sed 's/^[^.]*\.//')
+        echo -e "${BLUE}🔄 Subdomain not found, trying parent domain: $PARENT_DOMAIN${NC}"
+        DOMAIN_IP=$(dig +short "$PARENT_DOMAIN" 2>/dev/null | head -1)
     fi
+    
+    if [ -z "$DOMAIN_IP" ]; then
+        echo -e "${YELLOW}⚠️  Could not resolve domain IP${NC}"
+        return 1
+    fi
+    
+    echo -e "${BLUE}📍 Domain IP: $DOMAIN_IP${NC}"
+    
+    # Reverse DNS lookup to get EC2 hostname
+    EC2_HOSTNAME=$(nslookup "$DOMAIN_IP" 2>/dev/null | grep -E "amazonaws\.com" | awk '{print $4}' | sed 's/\.$//' | head -1)
+    if [ -z "$EC2_HOSTNAME" ]; then
+        echo -e "${YELLOW}⚠️  Could not find EC2 hostname via reverse DNS${NC}"
+        return 1
+    fi
+    
+    echo -e "${BLUE}🖥️  Found EC2 hostname: $EC2_HOSTNAME${NC}"
+    
+    # Format as ubuntu@hostname
+    AUTO_DETECTED_HOST="ubuntu@$EC2_HOSTNAME"
+    echo -e "${GREEN}✅ Auto-detected EC2 host: $AUTO_DETECTED_HOST${NC}"
+    
+    return 0
+}
+
+# Auto-detect or prompt for EC2 host
+if [ -z "$EC2_HOST" ]; then
+    if auto_detect_ec2_host; then
+        EC2_HOST="$AUTO_DETECTED_HOST"
+        echo -e "${GREEN}✅ Using auto-detected host: $EC2_HOST${NC}"
+    else
+        echo -e "${YELLOW}🔑 Auto-detection failed. Enter your EC2 SSH connection string:${NC}"
+        echo "   (e.g., ubuntu@ec2-xx-xx-xx-xx.region.compute.amazonaws.com)"
+        read -p "EC2 Host: " EC2_HOST
+
+        if [ -z "$EC2_HOST" ]; then
+            echo -e "${RED}❌ EC2 host is required!${NC}"
+            exit 1
+        fi
+    fi
+else
+    echo -e "${GREEN}✅ Using provided host: $EC2_HOST${NC}"
 fi
 
 # Check if key file exists
@@ -51,14 +128,27 @@ fi
 echo -e "${BLUE}📡 Target: $EC2_HOST${NC}"
 echo -e "${BLUE}🌐 Domain: $DOMAIN_NAME${NC}"
 
-# Function to run commands on EC2
+# Function to run commands on EC2 (with dry-run support)
 run_on_ec2() {
-    ssh -i "$EC2_KEY" "$EC2_HOST" "$1"
+    local command="$1"
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "${BLUE}[DRY RUN] Would execute on EC2:${NC}"
+        echo -e "${YELLOW}  ssh -i \"$EC2_KEY\" \"$EC2_HOST\" \"$command\"${NC}"
+        return 0
+    else
+        ssh -i "$EC2_KEY" "$EC2_HOST" "$command"
+    fi
 }
 
-# Function to copy files to EC2
+# Function to copy files to EC2 (with dry-run support)
 copy_to_ec2() {
-    scp -i "$EC2_KEY" "$1" "$EC2_HOST:$2"
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "${BLUE}[DRY RUN] Would copy file to EC2:${NC}"
+        echo -e "${YELLOW}  scp -i \"$EC2_KEY\" \"$1\" \"$EC2_HOST:$2\"${NC}"
+        return 0
+    else
+        scp -i "$EC2_KEY" "$1" "$EC2_HOST:$2"
+    fi
 }
 
 echo -e "${YELLOW}🔍 Checking current application status...${NC}"
@@ -162,26 +252,38 @@ run_on_ec2 "
 "
 
 echo -e "${YELLOW}⏳ Waiting for application startup...${NC}"
-sleep 8
+if [ "$DRY_RUN" = false ]; then
+    sleep 8
+fi
 
 echo -e "${YELLOW}🧪 Testing application health...${NC}"
-HEALTH_CHECK_ATTEMPTS=0
-MAX_ATTEMPTS=6
 
-while [ $HEALTH_CHECK_ATTEMPTS -lt $MAX_ATTEMPTS ]; do
-    HEALTH_STATUS=$(run_on_ec2 "curl -s http://localhost:8000/api/health | jq -r '.status' 2>/dev/null || echo 'failed'")
-    
-    if [ "$HEALTH_STATUS" = "healthy" ]; then
-        echo -e "${GREEN}✅ Application is healthy!${NC}"
-        break
-    else
-        echo -e "${YELLOW}⏳ Attempt $((HEALTH_CHECK_ATTEMPTS + 1))/$MAX_ATTEMPTS - Status: $HEALTH_STATUS${NC}"
-        sleep 5
-        HEALTH_CHECK_ATTEMPTS=$((HEALTH_CHECK_ATTEMPTS + 1))
-    fi
-done
+if [ "$DRY_RUN" = true ]; then
+    echo -e "${BLUE}[DRY RUN] Would perform health checks:${NC}"
+    echo -e "${YELLOW}  1. Wait for application startup${NC}"
+    echo -e "${YELLOW}  2. Check health endpoint 6 times with 5s intervals${NC}"
+    echo -e "${YELLOW}  3. Rollback if health checks fail${NC}"
+    echo -e "${GREEN}✅ Dry run health check simulation completed${NC}"
+    HEALTH_STATUS="healthy"  # Simulate success for dry run
+else
+    HEALTH_CHECK_ATTEMPTS=0
+    MAX_ATTEMPTS=6
 
-if [ $HEALTH_CHECK_ATTEMPTS -eq $MAX_ATTEMPTS ]; then
+    while [ $HEALTH_CHECK_ATTEMPTS -lt $MAX_ATTEMPTS ]; do
+        HEALTH_STATUS=$(run_on_ec2 "curl -s http://localhost:8000/api/health | jq -r '.status' 2>/dev/null || echo 'failed'")
+        
+        if [ "$HEALTH_STATUS" = "healthy" ]; then
+            echo -e "${GREEN}✅ Application is healthy!${NC}"
+            break
+        else
+            echo -e "${YELLOW}⏳ Attempt $((HEALTH_CHECK_ATTEMPTS + 1))/$MAX_ATTEMPTS - Status: $HEALTH_STATUS${NC}"
+            sleep 5
+            HEALTH_CHECK_ATTEMPTS=$((HEALTH_CHECK_ATTEMPTS + 1))
+        fi
+    done
+fi
+
+if [ "$DRY_RUN" = false ] && [ $HEALTH_CHECK_ATTEMPTS -eq $MAX_ATTEMPTS ]; then
     echo -e "${RED}❌ Health check failed! Rolling back...${NC}"
     
     # Restore database backup

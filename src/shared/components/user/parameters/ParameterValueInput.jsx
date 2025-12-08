@@ -17,7 +17,7 @@ const ParameterValueInput = ({ parameter, value, onChange }) => {
           )}
           <div className="relative w-full max-w-[400px]">
             <Select
-              value={value || parameterValues[0]?.id || parameterValues[0]?.label || parameterValues[0] || ''}
+              value={value || parameterValues[0]?.label || parameterValues[0]?.id || parameterValues[0] || ''}
               onChange={(e) => onChange(e.target.value)}
               className="w-full h-9 rounded-md border bg-transparent px-3 py-1 text-sm appearance-none"
             >
@@ -25,7 +25,7 @@ const ParameterValueInput = ({ parameter, value, onChange }) => {
                 Select...
               </option>
               {parameterValues.map((option, index) => {
-                const optionId = option.id || option.label || option;
+                const optionId = option.label || option.id || option;
                 const optionLabel = option.label || option;
                 return (
                   <option key={optionId || index} value={optionId}>
@@ -132,7 +132,7 @@ const ParameterValueInput = ({ parameter, value, onChange }) => {
           <div className="grid grid-cols-2 gap-2">
             {parameterValues.map((option, index) => {
               // Handle both {id, label} format and {label} format
-              const optionId = option.id || option.label || option || `option-${index}`;
+              const optionId = option.label || option.id || option || `option-${index}`;
               const optionLabel = option.label || option;
               
               return (
@@ -171,7 +171,7 @@ const ParameterValueInput = ({ parameter, value, onChange }) => {
           )}
           <div className="grid grid-cols-2 gap-2">
             {parameterValues.map((option, index) => {
-              const optionId = option.id || option.label || option || `option-${index}`;
+              const optionId = option.label || option.id || option || `option-${index}`;
               const optionLabel = option.label || option;
               
               return (

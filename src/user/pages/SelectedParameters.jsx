@@ -85,7 +85,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
               <SelectContent>
                 {parameterValues.map((option, index) => {
                   // Handle both {id, label} and {label} formats
-                  const optionId = option.id || option.label || option;
+                  const optionId = option.label || option.id || option;
                   const optionLabel = option.label || option;
                   return (
                     <SelectItem key={optionId || index} value={optionId}>
@@ -128,7 +128,7 @@ const SelectedParameterCard = ({ parameter, onUpdate, onRemove }) => {
             )}
             <div className="grid xl:grid-cols-2 grid-cols-1 gap-2">
               {parameterValues.map((option, index) => {
-                const optionId = option.id || option.label || option || `option-${index}`;
+                const optionId = option.label || option.id || option || `option-${index}`;
                 const optionLabel = option.label || option;
 
                 return (

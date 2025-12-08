@@ -137,7 +137,7 @@ export const useGeneration = (
         if (!parameterValues[param.categoryId]) {
           parameterValues[param.categoryId] = {};
         }
-        parameterValues[param.categoryId][param.id] = param.value;
+        parameterValues[param.categoryId][param.label || param.id] = param.value;
       });
     } else if (typeof paramsToUse === 'object' && paramsToUse !== null) {
       // Format is already the nested object structure

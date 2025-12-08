@@ -9,7 +9,7 @@ export const randomizeParameterValue = (parameter) => {
         case 'radio':
             if (parameter.parameter_values?.length) {
                 const idx = Math.floor(Math.random() * parameter.parameter_values.length);
-                return parameter.parameter_values[idx].id || parameter.parameter_values[idx].label;
+                return parameter.parameter_values[idx].label || parameter.parameter_values[idx].id;
             }
             return null;
 

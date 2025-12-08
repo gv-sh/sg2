@@ -159,7 +159,7 @@ export async function validateGenerationParameters(parameters: Record<string, an
         case 'select':
         case 'radio':
           if (dbParam.parameter_values && Array.isArray(dbParam.parameter_values)) {
-            const validValues = dbParam.parameter_values.map((v: any) => v.id || v.label);
+            const validValues = dbParam.parameter_values.map((v: any) => v.label || v.id);
             if (!validValues.includes(value)) {
               errors.push(`Parameter '${paramId}' must be one of: ${validValues.join(', ')}`);
             }

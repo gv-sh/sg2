@@ -11,7 +11,7 @@ EC2_HOST="${EC2_HOST:-}"
 EC2_KEY="${EC2_KEY:-./debanshu.pem}"
 REPO_URL="${REPO_URL:-https://github.com/gv-sh/sg2.git}"
 APP_DIR="${APP_DIR:-/home/ubuntu/sg2}"
-DOMAIN_NAME="v2.futuresofhope.org"
+DOMAIN_NAME="futuresofhope.org"
 
 # Colors for output
 RED='\033[0;31m'
@@ -251,6 +251,11 @@ fi
 echo -e "${YELLOW}🧹 Stopping existing services...${NC}"
 run_on_ec2 "
     cd '$APP_DIR' 2>/dev/null || true
+    # Stop old specgen deployment that serves main domain on port 3000
+    npx pm2 stop specgen 2>/dev/null || true
+    npx pm2 delete specgen 2>/dev/null || true
+    
+    # Stop sg2 if running, will restart later
     npx pm2 stop sg2 2>/dev/null || true
     npx pm2 delete sg2 2>/dev/null || true
 "
@@ -355,24 +360,27 @@ EOF
     echo 'Environment configured'
 "
 
-echo -e "${YELLOW}🌐 Setting up nginx and SSL...${NC}"
+echo -e "${YELLOW}🌐 Updating nginx configuration...${NC}"
 run_on_ec2 "
-    # Install nginx and certbot if not present
-    if ! command -v nginx &> /dev/null; then
-        echo 'Installing nginx and certbot...'
-        sudo apt update
-        sudo apt install -y nginx certbot python3-certbot-nginx
-    fi
+    # Update existing futuresofhope.org nginx configuration to point to port 8000
+    NGINX_CONF=\"/etc/nginx/sites-available/futuresofhope.org\"
     
-    # Create initial nginx configuration for $DOMAIN_NAME (HTTP only for certbot)
-    NGINX_CONF=\"/etc/nginx/sites-available/$DOMAIN_NAME\"
-    if [ ! -f \"\$NGINX_CONF\" ]; then
-        echo 'Creating initial nginx configuration...'
+    if [ -f \"\$NGINX_CONF\" ]; then
+        echo 'Updating existing futuresofhope.org nginx configuration...'
+        # Create backup of current config
+        sudo cp \"\$NGINX_CONF\" \"\$NGINX_CONF.backup.\$(date +%Y%m%d_%H%M%S)\"
+        
+        # Update port from 3000 to 8000 in the existing configuration
+        sudo sed -i 's|proxy_pass http://127.0.0.1:3000|proxy_pass http://127.0.0.1:8000|g' \"\$NGINX_CONF\"
+        
+        echo 'Updated futuresofhope.org to point to port 8000 (sg2 application)'
+    else
+        echo 'Creating new nginx configuration for futuresofhope.org...'
         sudo tee \"\$NGINX_CONF\" > /dev/null << 'NGINXEOF'
-# Nginx configuration for $DOMAIN_NAME
+# Nginx configuration for futuresofhope.org
 server {
     listen 80;
-    server_name $DOMAIN_NAME www.$DOMAIN_NAME;
+    server_name futuresofhope.org www.futuresofhope.org;
     
     # Let's Encrypt challenge location
     location /.well-known/acme-challenge/ {
@@ -395,37 +403,25 @@ server {
 }
 NGINXEOF
         
-        # Enable the v2 site (alongside existing sites, not replacing them)
+        # Enable the site
         sudo ln -sf \"\$NGINX_CONF\" /etc/nginx/sites-enabled/
-        
-        # NOTE: NOT removing existing sites - this will coexist with futuresofhope.org
-        echo 'Added v2 subdomain configuration (existing sites preserved)'
-        
-        # Create web root for certbot if it doesn't exist
-        sudo mkdir -p /var/www/html
-        
-        # Test and reload nginx (will work alongside existing configuration)
-        sudo nginx -t && sudo systemctl enable nginx && sudo systemctl reload nginx
-        echo 'v2 subdomain nginx configuration added successfully'
-    else
-        echo 'v2 subdomain nginx configuration already exists'
     fi
     
-    # Obtain SSL certificate
-    echo 'Setting up SSL certificate...'
-    if [ ! -f /etc/letsencrypt/live/$DOMAIN_NAME/fullchain.pem ]; then
-        echo 'Obtaining SSL certificate from Let'\''s Encrypt...'
-        sudo certbot --nginx -d $DOMAIN_NAME -d www.$DOMAIN_NAME --non-interactive --agree-tos --email admin@futuresofhope.org --redirect
+    # Test nginx configuration
+    sudo nginx -t && sudo systemctl reload nginx
+    echo 'Main domain nginx configuration updated successfully'
+    
+    # SSL certificate should already exist for futuresofhope.org
+    if [ ! -f /etc/letsencrypt/live/futuresofhope.org/fullchain.pem ]; then
+        echo 'Setting up SSL certificate...'
+        sudo mkdir -p /var/www/html
+        sudo certbot --nginx -d futuresofhope.org -d www.futuresofhope.org --non-interactive --agree-tos --email admin@futuresofhope.org --redirect
         echo 'SSL certificate obtained and nginx configured for HTTPS'
     else
-        echo 'SSL certificate already exists'
+        echo 'SSL certificate already exists for futuresofhope.org'
     fi
     
-    # Setup auto-renewal
-    echo 'Setting up SSL certificate auto-renewal...'
-    (sudo crontab -l 2>/dev/null || true; echo '0 12 * * * /usr/bin/certbot renew --quiet') | sudo crontab -
-    
-    echo 'SSL setup completed'
+    echo 'Nginx configuration update completed'
 "
 
 echo -e "${YELLOW}🚀 Starting application...${NC}"

@@ -9,7 +9,7 @@ set -e
 EC2_HOST="${EC2_HOST:-}"
 EC2_KEY="${EC2_KEY:-./debanshu.pem}"
 APP_DIR="${APP_DIR:-/home/ubuntu/sg2}"
-DOMAIN_NAME="v2.futuresofhope.org"
+DOMAIN_NAME="futuresofhope.org"
 BACKUP_DIR="/home/ubuntu/backups"
 
 # Colors for output

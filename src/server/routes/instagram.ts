@@ -730,7 +730,7 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
       
       // Serve the square processed image
       res.set({
-        'Content-Type': 'image/png', // Square images are always PNG
+        'Content-Type': 'image/jpeg', // Square images are JPEG for Instagram compatibility
         'Content-Length': squareImageBuffer.length.toString(),
         'Cache-Control': 'public, max-age=86400', // 24 hours cache
         'Access-Control-Allow-Origin': '*', // Allow Instagram to fetch
@@ -1042,15 +1042,15 @@ async function processImageToSquareWithSharp(imageBuffer: Buffer): Promise<Buffe
       console.log('processImageToSquareWithSharp - Image already square, no cropping needed');
     }
     
-    // Resize to exactly 1080x1080 and convert to PNG
+    // Resize to exactly 1080x1080 and convert to JPEG for Instagram compatibility
     const squareBuffer = await processedImage
       .resize(1080, 1080, {
         kernel: sharp.kernel.lanczos3,
         fastShrinkOnLoad: true
       })
-      .png({
+      .jpeg({
         quality: 95,
-        compressionLevel: 6
+        mozjpeg: true
       })
       .toBuffer();
     
@@ -1083,9 +1083,9 @@ async function processImageToSquareWithPuppeteer(imageBuffer: Buffer, story?: an
         const chunk = imageBuffer.slice(i, i + chunkSize);
         chunks.push(chunk.toString('base64'));
       }
-      base64Image = `data:image/png;base64,${chunks.join('')}`;
+      base64Image = `data:image/jpeg;base64,${chunks.join('')}`;
     } else {
-      base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+      base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
     }
     
     // Create HTML page with simple Canvas center cropping
@@ -1133,8 +1133,8 @@ async function processImageToSquareWithPuppeteer(imageBuffer: Buffer, story?: an
             // Draw the cropped square portion scaled to 1080x1080
             ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, 1080, 1080);
             
-            // Get canvas data as base64 PNG
-            const dataUrl = canvas.toDataURL('image/png', 1.0);
+            // Get canvas data as base64 JPEG for Instagram compatibility
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
             console.log('Canvas: Generated square image, data URL length:', dataUrl.length);
             
             // Store result for extraction
@@ -1180,12 +1180,12 @@ async function processImageToSquareWithPuppeteer(imageBuffer: Buffer, story?: an
       
       // Extract the processed image data
       const canvasDataUrl = await page.evaluate(() => (window as any).canvasResult);
-      if (!canvasDataUrl || !canvasDataUrl.startsWith('data:image/png;base64,')) {
+      if (!canvasDataUrl || !canvasDataUrl.startsWith('data:image/jpeg;base64,')) {
         throw new Error('Failed to generate valid canvas data URL');
       }
       
       // Convert base64 back to buffer
-      const base64Data = canvasDataUrl.replace('data:image/png;base64,', '');
+      const base64Data = canvasDataUrl.replace('data:image/jpeg;base64,', '');
       const squareImageBuffer = Buffer.from(base64Data, 'base64');
       
       console.log(`processImageToSquare - Successfully processed to 1080x1080 square, size: ${squareImageBuffer.length} bytes`);

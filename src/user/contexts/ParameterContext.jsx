@@ -10,7 +10,7 @@ export const ParameterProvider = ({ children }) => {
   const handleParameterSelect = useCallback((parameter) => {
     // Prevent duplicates
     if (!selectedParameters.some(p => p.id === parameter.id)) {
-      setSelectedParameters(prev => [...prev, parameter]);
+      setSelectedParameters(prev => [parameter, ...prev]);
     }
   }, [selectedParameters]);
 

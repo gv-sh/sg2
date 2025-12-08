@@ -108,19 +108,66 @@ router.post('/preview', asyncErrorHandler(async (req: TypedRequestBody<ShareRequ
       return next(boom.notFound(`Story with ID ${validatedData.storyId} not found`));
     }
 
-    // Generate carousel slides
-    const carouselData = await imageProcessor.generateCarouselSlides({
+    // Load Instagram design settings from database (same as admin route)
+    const designSettings = await dataService.getSettings();
+    
+    // Extract design settings for Instagram using the same structure as Settings page
+    const instagramDesignSettings = {
+      typography: {
+        font_family: designSettings['instagram.design.typography.font_family'] || 'Work Sans',
+        title_size: designSettings['instagram.design.typography.title_size'] || 52,
+        content_size: designSettings['instagram.design.typography.content_size'] || 24,
+        year_size: designSettings['instagram.design.typography.year_size'] || 28,
+        branding_title_size: designSettings['instagram.design.typography.branding_title_size'] || 32,
+        branding_main_size: designSettings['instagram.design.typography.branding_main_size'] || 56,
+        branding_subtitle_size: designSettings['instagram.design.typography.branding_subtitle_size'] || 20,
+        title_weight: designSettings['instagram.design.typography.title_weight'] || 600,
+        content_weight: designSettings['instagram.design.typography.content_weight'] || 400,
+        letter_spacing_title: designSettings['instagram.design.typography.letter_spacing_title'] || -0.025,
+        letter_spacing_year: designSettings['instagram.design.typography.letter_spacing_year'] || 0.05,
+        line_height_title: designSettings['instagram.design.typography.line_height_title'] || 1.1,
+        line_height_content: designSettings['instagram.design.typography.line_height_content'] || 1.6
+      },
+      colors: {
+        primary_background: designSettings['instagram.design.colors.primary_background'] || '#f8f8f8',
+        secondary_background: designSettings['instagram.design.colors.secondary_background'] || '#f0f0f0',
+        content_background: designSettings['instagram.design.colors.content_background'] || '#fdfdfd',
+        branding_background: designSettings['instagram.design.colors.branding_background'] || '#0a0a0a',
+        branding_background_secondary: designSettings['instagram.design.colors.branding_background_secondary'] || '#1a1a1a',
+        primary_text: designSettings['instagram.design.colors.primary_text'] || '#0a0a0a',
+        content_text: designSettings['instagram.design.colors.content_text'] || '#1a1a1a',
+        year_text: designSettings['instagram.design.colors.year_text'] || '#666666',
+        branding_text_primary: designSettings['instagram.design.colors.branding_text_primary'] || '#ffffff',
+        branding_text_secondary: designSettings['instagram.design.colors.branding_text_secondary'] || '#cccccc',
+        branding_text_subtitle: designSettings['instagram.design.colors.branding_text_subtitle'] || '#aaaaaa',
+        accent_border: designSettings['instagram.design.colors.accent_border'] || '#0a0a0a'
+      },
+      layout: {
+        card_padding: designSettings['instagram.design.layout.card_padding'] || 72,
+        content_padding: designSettings['instagram.design.layout.content_padding'] || 72,
+        border_width: designSettings['instagram.design.layout.border_width'] || 4,
+        title_margin_bottom: designSettings['instagram.design.layout.title_margin_bottom'] || 32,
+        year_margin_top: designSettings['instagram.design.layout.year_margin_top'] || 24,
+        paragraph_margin_bottom: designSettings['instagram.design.layout.paragraph_margin_bottom'] || 24
+      }
+    };
+
+    // Convert story to ContentApiData format for the generator
+    const storyData = {
       id: story.id,
       title: story.title,
       content: story.fiction_content,
-      type: 'combined',
+      type: 'combined' as const,
       image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
       image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
       parameters: story.prompt_data,
       year: story.metadata?.year || null,
       metadata: story.metadata || undefined,
       created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    };
+
+    // Generate carousel slides using ProductionImageGenerator with design settings
+    const carouselData = await imageGenerator.generateCarouselSlides(storyData, instagramDesignSettings);
 
     // Generate preview URLs for the carousel images
     const previewUrls: string[] = [];
@@ -138,19 +185,8 @@ router.post('/preview', asyncErrorHandler(async (req: TypedRequestBody<ShareRequ
         previewUrls.push(`/api/instagram/images/${story.id}/${slideIndex}`);
       });
 
-    // Generate Instagram caption
-    const caption = await imageProcessor.generateInstagramCaption({
-      id: story.id,
-      title: story.title,
-      content: story.fiction_content,
-      type: 'combined',
-      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-      parameters: story.prompt_data,
-      year: story.metadata?.year || null,
-      metadata: story.metadata || undefined,
-      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    // Generate Instagram caption using ProductionImageGenerator
+    const caption = await imageGenerator.generateInstagramCaption(storyData);
 
     // Cache the carousel data for later use
     await cacheCarouselData(story.id, carouselData, caption);
@@ -231,21 +267,69 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       return next(boom.badRequest('This story has already been shared to Instagram'));
     }
 
-    // Generate carousel slides and pre-generate all images
-    console.log(`Generating carousel and pre-generating all images for story ${story.id}`);
+    // Load Instagram design settings from database (same as admin route)
+    const designSettings = await dataService.getSettings();
     
-    const carouselData = await imageProcessor.generateCarouselSlides({
+    // Extract design settings for Instagram using the same structure as Settings page
+    const instagramDesignSettings = {
+      typography: {
+        font_family: designSettings['instagram.design.typography.font_family'] || 'Work Sans',
+        title_size: designSettings['instagram.design.typography.title_size'] || 52,
+        content_size: designSettings['instagram.design.typography.content_size'] || 24,
+        year_size: designSettings['instagram.design.typography.year_size'] || 28,
+        branding_title_size: designSettings['instagram.design.typography.branding_title_size'] || 32,
+        branding_main_size: designSettings['instagram.design.typography.branding_main_size'] || 56,
+        branding_subtitle_size: designSettings['instagram.design.typography.branding_subtitle_size'] || 20,
+        title_weight: designSettings['instagram.design.typography.title_weight'] || 600,
+        content_weight: designSettings['instagram.design.typography.content_weight'] || 400,
+        letter_spacing_title: designSettings['instagram.design.typography.letter_spacing_title'] || -0.025,
+        letter_spacing_year: designSettings['instagram.design.typography.letter_spacing_year'] || 0.05,
+        line_height_title: designSettings['instagram.design.typography.line_height_title'] || 1.1,
+        line_height_content: designSettings['instagram.design.typography.line_height_content'] || 1.6
+      },
+      colors: {
+        primary_background: designSettings['instagram.design.colors.primary_background'] || '#f8f8f8',
+        secondary_background: designSettings['instagram.design.colors.secondary_background'] || '#f0f0f0',
+        content_background: designSettings['instagram.design.colors.content_background'] || '#fdfdfd',
+        branding_background: designSettings['instagram.design.colors.branding_background'] || '#0a0a0a',
+        branding_background_secondary: designSettings['instagram.design.colors.branding_background_secondary'] || '#1a1a1a',
+        primary_text: designSettings['instagram.design.colors.primary_text'] || '#0a0a0a',
+        content_text: designSettings['instagram.design.colors.content_text'] || '#1a1a1a',
+        year_text: designSettings['instagram.design.colors.year_text'] || '#666666',
+        branding_text_primary: designSettings['instagram.design.colors.branding_text_primary'] || '#ffffff',
+        branding_text_secondary: designSettings['instagram.design.colors.branding_text_secondary'] || '#cccccc',
+        branding_text_subtitle: designSettings['instagram.design.colors.branding_text_subtitle'] || '#aaaaaa',
+        accent_border: designSettings['instagram.design.colors.accent_border'] || '#0a0a0a'
+      },
+      layout: {
+        card_padding: designSettings['instagram.design.layout.card_padding'] || 72,
+        content_padding: designSettings['instagram.design.layout.content_padding'] || 72,
+        border_width: designSettings['instagram.design.layout.border_width'] || 4,
+        title_margin_bottom: designSettings['instagram.design.layout.title_margin_bottom'] || 32,
+        year_margin_top: designSettings['instagram.design.layout.year_margin_top'] || 24,
+        paragraph_margin_bottom: designSettings['instagram.design.layout.paragraph_margin_bottom'] || 24
+      }
+    };
+
+    // Generate carousel slides and pre-generate all images
+    console.log(`Generating carousel and pre-generate all images for story ${story.id}`);
+    
+    // Convert story to ContentApiData format for the generator
+    const storyData = {
       id: story.id,
       title: story.title,
       content: story.fiction_content,
-      type: 'combined',
+      type: 'combined' as const,
       image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
       image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
       parameters: story.prompt_data,
       year: story.metadata?.year || null,
       metadata: story.metadata || undefined,
       created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    };
+
+    // Generate carousel slides using ProductionImageGenerator with design settings
+    const carouselData = await imageGenerator.generateCarouselSlides(storyData, instagramDesignSettings);
 
     // Try to get cached caption first (from preview), otherwise generate new one
     const cachedData = await getCachedCarouselData(story.id);
@@ -256,18 +340,7 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
       caption = cachedData.caption;
     } else {
       console.log('No cached caption found, generating new Instagram caption');
-      caption = await imageProcessor.generateInstagramCaption({
-        id: story.id,
-        title: story.title,
-        content: story.fiction_content,
-        type: 'combined',
-        image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
-        image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
-        parameters: story.prompt_data,
-        year: story.metadata?.year || null,
-        metadata: story.metadata || undefined,
-        created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-      });
+      caption = await imageGenerator.generateInstagramCaption(storyData);
     }
 
     // PRE-GENERATE ALL IMAGES BEFORE INSTAGRAM API CALLS
@@ -324,7 +397,7 @@ router.post('/share', asyncErrorHandler(async (req: TypedRequestBody<ShareReques
         if (!cachedImage) {
           try {
             console.log(`Generating image for index ${index} (${slideType})...`);
-            const generatedImage = await imageGenerator.generateImageFromHTML(html, imageOptions);
+            const generatedImage = await imageGenerator.generateImageFromHTMLWithDesign(html, instagramDesignSettings, imageOptions);
             
             cachedImage = {
               buffer: generatedImage.buffer,
@@ -581,6 +654,50 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
       return next(boom.notFound(`Story with ID ${storyId} not found`));
     }
 
+    // Load Instagram design settings from database (same as admin route)
+    const designSettings = await dataService.getSettings();
+    
+    // Extract design settings for Instagram using the same structure as Settings page
+    const instagramDesignSettings = {
+      typography: {
+        font_family: designSettings['instagram.design.typography.font_family'] || 'Work Sans',
+        title_size: designSettings['instagram.design.typography.title_size'] || 52,
+        content_size: designSettings['instagram.design.typography.content_size'] || 24,
+        year_size: designSettings['instagram.design.typography.year_size'] || 28,
+        branding_title_size: designSettings['instagram.design.typography.branding_title_size'] || 32,
+        branding_main_size: designSettings['instagram.design.typography.branding_main_size'] || 56,
+        branding_subtitle_size: designSettings['instagram.design.typography.branding_subtitle_size'] || 20,
+        title_weight: designSettings['instagram.design.typography.title_weight'] || 600,
+        content_weight: designSettings['instagram.design.typography.content_weight'] || 400,
+        letter_spacing_title: designSettings['instagram.design.typography.letter_spacing_title'] || -0.025,
+        letter_spacing_year: designSettings['instagram.design.typography.letter_spacing_year'] || 0.05,
+        line_height_title: designSettings['instagram.design.typography.line_height_title'] || 1.1,
+        line_height_content: designSettings['instagram.design.typography.line_height_content'] || 1.6
+      },
+      colors: {
+        primary_background: designSettings['instagram.design.colors.primary_background'] || '#f8f8f8',
+        secondary_background: designSettings['instagram.design.colors.secondary_background'] || '#f0f0f0',
+        content_background: designSettings['instagram.design.colors.content_background'] || '#fdfdfd',
+        branding_background: designSettings['instagram.design.colors.branding_background'] || '#0a0a0a',
+        branding_background_secondary: designSettings['instagram.design.colors.branding_background_secondary'] || '#1a1a1a',
+        primary_text: designSettings['instagram.design.colors.primary_text'] || '#0a0a0a',
+        content_text: designSettings['instagram.design.colors.content_text'] || '#1a1a1a',
+        year_text: designSettings['instagram.design.colors.year_text'] || '#666666',
+        branding_text_primary: designSettings['instagram.design.colors.branding_text_primary'] || '#ffffff',
+        branding_text_secondary: designSettings['instagram.design.colors.branding_text_secondary'] || '#cccccc',
+        branding_text_subtitle: designSettings['instagram.design.colors.branding_text_subtitle'] || '#aaaaaa',
+        accent_border: designSettings['instagram.design.colors.accent_border'] || '#0a0a0a'
+      },
+      layout: {
+        card_padding: designSettings['instagram.design.layout.card_padding'] || 72,
+        content_padding: designSettings['instagram.design.layout.content_padding'] || 72,
+        border_width: designSettings['instagram.design.layout.border_width'] || 4,
+        title_margin_bottom: designSettings['instagram.design.layout.title_margin_bottom'] || 32,
+        year_margin_top: designSettings['instagram.design.layout.year_margin_top'] || 24,
+        paragraph_margin_bottom: designSettings['instagram.design.layout.paragraph_margin_bottom'] || 24
+      }
+    };
+
     console.log(`DEBUG: imageIndex=${imageIndex}, story.image_blob length=${story.image_blob?.length || 'null'}`);
     
     // If requesting original image (index 0 and story has image)
@@ -638,18 +755,22 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
     }
 
     // Generate carousel slide on-demand (fallback)
-    const carouselData = await imageProcessor.generateCarouselSlides({
+    // Convert story to ContentApiData format for the generator
+    const storyData = {
       id: story.id,
       title: story.title,
       content: story.fiction_content,
-      type: 'combined',
+      type: 'combined' as const,
       image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
       image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
       parameters: story.prompt_data,
       year: story.metadata?.year || null,
       metadata: story.metadata || undefined,
       created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
-    });
+    };
+
+    // Generate carousel slides using ProductionImageGenerator with design settings
+    const carouselData = await imageGenerator.generateCarouselSlides(storyData, instagramDesignSettings);
 
     // Calculate the correct slide index (accounting for original image) - FIXED INDEXING
     console.log(`Serving image index ${imageIndex} for story ${storyId}`);
@@ -686,8 +807,8 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
     let cachedImage = await imageCache.get(cacheKey);
     
     if (!cachedImage) {
-      // Generate image using production Puppeteer service
-      const generatedImage = await imageGenerator.generateImageFromHTML(slide.html, imageOptions);
+      // Generate image using production Puppeteer service with design settings
+      const generatedImage = await imageGenerator.generateImageFromHTMLWithDesign(slide.html, instagramDesignSettings, imageOptions);
       
       // Cache the result
       cachedImage = {

@@ -11,7 +11,7 @@ import {
   Instagram,
   ExternalLink
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import ReactDOM from 'react-dom/client';
@@ -69,7 +69,11 @@ const StoryViewer = ({
   instagramData
 }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
+  
+  // Get story ID from URL parameters or story object
+  const storyId = searchParams.get('id') || story?.id;
   
   // Browser and device capability detection
   const deviceCapabilities = {
@@ -182,7 +186,7 @@ const StoryViewer = ({
     try {
       setIsPdfGenerating(true);
       await downloadStyledPDF({
-        story: { title: story.title, year: story.year, createdAt: story.createdAt },
+        story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
         imageSource: imageSource,
         contentParagraphs: contentParagraphs,
         instagramData: instagramData
@@ -211,7 +215,7 @@ const StoryViewer = ({
       if (deviceCapabilities.isTouchDevice || deviceCapabilities.isWindowsDevice || event?.pointerType === 'touch') {
         console.log('Touch/Windows device detected, using enhanced print method');
         await printStyledPDFWithTouchSupport({
-          story: { title: story.title, year: story.year, createdAt: story.createdAt },
+          story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
           imageSource: imageSource,
           contentParagraphs: contentParagraphs,
           instagramData: instagramData,
@@ -221,7 +225,7 @@ const StoryViewer = ({
         // Fallback to original method for desktop mouse devices
         console.log('Desktop mouse device detected, using standard print method');
         await printStyledPDF({
-          story: { title: story.title, year: story.year, createdAt: story.createdAt },
+          story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
           imageSource: imageSource,
           contentParagraphs: contentParagraphs,
           instagramData: instagramData
@@ -456,7 +460,7 @@ const StoryViewer = ({
       )}
 
       {/* Footer with actions */}
-      <footer className="py-6 border-t mt-auto">
+      <footer className="hidden md:block py-6 border-t mt-auto">
         <div className="flex items-center justify-center w-full mx-auto space-x-8">
           <div className="flex items-center space-x-3 mb-4">
             <Button
@@ -626,15 +630,25 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
   console.log('PDF Generation - Instagram data:', instagramData);
   console.log('PDF Generation - Has postId:', !!instagramData?.postId);
 
-  // Generate QR code for Instagram post if available
+  // Generate QR code for Instagram post if available, otherwise use story URL
   let qrCodeDataUrl = null;
+  let qrCodeUrl = null;
+  
   if (instagramData?.postId) {
-    const instagramUrl = instagramData.carouselUrl || getInstagramPostUrl(instagramData.postId);
-    console.log('PDF Generation - Instagram URL:', instagramUrl);
-    qrCodeDataUrl = await generateQRCode(instagramUrl);
+    // Priority 1: Use Instagram post URL if available
+    qrCodeUrl = instagramData.carouselUrl || getInstagramPostUrl(instagramData.postId);
+    console.log('PDF Generation - Using Instagram URL for QR code:', qrCodeUrl);
+  } else if (story?.id) {
+    // Priority 2: Use story URL as fallback (dynamic base URL for dev/prod)
+    qrCodeUrl = `${window.location.origin}/story?id=${story.id}`;
+    console.log('PDF Generation - Using story URL for QR code:', qrCodeUrl);
+  }
+  
+  if (qrCodeUrl) {
+    qrCodeDataUrl = await generateQRCode(qrCodeUrl);
     console.log('PDF Generation - QR code generated:', !!qrCodeDataUrl);
   } else {
-    console.log('PDF Generation - No Instagram postId found, skipping QR code');
+    console.log('PDF Generation - No URL available for QR code generation');
   }
 
   const jsxContent = (

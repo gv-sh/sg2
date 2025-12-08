@@ -1,7 +1,6 @@
 // src/user/UserApp.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isMobileDevice } from './utils/deviceUtils.js';
 
 // Layout Components
 import MainLayout from '../shared/components/user/layout/MainLayout.jsx';
@@ -20,17 +19,11 @@ function UserApp() {
 // App Content Component with shared state
 function AppContent() {
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedParameters, setSelectedParameters] = useState([]);
   const [showTour, setShowTour] = useState(false);
   const [generatedContent, setGeneratedContent] = useState(null);
   const [generationInProgress, setGenerationInProgress] = useState(false);
-
-  useEffect(() => {
-    const mobile = isMobileDevice();
-    setIsMobile(mobile);
-  }, []);
 
   // Enhanced tour handler that navigates to parameters page first
   const handleShowTour = () => {
@@ -38,16 +31,8 @@ function AppContent() {
     setShowTour(true);
   };
 
-  if (isMobile) {
-    return (
-      <div className="fixed inset-0 bg-background flex items-center justify-center p-6 text-center">
-        <div className="max-w-md space-y-4">
-          <h2 className="text-xl font-semibold">Desktop Only Application</h2>
-          <p>Please access this application from a desktop computer, web browser, or iPad for the best experience.</p>
-        </div>
-      </div>
-    );
-  }
+  // Mobile device restriction removed to allow touch screen and mobile access
+  // Previously blocked mobile devices with "Desktop Only Application" message
 
   return (
     <MainLayout onShowTour={handleShowTour}>

@@ -10,7 +10,7 @@ const GenerationControls = ({
   storyTitle 
 }) => {
   return (
-    <nav className="flex mb-4 pt-6 px-6" aria-label="Breadcrumb">
+    <nav className="hidden md:flex mb-4 pt-6 px-6" aria-label="Breadcrumb">
       <ol className="inline-flex items-center space-x-1 md:space-x-3">
         {(activeStory || generatedContent) ? (
           <>

@@ -70,6 +70,25 @@ const StoryViewer = ({
 }) => {
   const navigate = useNavigate();
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
+  
+  // Browser and device capability detection
+  const deviceCapabilities = {
+    isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+    isWindowsDevice: navigator.userAgent.includes('Windows'),
+    supportsPointerEvents: 'onpointerdown' in window,
+    supportsPopups: (() => {
+      try {
+        const testPopup = window.open('', '', 'width=1,height=1');
+        if (testPopup) {
+          testPopup.close();
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return false;
+      }
+    })()
+  };
 
   // Handle regenerate button click
   const handleRegenerateClick = () => {
@@ -176,22 +195,70 @@ const StoryViewer = ({
     }
   };
 
-  // Wrapper function for print with loading state
-  const handlePrint = async () => {
+  // Enhanced print handler with touch support and fallbacks
+  const handlePrint = async (event) => {
+    // Log event type and device capabilities for debugging
+    console.log('Print triggered by event type:', event?.type, {
+      ...deviceCapabilities,
+      pointerType: event?.pointerType || 'unknown',
+      eventTarget: event?.target?.tagName || 'unknown'
+    });
+
     try {
       setIsPdfGenerating(true);
-      await printStyledPDF({
-        story: { title: story.title, year: story.year, createdAt: story.createdAt },
-        imageSource: imageSource,
-        contentParagraphs: contentParagraphs,
-        instagramData: instagramData
-      });
+      
+      // Use enhanced method for touch devices or Windows devices
+      if (deviceCapabilities.isTouchDevice || deviceCapabilities.isWindowsDevice || event?.pointerType === 'touch') {
+        console.log('Touch/Windows device detected, using enhanced print method');
+        await printStyledPDFWithTouchSupport({
+          story: { title: story.title, year: story.year, createdAt: story.createdAt },
+          imageSource: imageSource,
+          contentParagraphs: contentParagraphs,
+          instagramData: instagramData,
+          deviceCapabilities: deviceCapabilities
+        });
+      } else {
+        // Fallback to original method for desktop mouse devices
+        console.log('Desktop mouse device detected, using standard print method');
+        await printStyledPDF({
+          story: { title: story.title, year: story.year, createdAt: story.createdAt },
+          imageSource: imageSource,
+          contentParagraphs: contentParagraphs,
+          instagramData: instagramData
+        });
+      }
     } catch (error) {
       console.error('Print failed:', error);
-      alert('Failed to generate PDF for printing. Please try again.');
+      
+      // Enhanced error handling with device-specific messaging
+      const isTouch = deviceCapabilities.isTouchDevice;
+      const fallbackMessage = isTouch 
+        ? 'Print failed on touch device. Would you like to download the PDF instead?' 
+        : 'Print failed. Would you like to download the PDF instead?';
+        
+      if (confirm(fallbackMessage)) {
+        try {
+          await handleDownload();
+          return;
+        } catch (downloadError) {
+          console.error('Download fallback also failed:', downloadError);
+        }
+      }
+      
+      const errorMessage = isTouch 
+        ? 'Print failed on touch device. Please use the Download button instead.'
+        : 'Failed to print. Please try the Download button instead.';
+      alert(errorMessage);
     } finally {
       setIsPdfGenerating(false);
     }
+  };
+
+  // Touch event handlers for better touch screen support
+  const handlePrintTouch = (event) => {
+    event.preventDefault();
+    console.log('Touch event on print button:', event.type);
+    handlePrint(event);
   };
 
 
@@ -417,7 +484,18 @@ const StoryViewer = ({
             <Button
               variant="outline"
               onClick={handlePrint}
+              onTouchStart={handlePrintTouch}
+              onPointerDown={handlePrint}
               disabled={isPdfGenerating}
+              style={{ 
+                touchAction: 'manipulation',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                KhtmlUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none',
+                userSelect: 'none'
+              }}
             >
               {isPdfGenerating ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -792,4 +870,131 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagram
       URL.revokeObjectURL(pdfUrl);
     }, 1000);
   };
+};
+
+// Enhanced print function with better touch screen support
+const printStyledPDFWithTouchSupport = async ({ story, imageSource, contentParagraphs, instagramData, deviceCapabilities }) => {
+  console.log('printStyledPDFWithTouchSupport - Starting enhanced print for touch devices', deviceCapabilities);
+  
+  const pdf = await downloadStyledPDF({
+    story,
+    imageSource,
+    contentParagraphs,
+    instagramData,
+    returnInstance: true
+  });
+
+  const pdfBlob = pdf.output('blob');
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+
+  // For touch/Windows devices, try opening in new window first (better support)
+  if (deviceCapabilities?.supportsPopups !== false) {
+    try {
+      console.log('printStyledPDFWithTouchSupport - Attempting new window print method');
+      
+      const printWindow = window.open(pdfUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes');
+      
+      if (printWindow) {
+      // Give the window time to load before triggering print
+      printWindow.onload = () => {
+        console.log('printStyledPDFWithTouchSupport - Print window loaded, triggering print');
+        setTimeout(() => {
+          try {
+            printWindow.focus();
+            printWindow.print();
+            
+            // Close window after printing (with delay)
+            setTimeout(() => {
+              printWindow.close();
+              URL.revokeObjectURL(pdfUrl);
+            }, 2000);
+          } catch (printError) {
+            console.error('printStyledPDFWithTouchSupport - Print trigger failed:', printError);
+            printWindow.close();
+            throw printError;
+          }
+        }, 500);
+      };
+      
+      // Fallback timeout in case onload doesn't fire
+      setTimeout(() => {
+        if (printWindow && !printWindow.closed) {
+          try {
+            printWindow.focus();
+            printWindow.print();
+          } catch (e) {
+            console.warn('printStyledPDFWithTouchSupport - Fallback print failed:', e);
+          }
+        }
+      }, 2000);
+      
+      } else {
+        console.warn('printStyledPDFWithTouchSupport - Popup blocked, falling back to iframe method');
+        throw new Error('Popup blocked');
+      }
+    } catch (error) {
+      console.warn('printStyledPDFWithTouchSupport - New window method failed, trying iframe fallback:', error);
+      // Continue to iframe fallback below
+    }
+  } else {
+    console.log('printStyledPDFWithTouchSupport - Popups not supported, using iframe method');
+  }
+  
+  // Fallback to iframe method with touch enhancements
+  console.log('printStyledPDFWithTouchSupport - Using iframe method with touch enhancements');
+  
+  try {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'block';  // Make visible for touch devices
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-1000px';
+    iframe.style.left = '-1000px';
+    iframe.style.width = '1px';
+    iframe.style.height = '1px';
+    iframe.style.border = 'none';
+    iframe.src = pdfUrl;
+    
+    // Add touch event listeners to iframe
+    iframe.addEventListener('touchstart', (e) => {
+      console.log('printStyledPDFWithTouchSupport - iframe touchstart detected');
+      e.stopPropagation();
+    });
+    
+    document.body.appendChild(iframe);
+
+    iframe.onload = function () {
+      console.log('printStyledPDFWithTouchSupport - iframe loaded, attempting print');
+      try {
+        // Add small delay for stability on touch devices
+        setTimeout(() => {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+            URL.revokeObjectURL(pdfUrl);
+          }, 1000);
+        }, 300);
+      } catch (iframeError) {
+        console.error('printStyledPDFWithTouchSupport - iframe print failed:', iframeError);
+        document.body.removeChild(iframe);
+        URL.revokeObjectURL(pdfUrl);
+        throw iframeError;
+      }
+    };
+    
+    // Cleanup on error
+    iframe.onerror = () => {
+      console.error('printStyledPDFWithTouchSupport - iframe failed to load');
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+      URL.revokeObjectURL(pdfUrl);
+    };
+  } catch (iframeError) {
+    console.error('printStyledPDFWithTouchSupport - iframe creation failed:', iframeError);
+    URL.revokeObjectURL(pdfUrl);
+    throw iframeError;
+  }
 };

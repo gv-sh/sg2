@@ -404,6 +404,7 @@ export class InstagramService {
         },
         body: JSON.stringify({
           image_url: imageUrl,
+          media_type: 'IMAGE',
           is_carousel_item: true,
           access_token: this.accessToken,
         }),
@@ -429,6 +430,65 @@ export class InstagramService {
     const result = await response.json();
     console.log('[Instagram Service] Media container created:', result.id);
     return { id: result.id };
+  }
+
+  /**
+   * Test media container creation (for debugging)
+   */
+  async testMediaContainer(imageUrl: string): Promise<{ success: boolean; details: any }> {
+    console.log('[Instagram Service] Testing media container for URL:', imageUrl);
+    
+    const igAccountId = await this.getInstagramBusinessAccountId();
+    
+    const requestBody = {
+      image_url: imageUrl,
+      media_type: 'IMAGE',
+      is_carousel_item: true,
+      access_token: this.accessToken,
+    };
+    
+    console.log('[Instagram Service] Request body:', JSON.stringify(requestBody, null, 2));
+    
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/${igAccountId}/media`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    console.log('[Instagram Service] Test response status:', response.status);
+    console.log('[Instagram Service] Test response headers:', Object.fromEntries(response.headers.entries()));
+    
+    const responseText = await response.text();
+    console.log('[Instagram Service] Test response body:', responseText);
+    
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      responseData = { raw: responseText };
+    }
+
+    if (!response.ok) {
+      console.error('[Instagram Service] Test media container error:', responseData);
+      throw new Error(`Test media container failed: ${responseData.error?.message || response.statusText} (Status: ${response.status})`);
+    }
+
+    console.log('[Instagram Service] Test media container success:', responseData.id);
+    return { 
+      success: true, 
+      details: {
+        mediaId: responseData.id,
+        status: response.status,
+        requestUrl: `https://graph.facebook.com/v18.0/${igAccountId}/media`,
+        requestBody,
+        responseBody: responseData
+      }
+    };
   }
 
   /**

@@ -1234,5 +1234,228 @@ router.get('/instagram/status', async (req: Request, res: Response<ApiResponse>,
   }
 });
 
+// ==================== INSTAGRAM TESTING ROUTES ====================
+
+/**
+ * @swagger
+ * /api/admin/test/instagram:
+ *   post:
+ *     summary: Test Instagram API integration with server-side debugging
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               storyId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       200:
+ *         description: Instagram API test results
+ */
+router.post('/test/instagram', async (req: TypedRequestBody<{ storyId: string }>, res: Response<ApiResponse>, next: NextFunction) => {
+  try {
+    const { storyId } = req.body;
+    
+    if (!storyId || typeof storyId !== 'string') {
+      return next(boom.badRequest('Valid story ID is required'));
+    }
+    
+    console.log('=== Instagram API Test Starting ===');
+    console.log('Story ID:', storyId);
+    
+    // Initialize services
+    let instagramService: InstagramService;
+    try {
+      instagramService = new InstagramService();
+    } catch (error: any) {
+      return res.json({
+        success: false,
+        error: `Instagram service initialization failed: ${error.message}`,
+        data: { step: 'service_init', details: error.message }
+      });
+    }
+    
+    // Step 1: Get story data
+    console.log('Step 1: Getting story data...');
+    const story = await dataService.getGeneratedContentById(storyId);
+    if (!story) {
+      return res.json({
+        success: false,
+        error: `Story with ID ${storyId} not found`,
+        data: { step: 'story_fetch', storyId }
+      });
+    }
+    console.log('✅ Story found:', story.title);
+    
+    // Step 2: Load design settings
+    console.log('Step 2: Loading design settings...');
+    const designSettings = await dataService.getSettings();
+    const instagramDesignSettings = {
+      typography: {
+        font_family: designSettings['instagram.design.typography.font_family'] || 'Work Sans',
+        title_size: designSettings['instagram.design.typography.title_size'] || 52,
+        content_size: designSettings['instagram.design.typography.content_size'] || 24,
+        year_size: designSettings['instagram.design.typography.year_size'] || 28,
+        branding_title_size: designSettings['instagram.design.typography.branding_title_size'] || 32,
+        branding_main_size: designSettings['instagram.design.typography.branding_main_size'] || 56,
+        branding_subtitle_size: designSettings['instagram.design.typography.branding_subtitle_size'] || 20,
+        title_weight: designSettings['instagram.design.typography.title_weight'] || 600,
+        content_weight: designSettings['instagram.design.typography.content_weight'] || 400,
+        letter_spacing_title: designSettings['instagram.design.typography.letter_spacing_title'] || -0.025,
+        letter_spacing_year: designSettings['instagram.design.typography.letter_spacing_year'] || 0.05,
+        line_height_title: designSettings['instagram.design.typography.line_height_title'] || 1.1,
+        line_height_content: designSettings['instagram.design.typography.line_height_content'] || 1.6
+      },
+      colors: {
+        primary_background: designSettings['instagram.design.colors.primary_background'] || '#f8f8f8',
+        secondary_background: designSettings['instagram.design.colors.secondary_background'] || '#f0f0f0',
+        content_background: designSettings['instagram.design.colors.content_background'] || '#fdfdfd',
+        branding_background: designSettings['instagram.design.colors.branding_background'] || '#0a0a0a',
+        branding_background_secondary: designSettings['instagram.design.colors.branding_background_secondary'] || '#1a1a1a',
+        primary_text: designSettings['instagram.design.colors.primary_text'] || '#0a0a0a',
+        content_text: designSettings['instagram.design.colors.content_text'] || '#1a1a1a',
+        year_text: designSettings['instagram.design.colors.year_text'] || '#666666',
+        branding_text_primary: designSettings['instagram.design.colors.branding_text_primary'] || '#ffffff',
+        branding_text_secondary: designSettings['instagram.design.colors.branding_text_secondary'] || '#cccccc',
+        branding_text_subtitle: designSettings['instagram.design.colors.branding_text_subtitle'] || '#aaaaaa',
+        accent_border: designSettings['instagram.design.colors.accent_border'] || '#0a0a0a'
+      },
+      layout: {
+        card_padding: designSettings['instagram.design.layout.card_padding'] || 72,
+        content_padding: designSettings['instagram.design.layout.content_padding'] || 72,
+        border_width: designSettings['instagram.design.layout.border_width'] || 4,
+        title_margin_bottom: designSettings['instagram.design.layout.title_margin_bottom'] || 32,
+        year_margin_top: designSettings['instagram.design.layout.year_margin_top'] || 24,
+        paragraph_margin_bottom: designSettings['instagram.design.layout.paragraph_margin_bottom'] || 24
+      }
+    };
+    console.log('✅ Design settings loaded');
+    
+    // Step 3: Generate test image
+    console.log('Step 3: Generating test image...');
+    const storyData = {
+      id: story.id,
+      title: story.title,
+      content: story.fiction_content,
+      type: 'combined' as const,
+      image_original_url: story.image_blob ? `/api/images/${story.id}/original` : undefined,
+      image_thumbnail_url: story.image_blob ? `/api/images/${story.id}/thumbnail` : undefined,
+      parameters: story.prompt_data,
+      year: story.metadata?.year || null,
+      metadata: story.metadata || undefined,
+      created_at: story.created_at instanceof Date ? story.created_at.toISOString() : story.created_at
+    };
+    
+    const carouselData = await imageGenerator.generateCarouselSlides(storyData, instagramDesignSettings);
+    console.log('✅ Carousel generated, slides:', carouselData.slides.length);
+    
+    // Step 4: Generate and cache a test image
+    console.log('Step 4: Generating test image...');
+    const testSlide = carouselData.slides.find(slide => slide.type !== 'original');
+    if (!testSlide) {
+      return res.json({
+        success: false,
+        error: 'No non-original slides found to test',
+        data: { step: 'test_slide_selection', slideCount: carouselData.slides.length }
+      });
+    }
+    
+    const testImageOptions = {
+      width: 1080,
+      height: 1080,
+      quality: 95,
+      format: 'jpeg' as const,
+      deviceScaleFactor: 2
+    };
+    
+    const generatedImage = await imageGenerator.generateImageFromHTMLWithDesign(
+      testSlide.html, 
+      instagramDesignSettings, 
+      testImageOptions
+    );
+    console.log('✅ Test image generated, size:', generatedImage.buffer.length, 'bytes');
+    
+    // Step 5: Test image URL accessibility
+    console.log('Step 5: Testing image URL accessibility...');
+    const testImageUrl = `https://futuresofhope.org/api/instagram/images/${story.id}/1`;
+    console.log('Test URL:', testImageUrl);
+    
+    try {
+      const imageResponse = await fetch(testImageUrl);
+      console.log('Image URL response status:', imageResponse.status);
+      console.log('Image URL response headers:', Object.fromEntries(imageResponse.headers.entries()));
+      
+      if (!imageResponse.ok) {
+        return res.json({
+          success: false,
+          error: `Image URL not accessible: ${imageResponse.status} ${imageResponse.statusText}`,
+          data: { 
+            step: 'image_url_test', 
+            url: testImageUrl, 
+            status: imageResponse.status,
+            headers: Object.fromEntries(imageResponse.headers.entries())
+          }
+        });
+      }
+      console.log('✅ Image URL accessible');
+    } catch (urlError: any) {
+      return res.json({
+        success: false,
+        error: `Failed to fetch image URL: ${urlError.message}`,
+        data: { step: 'image_url_test', url: testImageUrl, error: urlError.message }
+      });
+    }
+    
+    // Step 6: Test Instagram API media container creation
+    console.log('Step 6: Testing Instagram API media container creation...');
+    try {
+      // Create a test media container (this is the call that's failing)
+      const testResult = await instagramService.testMediaContainer(testImageUrl);
+      console.log('✅ Instagram API test successful');
+      
+      return res.json({
+        success: true,
+        message: 'Instagram API test completed successfully',
+        data: {
+          story: {
+            id: story.id,
+            title: story.title
+          },
+          imageGeneration: {
+            slidesCount: carouselData.slides.length,
+            testImageSize: generatedImage.buffer.length,
+            testImageFormat: generatedImage.format
+          },
+          imageUrl: {
+            url: testImageUrl,
+            accessible: true
+          },
+          instagramApi: testResult
+        }
+      });
+      
+    } catch (instagramError: any) {
+      console.error('❌ Instagram API test failed:', instagramError.message);
+      return res.json({
+        success: false,
+        error: `Instagram API test failed: ${instagramError.message}`,
+        data: { 
+          step: 'instagram_api_test',
+          imageUrl: testImageUrl,
+          error: instagramError.message,
+          stack: instagramError.stack
+        }
+      });
+    }
+    
+  } catch (error: any) {
+    console.error('❌ Instagram test failed:', error);
+    next(boom.internal('Instagram test failed', error));
+  }
+});
 
 export default router;

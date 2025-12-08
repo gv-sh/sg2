@@ -746,7 +746,7 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
     if (preGeneratedImage) {
       console.log(`Serving pre-generated image ${imageIndex} for story ${storyId}`);
       res.set({
-        'Content-Type': 'image/png',
+        'Content-Type': 'image/jpeg',
         'Content-Length': preGeneratedImage.length.toString(),
         'Cache-Control': 'public, max-age=86400' // 24 hours cache
       });
@@ -826,7 +826,7 @@ router.get('/images/:storyId/:imageIndex', asyncErrorHandler(async (req: TypedRe
     const imageBuffer = cachedImage.buffer;
     
     res.set({
-      'Content-Type': 'image/png',
+      'Content-Type': 'image/jpeg',
       'Content-Length': imageBuffer.length.toString(),
       'Cache-Control': 'public, max-age=86400' // 24 hours cache
     });

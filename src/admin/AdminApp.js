@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
+import axios from 'axios';
 import Categories from './pages/Categories.js';
 import Parameters from './pages/Parameters.js';
 import Content from './pages/Content.js';
@@ -12,6 +13,93 @@ import Navbar from '../shared/components/ui/Navbar.js';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../shared/components/ui/card.tsx';
 import { Button } from '../shared/components/ui/form-controls.js';
 import { ToastProvider } from '../shared/contexts/ToastContext.jsx';
+import config from './config.js';
+
+function StatTile({ label, value }) {
+  return (
+    <div className="text-center border rounded-lg p-4">
+      <p className="text-3xl font-bold">{value ?? '—'}</p>
+      <p className="text-xs text-muted-foreground mt-1">{label}</p>
+    </div>
+  );
+}
+
+function AdminHome() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${config.API_URL}/api/system/database/status`)
+      .then(r => setStats(r.data.data.statistics))
+      .catch(err => console.error('[AdminHome stats]', err));
+  }, []);
+
+  return (
+    <div className="flex flex-col justify-center items-center h-[calc(100vh-16rem)]">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">FOH Behind the Scenes</h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Configure story genres, adjust generation settings, and curate your fiction library.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 max-w-md w-full mb-10">
+        <StatTile label="Generations" value={stats?.generatedContent} />
+        <StatTile label="Categories"  value={stats?.categories} />
+        <StatTile label="Parameters"  value={stats?.parameters} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl w-full">
+        <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
+          <CardHeader>
+            <CardTitle>Categories</CardTitle>
+            <CardDescription>Define and organize the fictional worlds your stories inhabit.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 flex-grow flex flex-col justify-end">
+            <Link to="/admin/categories" className="w-full">
+              <Button variant="default" className="w-full">Manage Categories</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
+          <CardHeader>
+            <CardTitle>Parameters</CardTitle>
+            <CardDescription>Fine-tune how stories are generated for each genre.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 flex-grow flex flex-col justify-end">
+            <Link to="/admin/parameters" className="w-full">
+              <Button variant="default" className="w-full">Manage Parameters</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
+          <CardHeader>
+            <CardTitle>Content</CardTitle>
+            <CardDescription>Browse, review, and organize your generated stories and images.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 flex-grow flex flex-col justify-end">
+            <Link to="/admin/content" className="w-full">
+              <Button variant="default" className="w-full">Manage Content</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
+          <CardHeader>
+            <CardTitle>Instagram Preview</CardTitle>
+            <CardDescription>Preview how stories appear as Instagram carousels and understand the image processing pipeline.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 flex-grow flex flex-col justify-end">
+            <Link to="/admin/instagram-preview" className="w-full">
+              <Button variant="default" className="w-full">View Instagram Previews</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 function AdminApp() {
 
@@ -29,67 +117,7 @@ function AdminApp() {
               <Route path="settings" element={<Settings />} />
               <Route path="database" element={<Database />} />
               <Route path="instagram-preview" element={<InstagramPreview />} />
-              <Route path="/" element={
-                <div className="flex flex-col justify-center items-center h-[calc(100vh-16rem)]">
-                  <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold tracking-tight mb-4">FOH Behind the Scenes</h1>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                      Configure story genres, adjust generation settings, and curate your fiction library.
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl w-full">
-                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
-                      <CardHeader>
-                        <CardTitle>Categories</CardTitle>
-                        <CardDescription>Define and organize the fictional worlds your stories inhabit.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
-                        <Link to="/admin/categories" className="w-full">
-                          <Button variant="default" className="w-full">Manage Categories</Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
-                      <CardHeader>
-                        <CardTitle>Parameters</CardTitle>
-                        <CardDescription>Fine-tune how stories are generated for each genre.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
-                        <Link to="/admin/parameters" className="w-full">
-                          <Button variant="default" className="w-full">Manage Parameters</Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
-                      <CardHeader>
-                        <CardTitle>Content</CardTitle>
-                        <CardDescription>Browse, review, and organize your generated stories and images.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
-                        <Link to="/admin/content" className="w-full">
-                          <Button variant="default" className="w-full">Manage Content</Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="hover:shadow-md transition-shadow flex flex-col h-full">
-                      <CardHeader>
-                        <CardTitle>Instagram Preview</CardTitle>
-                        <CardDescription>Preview how stories appear as Instagram carousels and understand the image processing pipeline.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4 flex-grow flex flex-col justify-end">
-                        <Link to="/admin/instagram-preview" className="w-full">
-                          <Button variant="default" className="w-full">View Instagram Previews</Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                </div>
-              } />
+              <Route path="/" element={<AdminHome />} />
             </Routes>
           </Layout>
         </main>

@@ -628,7 +628,47 @@ function Parameters() {
                         />
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">Configure the range slider limits and increment step</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="rangeMinLabel" className="text-xs font-medium">Min Label</label>
+                        <Input
+                          id="rangeMinLabel"
+                          type="text"
+                          placeholder="e.g. Traditional"
+                          value={editingParameter
+                            ? (typeof editingParameter.parameter_config === 'object' ? editingParameter.parameter_config?.minLabel || '' : '')
+                            : (typeof newParameter.parameter_config === 'object' ? newParameter.parameter_config?.minLabel || '' : '')}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (editingParameter) {
+                              setEditingParameter({ ...editingParameter, parameter_config: { ...(typeof editingParameter.parameter_config === 'object' ? editingParameter.parameter_config : {}), minLabel: value } });
+                            } else {
+                              setNewParameter({ ...newParameter, parameter_config: { ...(newParameter.parameter_config || {}), minLabel: value } });
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="rangeMaxLabel" className="text-xs font-medium">Max Label</label>
+                        <Input
+                          id="rangeMaxLabel"
+                          type="text"
+                          placeholder="e.g. Charismatic"
+                          value={editingParameter
+                            ? (typeof editingParameter.parameter_config === 'object' ? editingParameter.parameter_config?.maxLabel || '' : '')
+                            : (typeof newParameter.parameter_config === 'object' ? newParameter.parameter_config?.maxLabel || '' : '')}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (editingParameter) {
+                              setEditingParameter({ ...editingParameter, parameter_config: { ...(typeof editingParameter.parameter_config === 'object' ? editingParameter.parameter_config : {}), maxLabel: value } });
+                            } else {
+                              setNewParameter({ ...newParameter, parameter_config: { ...(newParameter.parameter_config || {}), maxLabel: value } });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Configure the range slider limits, step, and optional endpoint labels</p>
                   </div>
                 )}
               </div>

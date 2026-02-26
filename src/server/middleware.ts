@@ -62,7 +62,9 @@ const parameterValueSchema = z.object({
 const parameterConfigSchema = z.object({
   min: z.number().optional(),
   max: z.number().optional(),
-  step: z.number().optional()
+  step: z.number().optional(),
+  minLabel: z.string().optional(),
+  maxLabel: z.string().optional()
 });
 
 export const parameterSchema = z.object({
@@ -70,6 +72,7 @@ export const parameterSchema = z.object({
   description: z.string().max(config.get('validation.maxDescriptionLength')).default(''),
   type: z.enum(['select', 'radio', 'text', 'range', 'boolean']),
   category_id: z.string().min(1, 'Category ID is required'),
+  parameter_config: parameterConfigSchema.optional(),
   parameter_values: z.union([
     z.array(parameterValueSchema),
     z.object({ on: z.string(), off: z.string() })
@@ -125,6 +128,7 @@ export const parameterUpdateSchema = z.object({
   description: z.string().max(config.get('validation.maxDescriptionLength')).optional(),
   type: z.enum(['select', 'radio', 'text', 'range', 'boolean']).optional(),
   category_id: z.string().min(1, 'Category ID is required').optional(), // Allow category_id in updates
+  parameter_config: parameterConfigSchema.optional(),
   parameter_values: z.any().optional() // Accept any parameter_values during updates - service layer validates compatibility
 });
 // No superRefine for updates - let service layer handle all parameter_values compatibility

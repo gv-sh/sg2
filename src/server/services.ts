@@ -164,8 +164,9 @@ class DataService {
           description: param.description || '',
           type: param.type === 'Dropdown' ? 'select' : param.type.toLowerCase() as any,
           category_id: param.category_id, // Use new format
-          parameter_values: param.values || param.parameter_values
-        });
+          parameter_values: param.values || param.parameter_values,
+          parameter_config: param.parameter_config
+        } as any);
       }
 
       console.log('✅ JSON data import completed successfully');
@@ -755,8 +756,9 @@ class DataService {
             description: param.description || '',
             type: param.type,
             category_id: param.category_id,
-            parameter_values: param.parameter_values
-          });
+            parameter_values: param.parameter_values,
+            parameter_config: param.parameter_config
+          } as any);
         }
       }
 

@@ -77,7 +77,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Traditional",
+        "maxLabel": "Charismatic"
       }
     },
     {
@@ -90,7 +92,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Centralized",
+        "maxLabel": "Fragmented"
       }
     },
     {
@@ -129,7 +133,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Traditional",
+        "maxLabel": "Progressive"
       }
     },
     {
@@ -142,7 +148,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Control",
+        "maxLabel": "Freedom"
       }
     },
     {
@@ -155,7 +163,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Oppressive",
+        "maxLabel": "Free"
       }
     },
     {
@@ -168,7 +178,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Cooperative",
+        "maxLabel": "Hostile"
       }
     },
     {
@@ -345,7 +357,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Decentralized",
+        "maxLabel": "Centralized"
       }
     },
     {
@@ -384,7 +398,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Fair",
+        "maxLabel": "Unfair"
       }
     },
     {
@@ -453,7 +469,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Centralized",
+        "maxLabel": "Decentralized"
       }
     },
     {
@@ -496,7 +514,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Laissez-Faire",
+        "maxLabel": "Authoritarian"
       }
     },
     {
@@ -509,7 +529,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Exploitative",
+        "maxLabel": "Restorative"
       }
     },
     {
@@ -572,7 +594,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Minimal",
+        "maxLabel": "Extremely Classified"
       }
     },
     {
@@ -615,7 +639,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Conservative",
+        "maxLabel": "Radical"
       }
     },
     {
@@ -628,7 +654,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Flexible",
+        "maxLabel": "Enforced"
       }
     },
     {
@@ -671,7 +699,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Exclusive",
+        "maxLabel": "Inclusive"
       }
     },
     {
@@ -684,7 +714,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Indoctrination",
+        "maxLabel": "Enlightenment"
       }
     },
     {
@@ -757,7 +789,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Pragmatic",
+        "maxLabel": "Idealistic"
       }
     },
     {
@@ -770,7 +804,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Peaceful",
+        "maxLabel": "Revolutionary"
       }
     },
     {
@@ -873,7 +909,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Taboo",
+        "maxLabel": "Embraced"
       }
     },
     {
@@ -886,7 +924,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Free",
+        "maxLabel": "Controlled"
       }
     },
     {
@@ -929,7 +969,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Objective",
+        "maxLabel": "Subjective"
       }
     },
     {
@@ -942,7 +984,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Selfish",
+        "maxLabel": "Selfless"
       }
     },
     {
@@ -955,7 +999,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Hostile",
+        "maxLabel": "Inclusive"
       }
     },
     {
@@ -1364,7 +1410,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Slow",
+        "maxLabel": "Instantaneous"
       }
     },
     {
@@ -1377,7 +1425,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 10
+        "step": 10,
+        "minLabel": "Survival",
+        "maxLabel": "Abundance"
       }
     },
     {
@@ -1416,7 +1466,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Individual",
+        "maxLabel": "Automated"
       }
     },
     {
@@ -1429,7 +1481,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Stable",
+        "maxLabel": "Volatile"
       }
     },
     {
@@ -1498,7 +1552,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Sparse",
+        "maxLabel": "Abundant"
       }
     },
     {
@@ -1511,7 +1567,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Domsiticated",
+        "maxLabel": "Predators"
       }
     },
     {
@@ -1524,7 +1582,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Independant",
+        "maxLabel": "Interdependent"
       }
     },
     {
@@ -1593,7 +1653,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Mild",
+        "maxLabel": "Cataclysmic"
       }
     },
     {
@@ -1606,7 +1668,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Natural",
+        "maxLabel": "Artificial"
       }
     },
     {
@@ -1619,7 +1683,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Exploited",
+        "maxLabel": "Restored"
       }
     },
     {
@@ -1632,7 +1698,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Pure",
+        "maxLabel": "Suffocating"
       }
     },
     {
@@ -1645,7 +1713,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Transparent",
+        "maxLabel": "Impenetrable"
       }
     },
     {
@@ -1658,7 +1728,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Infertile",
+        "maxLabel": "Overabundant"
       }
     },
     {
@@ -1671,7 +1743,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Blinding",
+        "maxLabel": "Murky"
       }
     },
     {
@@ -1752,7 +1826,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Opaque",
+        "maxLabel": "Omniscient"
       }
     },
     {
@@ -1765,7 +1841,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Dogmatic",
+        "maxLabel": "Pragmatic"
       }
     },
     {
@@ -1846,7 +1924,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Rehabilitative",
+        "maxLabel": "Torturous"
       }
     },
     {
@@ -1859,7 +1939,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Informal",
+        "maxLabel": "Binding"
       }
     },
     {
@@ -1872,7 +1954,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Barbaric",
+        "maxLabel": "Rational"
       }
     },
     {
@@ -1919,7 +2003,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Privacy",
+        "maxLabel": "Omnipresent"
       }
     },
     {
@@ -1932,7 +2018,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Rampant",
+        "maxLabel": "Nonexistent"
       }
     },
     {
@@ -1945,7 +2033,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Restrained",
+        "maxLabel": "Brutal"
       }
     },
     {
@@ -1958,7 +2048,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Suppressed",
+        "maxLabel": "Absolute"
       }
     },
     {
@@ -2079,7 +2171,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Territorial",
+        "maxLabel": "Borderless"
       }
     },
     {
@@ -2092,7 +2186,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Dystopian",
+        "maxLabel": "Utopian"
       }
     },
     {
@@ -2127,7 +2223,9 @@
       "parameter_config": {
         "min": -100,
         "max": 100,
-        "step": 1
+        "step": 1,
+        "minLabel": "Minimalist",
+        "maxLabel": "Complex"
       }
     },
     {

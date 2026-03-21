@@ -54,6 +54,8 @@ const generateQRCode = async (url) => {
   }
 };
 
+const imageBase64Cache = new Map();
+
 // Generate Instagram post URL if we have post ID
 const getInstagramPostUrl = (postId) => {
   if (!postId) return null;
@@ -71,28 +73,28 @@ const StoryViewer = ({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
-  
+
   // Get story ID from URL parameters or story object
   const storyId = searchParams.get('id') || story?.id;
-  
+
   // Browser and device capability detection
-  const deviceCapabilities = {
-    isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-    isWindowsDevice: navigator.userAgent.includes('Windows'),
-    supportsPointerEvents: 'onpointerdown' in window,
-    supportsPopups: (() => {
-      try {
-        const testPopup = window.open('', '', 'width=1,height=1');
-        if (testPopup) {
-          testPopup.close();
-          return true;
-        }
-        return false;
-      } catch (e) {
-        return false;
-      }
-    })()
-  };
+  // const deviceCapabilities = {
+  //   isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+  //   isWindowsDevice: navigator.userAgent.includes('Windows'),
+  //   supportsPointerEvents: 'onpointerdown' in window,
+  //   supportsPopups: (() => {
+  //     try {
+  //       const testPopup = window.open('', '', 'width=1,height=1');
+  //       if (testPopup) {
+  //         testPopup.close();
+  //         return true;
+  //       }
+  //       return false;
+  //     } catch (e) {
+  //       return false;
+  //     }
+  //   })()
+  // };
 
   // Handle regenerate button click
   const handleRegenerateClick = () => {
@@ -199,71 +201,59 @@ const StoryViewer = ({
     }
   };
 
-  // Enhanced print handler with touch support and fallbacks
+
+
+  //this one works on chrome
+  // const handlePrint = async (event) => {
+  //   if (isPdfGenerating) return; // guard against double calls
+
+  //   try {
+  //     setIsPdfGenerating(true);
+  //     await printStyledPDF({
+  //       story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
+  //       imageSource,
+  //       contentParagraphs,
+  //       instagramData
+  //     });
+  //   } catch (error) {
+  //     console.error('Print failed:', error);
+  //     if (confirm('Print failed. Would you like to download the PDF instead?')) {
+  //       await handleDownload();
+  //     }
+  //   } finally {
+  //     setIsPdfGenerating(false);
+  //   }
+  // };
+
   const handlePrint = async (event) => {
-    // Log event type and device capabilities for debugging
-    console.log('Print triggered by event type:', event?.type, {
-      ...deviceCapabilities,
-      pointerType: event?.pointerType || 'unknown',
-      eventTarget: event?.target?.tagName || 'unknown'
-    });
+    if (isPdfGenerating) return; // guard against double calls
 
     try {
       setIsPdfGenerating(true);
-      
-      // Use enhanced method for touch devices or Windows devices
-      if (deviceCapabilities.isTouchDevice || deviceCapabilities.isWindowsDevice || event?.pointerType === 'touch') {
-        console.log('Touch/Windows device detected, using enhanced print method');
-        await printStyledPDFWithTouchSupport({
-          story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
-          imageSource: imageSource,
-          contentParagraphs: contentParagraphs,
-          instagramData: instagramData,
-          deviceCapabilities: deviceCapabilities
-        });
-      } else {
-        // Fallback to original method for desktop mouse devices
-        console.log('Desktop mouse device detected, using standard print method');
-        await printStyledPDF({
-          story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
-          imageSource: imageSource,
-          contentParagraphs: contentParagraphs,
-          instagramData: instagramData
-        });
-      }
+      await printStyledPDF({
+        story: { title: story.title, year: story.year, createdAt: story.createdAt, id: storyId },
+        imageSource,
+        contentParagraphs,
+        instagramData
+      });
     } catch (error) {
       console.error('Print failed:', error);
-      
-      // Enhanced error handling with device-specific messaging
-      const isTouch = deviceCapabilities.isTouchDevice;
-      const fallbackMessage = isTouch 
-        ? 'Print failed on touch device. Would you like to download the PDF instead?' 
-        : 'Print failed. Would you like to download the PDF instead?';
-        
-      if (confirm(fallbackMessage)) {
-        try {
-          await handleDownload();
-          return;
-        } catch (downloadError) {
-          console.error('Download fallback also failed:', downloadError);
-        }
+      if (confirm('Print failed. Would you like to download the PDF instead?')) {
+        await handleDownload();
       }
-      
-      const errorMessage = isTouch 
-        ? 'Print failed on touch device. Please use the Download button instead.'
-        : 'Failed to print. Please try the Download button instead.';
-      alert(errorMessage);
     } finally {
       setIsPdfGenerating(false);
     }
   };
 
+
+
   // Touch event handlers for better touch screen support
-  const handlePrintTouch = (event) => {
-    event.preventDefault();
-    console.log('Touch event on print button:', event.type);
-    handlePrint(event);
-  };
+  // const handlePrintTouch = (event) => {
+  //   event.preventDefault();
+  //   console.log('Touch event on print button:', event.type);
+  //   handlePrint(event);
+  // };
 
 
   // Handle share button click
@@ -485,13 +475,13 @@ const StoryViewer = ({
               {isPdfGenerating ? 'Preparing...' : 'Download'}
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               onClick={handlePrint}
-              onTouchStart={handlePrintTouch}
-              onPointerDown={handlePrint}
+              // onTouchStart={handlePrintTouch}
+              // onPointerDown={handlePrint}
               disabled={isPdfGenerating}
-              style={{ 
+              style={{
                 touchAction: 'manipulation',
                 WebkitTouchCallout: 'none',
                 WebkitUserSelect: 'none',
@@ -500,6 +490,20 @@ const StoryViewer = ({
                 msUserSelect: 'none',
                 userSelect: 'none'
               }}
+            >
+              {isPdfGenerating ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Printer className="h-4 w-4 mr-2" />
+              )}
+              {isPdfGenerating ? 'Preparing...' : 'Print'}
+            </Button> */}
+
+            <Button
+              variant="outline"
+              onClick={handlePrint}
+              disabled={isPdfGenerating}
+              style={{ touchAction: 'manipulation' }}
             >
               {isPdfGenerating ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -633,7 +637,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
   // Generate QR code for Instagram post if available, otherwise use story URL
   let qrCodeDataUrl = null;
   let qrCodeUrl = null;
-  
+
   if (instagramData?.postId) {
     // Priority 1: Use Instagram post URL if available
     qrCodeUrl = instagramData.carouselUrl || getInstagramPostUrl(instagramData.postId);
@@ -643,7 +647,7 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
     qrCodeUrl = `${window.location.origin}/story?id=${story.id}`;
     console.log('PDF Generation - Using story URL for QR code:', qrCodeUrl);
   }
-  
+
   if (qrCodeUrl) {
     qrCodeDataUrl = await generateQRCode(qrCodeUrl);
     console.log('PDF Generation - QR code generated:', !!qrCodeDataUrl);
@@ -857,158 +861,223 @@ const downloadStyledPDF = async ({ story, imageSource, contentParagraphs, instag
 };
 
 
-const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData }) => {
-  const pdf = await downloadStyledPDF({
-    story,
-    imageSource,
-    contentParagraphs,
-    instagramData,
-    returnInstance: true // enable PDF return instead of save
+// const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData }) => {
+//   const pdf = await downloadStyledPDF({
+//     story,
+//     imageSource,
+//     contentParagraphs,
+//     instagramData,
+//     returnInstance: true // enable PDF return instead of save
+//   });
+
+//   const pdfBlob = pdf.output('blob');
+//   const pdfUrl = URL.createObjectURL(pdfBlob);
+
+//   // Create hidden iframe for printing instead of opening new window
+//   const iframe = document.createElement('iframe');
+//   iframe.style.display = 'none';
+//   iframe.src = pdfUrl;
+//   document.body.appendChild(iframe);
+
+//   iframe.onload = function () {
+//     iframe.contentWindow.focus();
+//     iframe.contentWindow.print();
+//     // Clean up after printing
+//     setTimeout(() => {
+//       document.body.removeChild(iframe);
+//       URL.revokeObjectURL(pdfUrl);
+//     }, 1000);
+//   };
+// };
+
+const imageToBase64 = (src) => {
+  if (!src) return Promise.resolve(null);
+  if (src.startsWith('data:')) return Promise.resolve(src);
+
+  // Return cached result if already converted
+  if (imageBase64Cache.has(src)) {
+    console.log('imageToBase64 - returning cached result for:', src.substring(0, 50));
+    return Promise.resolve(imageBase64Cache.get(src));
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      const base64 = canvas.toDataURL('image/jpeg', 0.95);
+      imageBase64Cache.set(src, base64); // cache it
+      console.log('imageToBase64 - converted and cached:', src.substring(0, 50));
+      resolve(base64);
+    };
+    img.onerror = () => {
+      console.warn('imageToBase64 - failed to convert, will skip image in print');
+      resolve(null);
+    };
+    img.src = src + '?t=' + Date.now(); // cache-bust the API request
   });
-
-  const pdfBlob = pdf.output('blob');
-  const pdfUrl = URL.createObjectURL(pdfBlob);
-
-  // Create hidden iframe for printing instead of opening new window
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.src = pdfUrl;
-  document.body.appendChild(iframe);
-
-  iframe.onload = function () {
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    // Clean up after printing
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-      URL.revokeObjectURL(pdfUrl);
-    }, 1000);
-  };
 };
 
-// Enhanced print function with better touch screen support
-const printStyledPDFWithTouchSupport = async ({ story, imageSource, contentParagraphs, instagramData, deviceCapabilities }) => {
-  console.log('printStyledPDFWithTouchSupport - Starting enhanced print for touch devices', deviceCapabilities);
-  
-  const pdf = await downloadStyledPDF({
-    story,
-    imageSource,
-    contentParagraphs,
-    instagramData,
-    returnInstance: true
-  });
+const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagramData }) => {
+  // Convert image to base64 so it works cross-origin in the print window
+  const imageBase64 = await imageToBase64(imageSource);
 
-  const pdfBlob = pdf.output('blob');
-  const pdfUrl = URL.createObjectURL(pdfBlob);
+  // Generate QR code — same logic as download
+  let qrCodeDataUrl = null;
+  let qrCodeUrl = null;
 
-  // For touch/Windows devices, try opening in new window first (better support)
-  if (deviceCapabilities?.supportsPopups !== false) {
-    try {
-      console.log('printStyledPDFWithTouchSupport - Attempting new window print method');
-      
-      const printWindow = window.open(pdfUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes');
-      
-      if (printWindow) {
-      // Give the window time to load before triggering print
-      printWindow.onload = () => {
-        console.log('printStyledPDFWithTouchSupport - Print window loaded, triggering print');
-        setTimeout(() => {
-          try {
-            printWindow.focus();
-            printWindow.print();
-            
-            // Close window after printing (with delay)
-            setTimeout(() => {
-              printWindow.close();
-              URL.revokeObjectURL(pdfUrl);
-            }, 2000);
-          } catch (printError) {
-            console.error('printStyledPDFWithTouchSupport - Print trigger failed:', printError);
-            printWindow.close();
-            throw printError;
-          }
-        }, 500);
-      };
-      
-      // Fallback timeout in case onload doesn't fire
-      setTimeout(() => {
-        if (printWindow && !printWindow.closed) {
-          try {
-            printWindow.focus();
-            printWindow.print();
-          } catch (e) {
-            console.warn('printStyledPDFWithTouchSupport - Fallback print failed:', e);
-          }
-        }
-      }, 2000);
-      
-      } else {
-        console.warn('printStyledPDFWithTouchSupport - Popup blocked, falling back to iframe method');
-        throw new Error('Popup blocked');
-      }
-    } catch (error) {
-      console.warn('printStyledPDFWithTouchSupport - New window method failed, trying iframe fallback:', error);
-      // Continue to iframe fallback below
+  if (instagramData?.postId) {
+    qrCodeUrl = instagramData.carouselUrl || getInstagramPostUrl(instagramData.postId);
+  } else if (story?.id) {
+    qrCodeUrl = `${window.location.origin}/story?id=${story.id}`;
+  }
+
+  if (qrCodeUrl) {
+    qrCodeDataUrl = await generateQRCode(qrCodeUrl);
+  }
+
+  const logoUrl = `${window.location.origin}/QLO_logo_color.png`;
+  const titleBlockLeft = qrCodeDataUrl ? '27.94mm' : '7.62mm';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @page {
+      size: 152mm 102mm;
+      margin: 0;
     }
-  } else {
-    console.log('printStyledPDFWithTouchSupport - Popups not supported, using iframe method');
-  }
-  
-  // Fallback to iframe method with touch enhancements
-  console.log('printStyledPDFWithTouchSupport - Using iframe method with touch enhancements');
-  
-  try {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'block';  // Make visible for touch devices
-    iframe.style.position = 'fixed';
-    iframe.style.top = '-1000px';
-    iframe.style.left = '-1000px';
-    iframe.style.width = '1px';
-    iframe.style.height = '1px';
-    iframe.style.border = 'none';
-    iframe.src = pdfUrl;
-    
-    // Add touch event listeners to iframe
-    iframe.addEventListener('touchstart', (e) => {
-      console.log('printStyledPDFWithTouchSupport - iframe touchstart detected');
-      e.stopPropagation();
-    });
-    
-    document.body.appendChild(iframe);
 
-    iframe.onload = function () {
-      console.log('printStyledPDFWithTouchSupport - iframe loaded, attempting print');
-      try {
-        // Add small delay for stability on touch devices
-        setTimeout(() => {
-          iframe.contentWindow.focus();
-          iframe.contentWindow.print();
-          
-          // Clean up
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-            URL.revokeObjectURL(pdfUrl);
-          }, 1000);
-        }, 300);
-      } catch (iframeError) {
-        console.error('printStyledPDFWithTouchSupport - iframe print failed:', iframeError);
-        document.body.removeChild(iframe);
-        URL.revokeObjectURL(pdfUrl);
-        throw iframeError;
-      }
+    html, body {
+      width: 152mm;
+      height: 102mm;
+      overflow: hidden;
+      background: white;
+    }
+
+    .postcard {
+      width: 152mm;
+      height: 102mm;
+      position: relative;
+      background: white;
+      font-family: 'Work Sans', sans-serif;
+      color: #111827;
+      overflow: hidden;
+    }
+
+    .story-image {
+      width: 100%;
+      height: 73.66mm;
+      object-fit: cover;
+      display: block;
+    }
+
+    .qr-container {
+      position: absolute;
+      top: 73.66mm;
+      left: 5.08mm;
+      width: 20.32mm;
+      height: 29mm;
+      border: 0.3mm solid #000000;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5mm;
+    }
+
+    .qr-image {
+      width: 18mm;
+      height: 18mm;
+    }
+
+    .qr-text {
+      font-size: 6.5px;
+      line-height: 1.2;
+      font-weight: 300;
+      margin-top: 1mm;
+      padding-left: 0.5mm;
+      width: 100%;
+    }
+
+    .title-block {
+      position: absolute;
+      top: 87mm;
+      left: ${titleBlockLeft};
+      right: 28mm;
+      height: 15mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .story-title {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+
+    .story-year {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-top: 1mm;
+    }
+
+    .logo {
+      position: absolute;
+      top: 88mm;
+      right: 5mm;
+      height: 8mm;
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="postcard">
+
+    ${imageBase64 ? `<img class="story-image" src="${imageBase64}" />` : ''}
+
+    ${qrCodeDataUrl ? `
+    <div class="qr-container">
+      <img class="qr-image" src="${qrCodeDataUrl}" />
+      <div class="qr-text">scan to read<br>the future</div>
+    </div>` : ''}
+
+    <div class="title-block">
+      <div class="story-title">${story.title}</div>
+      <div class="story-year">Year ${story.year}</div>
+    </div>
+
+    <img class="logo" src="${logoUrl}" />
+
+  </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 800);
     };
-    
-    // Cleanup on error
-    iframe.onerror = () => {
-      console.error('printStyledPDFWithTouchSupport - iframe failed to load');
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-      URL.revokeObjectURL(pdfUrl);
-    };
-  } catch (iframeError) {
-    console.error('printStyledPDFWithTouchSupport - iframe creation failed:', iframeError);
-    URL.revokeObjectURL(pdfUrl);
-    throw iframeError;
+  </script>
+</body>
+</html>`;
+
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+
+  if (!printWindow) {
+    throw new Error('Print window was blocked. Please allow popups for this site.');
   }
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
 };

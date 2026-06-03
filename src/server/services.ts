@@ -1150,19 +1150,30 @@ class AIService {
     return String(value);
   }
 
+  // private buildImagePrompt(year: number | null, generatedText: string | null, promptSuffix: string): string {
+  //   let prompt = 'Create a beautiful, detailed image';
+
+  //   if (generatedText) {
+  //     const visualElements = this.extractVisualElements(generatedText);
+  //     if (visualElements.length > 0) {
+  //       prompt += ` showing: ${visualElements.join(', ')}`;
+  //     }
+  //   }
+
+  //   if (year) prompt += ` Set in year ${year}.`;
+  //   prompt += ` ${promptSuffix}`;
+
+  //   return prompt;
+  // }
+
   private buildImagePrompt(year: number | null, generatedText: string | null, promptSuffix: string): string {
-    let prompt = 'Create a beautiful, detailed image';
-
+    let prompt = 'Create a single illustration for this story.';
     if (generatedText) {
-      const visualElements = this.extractVisualElements(generatedText);
-      if (visualElements.length > 0) {
-        prompt += ` showing: ${visualElements.join(', ')}`;
-      }
+      const storyExcerpt = generatedText.replace(/\s+/g, ' ').trim().substring(0, 2000);
+      prompt += ` STORY: "${storyExcerpt}"`;
     }
-
-    if (year) prompt += ` Set in year ${year}.`;
+    if (year) prompt += ` The scene is set in the year ${year}.`;
     prompt += ` ${promptSuffix}`;
-
     return prompt;
   }
 

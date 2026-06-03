@@ -942,7 +942,6 @@ class AIService {
     }
 
     const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength);
-
     // TEMPORARY: remove after verifying prompt format
     console.log('=== FICTION PROMPT ===\n', fictionPrompt);
 
@@ -1121,7 +1120,7 @@ class AIService {
       if (typeof categoryParams === 'object' && categoryParams !== null) {
         Object.entries(categoryParams).forEach(([paramId, value]) => {
           if (value === null || value === undefined) return;
-
+          console.log('PARAM KEY:', paramId, '| matched def:', !!paramDefs[paramId]);
           const def = paramDefs[paramId];
           const displayName = def?.name || this.formatParameterName(paramId);
           const displayValue = this.formatParameterValue(paramId, value, def);

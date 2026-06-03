@@ -933,12 +933,21 @@ class AIService {
     // Load dynamic settings from database
     const fictionConfig = await this.getAISettingsConfig('fiction');
 
+    // let paramDefs: Record<string, any> = {};
+    // try {
+    //   const allParams = await dataService.getParameters();
+    //   paramDefs = Object.fromEntries(allParams.map((p: any) => [p.id, p]));
+    // } catch (e) {
+    //   paramDefs = {};
+    // }
+
     let paramDefs: Record<string, any> = {};
     try {
       const allParams = await dataService.getParameters();
-      paramDefs = Object.fromEntries(allParams.map((p: any) => [p.id, p]));
-    } catch (e) {
-      paramDefs = {};
+      paramDefs = Object.fromEntries(allParams.map((p: any) => [String(p.id).trim(), p]));
+      console.log('PARAM DEFS OK:', allParams.length, 'first:', JSON.stringify(allParams[0]?.id));
+    } catch (e: any) {
+      console.log('PARAM DEFS THREW:', e?.message, '|', e?.stack);
     }
 
     const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength);

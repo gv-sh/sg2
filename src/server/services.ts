@@ -91,7 +91,7 @@ class DataService {
     const tableCheck = await this.get(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='categories'"
     );
-    
+
     if (!tableCheck) {
       // Create all tables
       await this.createDatabaseSchema();
@@ -122,7 +122,7 @@ class DataService {
     try {
       // Check if categories exist
       const existingCategories = await this.query('SELECT COUNT(*) as count FROM categories');
-      
+
       if (existingCategories[0].count === 0) {
         console.log('Database is empty, attempting JSON data import...');
         await this.importJsonData();
@@ -140,11 +140,11 @@ class DataService {
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
-      
+
       // Try to read JSON database file
       const jsonPath = path.resolve('./data/database.json');
       const jsonData = JSON.parse(await fs.readFile(jsonPath, 'utf8'));
-      
+
       console.log('Importing categories...');
       // Import categories
       for (const category of jsonData.categories || []) {
@@ -170,7 +170,7 @@ class DataService {
       }
 
       console.log('✅ JSON data import completed successfully');
-      
+
     } catch (error: any) {
       console.log('No JSON data to import or import failed:', error.message);
     }
@@ -178,7 +178,7 @@ class DataService {
 
   async query(sql: string, params: any[] = []): Promise<any[]> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, reject) => {
       this.db!.all(sql, params, (err, rows) => {
         if (err) {
@@ -192,9 +192,9 @@ class DataService {
 
   async run(sql: string, params: any[] = []): Promise<DatabaseResult> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, reject) => {
-      this.db!.run(sql, params, function(err) {
+      this.db!.run(sql, params, function (err) {
         if (err) {
           reject(boom.internal(`Database operation failed: ${sql}`, err));
         } else {
@@ -206,7 +206,7 @@ class DataService {
 
   async get(sql: string, params: any[] = []): Promise<any> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, reject) => {
       this.db!.get(sql, params, (err, row) => {
         if (err) {
@@ -278,20 +278,20 @@ class DataService {
     // First check if category exists
     const existing = await this.get('SELECT * FROM categories WHERE id = ?', [id]);
     if (!existing) throw boom.notFound(`Category with id ${id} not found`);
-    
+
     // Check for dependent parameters (helpful for debugging)
     const dependentParams = await this.query('SELECT id, name FROM parameters WHERE category_id = ?', [id]);
     if (dependentParams.length > 0) {
       console.log(`Deleting category ${id} with ${dependentParams.length} dependent parameters:`, dependentParams.map(p => p.name));
     }
-    
+
     // Ensure foreign keys are enabled for this connection
     await this.run('PRAGMA foreign_keys = ON');
-    
+
     // Delete the category (CASCADE should handle parameters)
     const result = await this.run('DELETE FROM categories WHERE id = ?', [id]);
     if (result.changes === 0) throw boom.notFound(`Category with id ${id} not found`);
-    
+
     return { success: true, message: 'Category deleted successfully' };
   }
 
@@ -322,7 +322,7 @@ class DataService {
   async createParameter(parameterData: ParameterData): Promise<Parameter> {
     const id = parameterData.id || this.generateId(parameterData.name);
     await this.getCategoryById(parameterData.category_id); // Verify category exists
-    
+
     await this.run(
       `INSERT INTO parameters (id, name, description, type, category_id, parameter_values, parameter_config)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -342,21 +342,21 @@ class DataService {
   async updateParameter(id: string, updates: Partial<ParameterData>): Promise<Parameter> {
     const existing = await this.getParameterById(id);
     if (updates.category_id) await this.getCategoryById(updates.category_id);
-    
+
     // Determine the new type
     const newType = updates.type || existing.type;
     const isTypeChanging = updates.type && updates.type !== existing.type;
-    
+
     // Handle parameter_values based on type changes
     let parameterValues: string | null;
     let parameterConfig: string | null;
-    
+
     // Enhanced logic to handle type-value compatibility
     const shouldUseDefaults = isTypeChanging && (
-      updates.parameter_values === undefined || 
+      updates.parameter_values === undefined ||
       !this.isParameterValueCompatible(newType, updates.parameter_values)
     );
-    
+
     if (shouldUseDefaults) {
       // Type is changing or incompatible values - initialize appropriate defaults
       switch (newType) {
@@ -380,42 +380,42 @@ class DataService {
         default:
           parameterValues = null;
       }
-      
-      console.log('Parameter update using type defaults:', { 
-        id, 
-        newType, 
+
+      console.log('Parameter update using type defaults:', {
+        id,
+        newType,
         isTypeChanging,
         providedValues: updates.parameter_values,
-        resultValues: parameterValues 
+        resultValues: parameterValues
       });
-      
+
     } else if (updates.parameter_values !== undefined) {
       // Explicitly provided parameter_values that are compatible
       parameterValues = updates.parameter_values ? JSON.stringify(updates.parameter_values) : null;
-      
-      console.log('Parameter update using provided values:', { 
-        id, 
-        newType, 
+
+      console.log('Parameter update using provided values:', {
+        id,
+        newType,
         providedValues: updates.parameter_values,
-        resultValues: parameterValues 
+        resultValues: parameterValues
       });
-      
+
     } else {
       // No type change, no explicit parameter_values - keep existing
       parameterValues = existing.parameter_values ? JSON.stringify(existing.parameter_values) : null;
-      
-      console.log('Parameter update keeping existing values:', { 
-        id, 
-        newType, 
+
+      console.log('Parameter update keeping existing values:', {
+        id,
+        newType,
         existingValues: existing.parameter_values,
-        resultValues: parameterValues 
+        resultValues: parameterValues
       });
     }
-    
+
     // Handle parameter_config for range parameters
     const updatesWithConfig = updates as any;
     const existingWithConfig = existing as any;
-    
+
     if (updatesWithConfig.parameter_config !== undefined) {
       // Explicitly provided parameter_config
       parameterConfig = updatesWithConfig.parameter_config ? JSON.stringify(updatesWithConfig.parameter_config) : null;
@@ -432,7 +432,7 @@ class DataService {
       // No type change, no explicit parameter_config - keep existing
       parameterConfig = existingWithConfig.parameter_config ? JSON.stringify(existingWithConfig.parameter_config) : null;
     }
-    
+
     await this.run(
       `UPDATE parameters SET name = ?, description = ?, type = ?, category_id = ?, parameter_values = ?, parameter_config = ? WHERE id = ?`,
       [
@@ -460,22 +460,22 @@ class DataService {
       case 'select':
       case 'radio':
         // Should be non-empty array with valid structure
-        return Array.isArray(values) && 
-               values.length > 0 && 
-               values.every(v => v && typeof v.label === 'string');
-        
+        return Array.isArray(values) &&
+          values.length > 0 &&
+          values.every(v => v && typeof v.label === 'string');
+
       case 'boolean':
         // Should be object with 'on' and 'off' string properties
-        return typeof values === 'object' && 
-               !Array.isArray(values) &&
-               typeof values.on === 'string' && 
-               typeof values.off === 'string';
-        
+        return typeof values === 'object' &&
+          !Array.isArray(values) &&
+          typeof values.on === 'string' &&
+          typeof values.off === 'string';
+
       case 'text':
       case 'range':
         // These types should not have parameter_values
         return values === null;
-        
+
       default:
         return false;
     }
@@ -595,7 +595,7 @@ class DataService {
       `UPDATE generated_content SET ${updateFields.join(', ')} WHERE id = ?`,
       updateValues
     );
-    
+
     return await this.getGeneratedContentById(id);
   }
 
@@ -807,7 +807,7 @@ class DataService {
     try {
       // Clear all data
       await this.run('DELETE FROM generated_content');
-      await this.run('DELETE FROM parameters');  
+      await this.run('DELETE FROM parameters');
       await this.run('DELETE FROM categories');
       await this.run('DELETE FROM settings');
 
@@ -820,7 +820,7 @@ class DataService {
 
   async exportContent(): Promise<any[]> {
     const content = await this.getRecentContent(10000); // Get all content
-    
+
     // Clean up data for export (remove database-specific fields)
     return content.map(item => ({
       id: item.id,
@@ -888,23 +888,23 @@ class AIService {
     try {
       const settings = await dataService.getSettings();
       const staticConfig = config.getAIConfig(type) as any;
-      
+
       console.log('Loading AI settings for:', type);
       console.log('Database settings:', settings);
       console.log('Static config:', staticConfig);
-      
+
       if (type === 'fiction') {
         return {
           model: settings['ai.models.fiction'] || staticConfig.model,
           parameters: {
-            temperature: settings['ai.parameters.fiction.temperature'] !== undefined 
-              ? Number(settings['ai.parameters.fiction.temperature']) 
+            temperature: settings['ai.parameters.fiction.temperature'] !== undefined
+              ? Number(settings['ai.parameters.fiction.temperature'])
               : staticConfig.parameters.temperature,
-            maxTokens: settings['ai.parameters.fiction.max_tokens'] !== undefined 
-              ? Number(settings['ai.parameters.fiction.max_tokens']) 
+            maxTokens: settings['ai.parameters.fiction.max_tokens'] !== undefined
+              ? Number(settings['ai.parameters.fiction.max_tokens'])
               : staticConfig.parameters.maxTokens,
-            defaultStoryLength: settings['ai.parameters.fiction.default_story_length'] !== undefined 
-              ? Number(settings['ai.parameters.fiction.default_story_length']) 
+            defaultStoryLength: settings['ai.parameters.fiction.default_story_length'] !== undefined
+              ? Number(settings['ai.parameters.fiction.default_story_length'])
               : staticConfig.parameters.defaultStoryLength,
             systemPrompt: settings['ai.parameters.fiction.system_prompt'] || staticConfig.parameters.systemPrompt
           },
@@ -933,12 +933,12 @@ class AIService {
     // Load dynamic settings from database
     const fictionConfig = await this.getAISettingsConfig('fiction');
     const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength);
-    
+
     let fictionContent: string;
-    let fictionTitle: string; 
+    let fictionTitle: string;
     let wordCount: number;
     let fictionMetadata: any;
-    
+
     try {
       const fictionResponse: AxiosResponse<OpenAIChatResponse['data']> = await axios.post(
         `${this.baseUrl}/chat/completions`,
@@ -983,7 +983,7 @@ class AIService {
     // Generate image based on fiction content
     const imageConfig = await this.getAISettingsConfig('image');
     const imagePrompt = this.buildImagePrompt(year, fictionContent, imageConfig.parameters.promptSuffix);
-    
+
     let imageBlob: Buffer | undefined;
     let imageFormat: string | undefined;
     let imageSizeBytes: number | undefined;
@@ -1008,16 +1008,43 @@ class AIService {
         }
       }
 
+      // const imageResponse: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
+      //   `${this.baseUrl}/images/generations`,
+      //   requestPayload,
+      //   { headers: { Authorization: `Bearer ${this.apiKey}` } }
+      // );
+
+      // const imageUrl = imageResponse.data.data[0].url;
+
+      // // Always download and store image data
+      // const imageData = await this.downloadImage(imageUrl);
+      // imageBlob = imageData.buffer;
+      // imageFormat = imageData.format;
+      // imageSizeBytes = imageData.size;
+      // imageMetadata = {
+      //   model: imageConfig.model,
+      //   prompt: imagePrompt.substring(0, 100) + '...',
+      //   originalSize: imageData.size
+      // };
       const imageResponse: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
         `${this.baseUrl}/images/generations`,
         requestPayload,
         { headers: { Authorization: `Bearer ${this.apiKey}` } }
       );
 
-      const imageUrl = imageResponse.data.data[0].url;
-      
-      // Always download and store image data
-      const imageData = await this.downloadImage(imageUrl);
+      const imageItem: any = imageResponse.data.data[0];
+
+      // DALL-E returns a URL; gpt-image-1 returns base64 in b64_json
+      let imageData: { buffer: Buffer; format: string; size: number };
+      if (imageItem.url) {
+        imageData = await this.downloadImage(imageItem.url);
+      } else if (imageItem.b64_json) {
+        const buffer = Buffer.from(imageItem.b64_json, 'base64');
+        imageData = { buffer, format: 'png', size: buffer.length };
+      } else {
+        throw new Error('No image URL or base64 data in OpenAI response');
+      }
+
       imageBlob = imageData.buffer;
       imageFormat = imageData.format;
       imageSizeBytes = imageData.size;
@@ -1048,21 +1075,21 @@ class AIService {
 
   private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null, wordLimit: number): string {
     let prompt = 'Create a compelling speculative fiction story with the following elements:\n\n';
-    
+
     if (year) prompt += `Setting: Year ${year}\n\n`;
-    
+
     // Add word count constraint
     if (wordLimit && wordLimit > 0) {
       prompt += `Length: Write approximately ${wordLimit} words (this is important - do not exceed this word count)\n\n`;
     }
-    
+
     // Handle category-grouped parameters
     Object.entries(parameters).forEach(([categoryName, categoryParams]) => {
       if (typeof categoryParams === 'object' && categoryParams !== null) {
         const paramEntries = Object.entries(categoryParams);
         if (paramEntries.length > 0) {
           prompt += `${categoryName}:\n`;
-          
+
           paramEntries.forEach(([paramId, value]) => {
             if (value !== null && value !== undefined) {
               const paramName = this.formatParameterName(paramId);
@@ -1070,19 +1097,19 @@ class AIService {
               prompt += `- ${paramName}: ${displayValue}\n`;
             }
           });
-          
+
           prompt += '\n';
         }
       }
     });
-    
+
     prompt += `Write a story that incorporates these elements naturally. Include a compelling title.`;
-    
+
     // Emphasize word limit again at the end
     if (wordLimit && wordLimit > 0) {
       prompt += ` Keep the story to approximately ${wordLimit} words - this is a strict requirement.`;
     }
-    
+
     return prompt;
   }
 
@@ -1099,7 +1126,7 @@ class AIService {
       if (value <= 0.8) return `Advanced (${value})`;
       return `Highly Advanced (${value})`;
     }
-    
+
     if (paramId === 'conflict-intensity') {
       if (value <= 0.2) return `Peaceful (${value})`;
       if (value <= 0.4) return `Low (${value})`;
@@ -1107,42 +1134,42 @@ class AIService {
       if (value <= 0.8) return `High (${value})`;
       return `Extreme (${value})`;
     }
-    
+
     // Handle boolean parameters
     if (typeof value === 'boolean') {
       return value ? 'Yes' : 'No';
     }
-    
+
     // Handle select parameters - try to capitalize first letter
     if (typeof value === 'string') {
       // Convert kebab-case to title case
       return value.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
-    
+
     // Return as-is for numbers and other types
     return String(value);
   }
 
   private buildImagePrompt(year: number | null, generatedText: string | null, promptSuffix: string): string {
     let prompt = 'Create a beautiful, detailed image';
-    
+
     if (generatedText) {
       const visualElements = this.extractVisualElements(generatedText);
       if (visualElements.length > 0) {
         prompt += ` showing: ${visualElements.join(', ')}`;
       }
     }
-    
+
     if (year) prompt += ` Set in year ${year}.`;
     prompt += ` ${promptSuffix}`;
-    
+
     return prompt;
   }
 
   private extractVisualElements(text: string): string[] {
     const elements: string[] = [];
     const cleanText = text.replace(/\*\*Title:.*?\*\*/g, '').trim();
-    
+
     Object.values(VISUAL_PATTERNS).forEach((patterns: RegExp[]) => {
       patterns.forEach((pattern: RegExp) => {
         const matches = cleanText.match(pattern) || [];
@@ -1154,7 +1181,7 @@ class AIService {
         });
       });
     });
-    
+
     return [...new Set(elements)].slice(0, 5);
   }
 
@@ -1163,7 +1190,7 @@ class AIService {
       // Download the image from DALL-E URL
       const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       const buffer = Buffer.from(response.data);
-      
+
       // Detect format from content-type header or default to png
       const contentType = response.headers['content-type'] || '';
       let format = 'png';
@@ -1172,7 +1199,7 @@ class AIService {
       } else if (contentType.includes('webp')) {
         format = 'webp';
       }
-      
+
       return {
         buffer,
         format,
@@ -1189,18 +1216,18 @@ class AIService {
     if (titleMatchBold) {
       return this.cleanTitle(titleMatchBold[1]);
     }
-    
+
     // Look for title pattern without markdown bold
     const titleMatch = content.match(/^Title:\s*(.+)$/m);
     if (titleMatch) {
       return this.cleanTitle(titleMatch[1]);
     }
-    
+
     const firstLine = content.split('\n')[0];
     if (firstLine.length < 100) {
       return this.cleanTitle(firstLine);
     }
-    
+
     return `Fiction ${new Date().toISOString().slice(0, 10)}`;
   }
 
@@ -1227,22 +1254,22 @@ class AIService {
   private removeTitle(content: string): string {
     // Remove **Title: ...** pattern if found
     let cleanContent = content.replace(/^\*\*Title:\s*[^*\n]+\*\*\s*\n?/i, '');
-    
+
     // If no formal title pattern, check if first line looks like a title
     if (cleanContent === content) {
       const lines = content.split('\n');
       const firstLine = lines[0];
-      
+
       // If first line is short, wrapped in ** or looks like a title, remove it
       if (firstLine.length < 100 && (
-        firstLine.match(/^\*\*.*\*\*$/) || 
+        firstLine.match(/^\*\*.*\*\*$/) ||
         firstLine.match(/^[A-Z][^.!?]*$/) ||
         lines.length > 1 && lines[1].trim() === ''
       )) {
         cleanContent = lines.slice(1).join('\n').trim();
       }
     }
-    
+
     return cleanContent;
   }
 }

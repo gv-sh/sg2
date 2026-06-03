@@ -975,14 +975,14 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagram
 
     .story-image {
       width: 100%;
-      height: 73.66mm;
+      height: 86mm;
       object-fit: cover;
       display: block;
     }
 
     .qr-container {
       position: absolute;
-      top: 73.66mm;
+      top: 69.66mm;
       left: 5.08mm;
       width: 20.32mm;
       height: 29mm;
@@ -1000,7 +1000,7 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagram
     }
 
     .qr-text {
-      font-size: 6.5px;
+      font-size: 11.5px;
       line-height: 1.2;
       font-weight: 300;
       margin-top: 1mm;
@@ -1010,7 +1010,7 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagram
 
     .title-block {
       position: absolute;
-      top: 87mm;
+      top: 86mm;
       left: ${titleBlockLeft};
       right: 28mm;
       height: 15mm;
@@ -1020,14 +1020,14 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagram
     }
 
     .story-title {
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 18px;
+      font-weight: 700;
       letter-spacing: -0.01em;
       line-height: 1.1;
     }
 
     .story-year {
-      font-size: 9px;
+      font-size: 13px;
       font-weight: 500;
       letter-spacing: -0.01em;
       margin-top: 1mm;
@@ -1061,10 +1061,22 @@ const printStyledPDF = async ({ story, imageSource, contentParagraphs, instagram
     <img class="logo" src="${logoUrl}" />
 
   </div>
-  <script>
+   <script>
     window.onload = function() {
       setTimeout(function() {
         window.print();
+        // Poll until window has focus again — means print dialog is closed
+        var checkClosed = setInterval(function() {
+          if (document.hasFocus()) {
+            clearInterval(checkClosed);
+            setTimeout(function() { window.close(); }, 500);
+          }
+        }, 200);
+        // Safety fallback — close after 2 minutes no matter what
+        setTimeout(function() { 
+          clearInterval(checkClosed);
+          window.close(); 
+        }, 120000);
       }, 800);
     };
   </script>

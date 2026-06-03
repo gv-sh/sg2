@@ -932,7 +932,19 @@ class AIService {
   async generateUnified(parameters: AIGenerationParameters, year: number | null): Promise<GenerationResult> {
     // Load dynamic settings from database
     const fictionConfig = await this.getAISettingsConfig('fiction');
+
+    let paramDefs: Record<string, any> = {};
+    try {
+      const allParams = await dataService.getParameters();
+      paramDefs = Object.fromEntries(allParams.map((p: any) => [p.id, p]));
+    } catch (e) {
+      paramDefs = {};
+    }
+
     const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength);
+
+    // TEMPORARY: remove after verifying prompt format
+    console.log('=== FICTION PROMPT ===\n', fictionPrompt);
 
     let fictionContent: string;
     let fictionTitle: string;
@@ -1008,24 +1020,6 @@ class AIService {
         }
       }
 
-      // const imageResponse: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
-      //   `${this.baseUrl}/images/generations`,
-      //   requestPayload,
-      //   { headers: { Authorization: `Bearer ${this.apiKey}` } }
-      // );
-
-      // const imageUrl = imageResponse.data.data[0].url;
-
-      // // Always download and store image data
-      // const imageData = await this.downloadImage(imageUrl);
-      // imageBlob = imageData.buffer;
-      // imageFormat = imageData.format;
-      // imageSizeBytes = imageData.size;
-      // imageMetadata = {
-      //   model: imageConfig.model,
-      //   prompt: imagePrompt.substring(0, 100) + '...',
-      //   originalSize: imageData.size
-      // };
       const imageResponse: AxiosResponse<OpenAIImageResponse['data']> = await axios.post(
         `${this.baseUrl}/images/generations`,
         requestPayload,
@@ -1073,41 +1067,101 @@ class AIService {
     };
   }
 
-  private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null, wordLimit: number): string {
-    let prompt = 'Create a compelling speculative fiction story with the following elements:\n\n';
+  // private buildFictionPrompt(parameters: AIGenerationParameters, year: number | null, wordLimit: number): string {
+  //   let prompt = 'Create a compelling speculative fiction story with the following elements:\n\n';
 
-    if (year) prompt += `Setting: Year ${year}\n\n`;
+  //   if (year) prompt += `Setting: Year ${year}\n\n`;
 
-    // Add word count constraint
-    if (wordLimit && wordLimit > 0) {
-      prompt += `Length: Write approximately ${wordLimit} words (this is important - do not exceed this word count)\n\n`;
-    }
+  //   // Add word count constraint
+  //   if (wordLimit && wordLimit > 0) {
+  //     prompt += `Length: Write approximately ${wordLimit} words (this is important - do not exceed this word count)\n\n`;
+  //   }
 
-    // Handle category-grouped parameters
-    Object.entries(parameters).forEach(([categoryName, categoryParams]) => {
+  //   // Handle category-grouped parameters
+  //   Object.entries(parameters).forEach(([categoryName, categoryParams]) => {
+  //     if (typeof categoryParams === 'object' && categoryParams !== null) {
+  //       const paramEntries = Object.entries(categoryParams);
+  //       if (paramEntries.length > 0) {
+  //         prompt += `${categoryName}:\n`;
+
+  //         paramEntries.forEach(([paramId, value]) => {
+  //           if (value !== null && value !== undefined) {
+  //             const paramName = this.formatParameterName(paramId);
+  //             const displayValue = this.formatParameterValue(paramId, value);
+  //             prompt += `- ${paramName}: ${displayValue}\n`;
+  //           }
+  //         });
+
+  //         prompt += '\n';
+  //       }
+  //     }
+  //   });
+
+  //   prompt += `Write a story that incorporates these elements naturally. Include a compelling title.`;
+
+  //   // Emphasize word limit again at the end
+  //   if (wordLimit && wordLimit > 0) {
+  //     prompt += ` Keep the story to approximately ${wordLimit} words - this is a strict requirement.`;
+  //   }
+
+  //   return prompt;
+  // }
+
+  private buildFictionPrompt(
+    parameters: AIGenerationParameters,
+    year: number | null,
+    wordLimit: number,
+    paramDefs: Record<string, any> = {}
+  ): string {
+    const worldLines: string[] = [];
+    const narrativeLines: string[] = [];
+    let hasPointOfView = false;
+
+    Object.entries(parameters).forEach(([, categoryParams]) => {
       if (typeof categoryParams === 'object' && categoryParams !== null) {
-        const paramEntries = Object.entries(categoryParams);
-        if (paramEntries.length > 0) {
-          prompt += `${categoryName}:\n`;
+        Object.entries(categoryParams).forEach(([paramId, value]) => {
+          if (value === null || value === undefined) return;
 
-          paramEntries.forEach(([paramId, value]) => {
-            if (value !== null && value !== undefined) {
-              const paramName = this.formatParameterName(paramId);
-              const displayValue = this.formatParameterValue(paramId, value);
-              prompt += `- ${paramName}: ${displayValue}\n`;
-            }
-          });
+          const def = paramDefs[paramId];
+          const displayName = def?.name || this.formatParameterName(paramId);
+          const displayValue = this.formatParameterValue(paramId, value, def);
+          const line = `- ${displayName}: ${displayValue}`;
 
-          prompt += '\n';
-        }
+          if (paramId.startsWith('narrative-')) {
+            narrativeLines.push(line);
+            if (paramId === 'narrative-point-of-view') hasPointOfView = true;
+          } else {
+            worldLines.push(line);
+          }
+        });
       }
     });
 
-    prompt += `Write a story that incorporates these elements naturally. Include a compelling title.`;
-
-    // Emphasize word limit again at the end
+    let prompt = 'Create a compelling speculative fiction story.\n\n';
+    if (year) prompt += `Setting: Year ${year}\n\n`;
     if (wordLimit && wordLimit > 0) {
-      prompt += ` Keep the story to approximately ${wordLimit} words - this is a strict requirement.`;
+      prompt += `Length: approximately ${wordLimit} words (do not exceed this).\n\n`;
+    }
+
+    if (worldLines.length > 0) {
+      prompt += `THE WORLD (what the story is about):\n${worldLines.join('\n')}\n\n`;
+    }
+
+    prompt += `HOW TO TELL THE STORY (narrative style):\n`;
+    if (narrativeLines.length > 0) {
+      prompt += `${narrativeLines.join('\n')}\n`;
+      if (!hasPointOfView) {
+        prompt += `- Point of View: third person\n`;
+      }
+      prompt += '\n';
+    } else {
+      prompt += `- Use a third-person perspective, a grounded and immersive tone, clear and accessible prose, and a linear structure.\n\n`;
+    }
+
+    prompt += `Write a story that treats the world elements as the content and the narrative style as instructions for how the story is told. Include a compelling title.`;
+
+    if (wordLimit && wordLimit > 0) {
+      prompt += ` Keep the story to approximately ${wordLimit} words.`;
     }
 
     return prompt;
@@ -1117,54 +1171,63 @@ class AIService {
     return paramId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
-  private formatParameterValue(paramId: string, value: any): string {
-    // Handle range parameters with descriptive labels
-    if (paramId === 'technology-level') {
-      if (value <= 0.2) return `Primitive (${value})`;
-      if (value <= 0.4) return `Basic (${value})`;
-      if (value <= 0.6) return `Moderate (${value})`;
-      if (value <= 0.8) return `Advanced (${value})`;
-      return `Highly Advanced (${value})`;
-    }
-
-    if (paramId === 'conflict-intensity') {
-      if (value <= 0.2) return `Peaceful (${value})`;
-      if (value <= 0.4) return `Low (${value})`;
-      if (value <= 0.6) return `Moderate (${value})`;
-      if (value <= 0.8) return `High (${value})`;
-      return `Extreme (${value})`;
-    }
-
-    // Handle boolean parameters
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-
-    // Handle select parameters - try to capitalize first letter
-    if (typeof value === 'string') {
-      // Convert kebab-case to title case
-      return value.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    }
-
-    // Return as-is for numbers and other types
-    return String(value);
-  }
-
-  // private buildImagePrompt(year: number | null, generatedText: string | null, promptSuffix: string): string {
-  //   let prompt = 'Create a beautiful, detailed image';
-
-  //   if (generatedText) {
-  //     const visualElements = this.extractVisualElements(generatedText);
-  //     if (visualElements.length > 0) {
-  //       prompt += ` showing: ${visualElements.join(', ')}`;
-  //     }
+  // private formatParameterValue(paramId: string, value: any): string {
+  //   // Handle range parameters with descriptive labels
+  //   if (paramId === 'technology-level') {
+  //     if (value <= 0.2) return `Primitive (${value})`;
+  //     if (value <= 0.4) return `Basic (${value})`;
+  //     if (value <= 0.6) return `Moderate (${value})`;
+  //     if (value <= 0.8) return `Advanced (${value})`;
+  //     return `Highly Advanced (${value})`;
   //   }
 
-  //   if (year) prompt += ` Set in year ${year}.`;
-  //   prompt += ` ${promptSuffix}`;
+  //   if (paramId === 'conflict-intensity') {
+  //     if (value <= 0.2) return `Peaceful (${value})`;
+  //     if (value <= 0.4) return `Low (${value})`;
+  //     if (value <= 0.6) return `Moderate (${value})`;
+  //     if (value <= 0.8) return `High (${value})`;
+  //     return `Extreme (${value})`;
+  //   }
 
-  //   return prompt;
+  //   // Handle boolean parameters
+  //   if (typeof value === 'boolean') {
+  //     return value ? 'Yes' : 'No';
+  //   }
+
+  //   // Handle select parameters - try to capitalize first letter
+  //   if (typeof value === 'string') {
+  //     // Convert kebab-case to title case
+  //     return value.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  //   }
+
+  //   // Return as-is for numbers and other types
+  //   return String(value);
   // }
+
+  private formatParameterValue(paramId: string, value: any, paramDef?: any): string {
+    if (paramDef && paramDef.type === 'range' && paramDef.parameter_config) {
+      const cfg = paramDef.parameter_config;
+      const min = cfg.min ?? 0;
+      const max = cfg.max ?? 100;
+      if (cfg.minLabel && cfg.maxLabel) {
+        return `${value} on a scale from ${min} (${cfg.minLabel}) to ${max} (${cfg.maxLabel})`;
+      }
+      return `${value} (scale ${min} to ${max})`;
+    }
+
+    if ((paramDef?.type === 'select' || paramDef?.type === 'radio')
+      && Array.isArray(paramDef.parameter_values)) {
+      const match = paramDef.parameter_values.find((opt: any) => opt.id === value);
+      if (match && match.label) return match.label;
+    }
+
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+
+    if (typeof value === 'string') {
+      return value.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+    return String(value);
+  }
 
   private buildImagePrompt(year: number | null, generatedText: string | null, promptSuffix: string): string {
     let prompt = 'Create a single illustration for this story.';

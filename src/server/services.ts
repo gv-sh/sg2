@@ -945,13 +945,12 @@ class AIService {
     try {
       const allParams = await dataService.getParameters();
       paramDefs = Object.fromEntries(allParams.map((p: any) => [String(p.id).trim(), p]));
-      console.log('PARAM DEFS OK:', allParams.length, 'first:', JSON.stringify(allParams[0]?.id));
+      //console.log('PARAM DEFS OK:', allParams.length, 'first:', JSON.stringify(allParams[0]?.id));
     } catch (e: any) {
-      console.log('PARAM DEFS THREW:', e?.message, '|', e?.stack);
+      //console.log('PARAM DEFS THREW:', e?.message, '|', e?.stack);
     }
 
-    const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength);
-    // TEMPORARY: remove after verifying prompt format
+    const fictionPrompt = this.buildFictionPrompt(parameters, year, fictionConfig.parameters.defaultStoryLength, paramDefs);    // TEMPORARY: remove after verifying prompt format
     console.log('=== FICTION PROMPT ===\n', fictionPrompt);
 
     let fictionContent: string;
